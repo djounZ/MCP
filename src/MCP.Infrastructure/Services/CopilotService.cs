@@ -14,7 +14,7 @@ namespace MCP.Infrastructure.Services
         public CopilotService(HttpClient httpClient)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            
+
             // Start token refresh timer
             _tokenRefreshTimer = new Timer(async _ =>
             {
@@ -216,7 +216,7 @@ namespace MCP.Infrastructure.Services
         private async Task<string> SendPostRequestAsync(string url, object data, Dictionary<string, string> headers)
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
-            
+
             foreach (var header in headers)
             {
                 if (header.Key == "content-type")
@@ -226,22 +226,38 @@ namespace MCP.Infrastructure.Services
 
             var json = System.Text.Json.JsonSerializer.Serialize(data);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.SendAsync(request);
-            return await response.Content.ReadAsStringAsync();
-        }
-
+var response = await _httpClient.SendAsync(request);
+response.EnsureSuccessStatusCode();
+using var responseStream = await response.Content.ReadAsStreamAsync();
+Stream finalStream = responseStream;
+if (response.Content.Headers.ContentEncoding.Contains("gzip"))
+{
+    finalStream = new System.IO.Compression.GZipStream(responseStream, System.IO.Compression.CompressionMode.Decompress);
+}
         private async Task<string> SendGetRequestAsync(string url, Dictionary<string, string> headers)
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            
+
             foreach (var header in headers)
             {
                 request.Headers.Add(header.Key, header.Value);
             }
 
             var response = await _httpClient.SendAsync(request);
-            return await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            // Try to decompress if the response is gzip encoded
+            if (response.Content.Headers.ContentEncoding.Contains("gzip"))
+            {
+                using var decompressedStream = new System.IO.Compression.GZipStream(responseStream, System.IO.Compression.CompressionMode.Decompress);
+                using var reader = new StreamReader(decompressedStream, Encoding.UTF8);
+                return await reader.ReadToEndAsync();
+            }
+            else
+            {
+                using var reader = new StreamReader(responseStream, Encoding.UTF8);
+                return await reader.ReadToEndAsync();
+            }
         }
 
         public void Dispose()

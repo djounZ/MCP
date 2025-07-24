@@ -1,29 +1,45 @@
-# MCP - .NET 9 Clean Architecture Template
+# MCP - .NET 9 Clean Architecture with Functional Error Handling
 
-A well-structured .NET 9 solution following Clean Architecture principles and industry best practices.
+A well-structured .NET 9 solution following Clean Architecture principles with modern functional programming patterns, featuring Result monad for robust error handling.
 
 ## 🏗️ Architecture
 
-This project implements Clean Architecture with the following layers:
+This project implements Clean Architecture with functional programming patterns:
 
-- **Domain** (`MCP.Domain`) - Core business logic and entities
+- **Domain** (`MCP.Domain`) - Core business logic, entities, and Result monad
 - **Application** (`MCP.Application`) - Use cases and business rules
-- **Infrastructure** (`MCP.Infrastructure`) - External concerns (data access, APIs)
+- **Infrastructure** (`MCP.Infrastructure`) - External concerns with monadic error handling
 - **WebApi** (`MCP.WebApi`) - REST API endpoints and presentation layer
+
+## ✨ Key Features
+
+- **🎯 Clean Architecture** - Separation of concerns with clear dependency boundaries
+- **🔄 Result Monad Pattern** - Functional error handling without exceptions
+- **📊 Structured Logging** - Comprehensive logging with ILogger<T>
+- **⚙️ Configuration-Driven** - Options pattern with appsettings.json
+- **🧪 Comprehensive Testing** - Unit and integration tests with high coverage
+- **🔒 Type Safety** - Strong typing with nullable reference types
+- **🚀 .NET 9** - Latest .NET features and performance improvements
 
 ## 📁 Project Structure
 
 ```
 MCP/
 ├── src/
-│   ├── MCP.Domain/           # Core business logic and entities
+│   ├── MCP.Domain/           # Core business logic, entities, and Result monad
+│   │   ├── Common/           # Result<T> monad and shared abstractions
+│   │   ├── Interfaces/       # Domain service interfaces
+│   │   └── Models/           # Domain entities and value objects
 │   ├── MCP.Application/      # Use cases and application services
-│   ├── MCP.Infrastructure/   # External dependencies (DB, APIs, etc.)
+│   ├── MCP.Infrastructure/   # External dependencies with monadic error handling
+│   │   ├── Constants/        # Application constants (HeaderKeys, ContentTypes)
+│   │   ├── Options/          # Configuration options (CopilotServiceOptions)
+│   │   └── Services/         # Service implementations with Result<T>
 │   └── MCP.WebApi/          # Presentation layer (REST API)
 ├── tests/
 │   ├── MCP.Domain.Tests/           # Unit tests for Domain
 │   ├── MCP.Application.Tests/      # Unit tests for Application
-│   ├── MCP.Infrastructure.Tests/   # Unit tests for Infrastructure
+│   ├── MCP.Infrastructure.Tests/   # Unit tests for Infrastructure (Result pattern)
 │   └── MCP.WebApi.IntegrationTests/ # Integration tests for WebApi
 ├── docs/                    # Documentation
 └── scripts/                 # Build and deployment scripts
@@ -34,13 +50,50 @@ MCP/
 ```
 WebApi → Infrastructure
   ↓           ↓
-Application → Domain
+Application → Domain (Result<T>)
 ```
 
-- **Domain**: Contains business entities, value objects, and domain services. No dependencies on other layers.
-- **Application**: Contains use cases, interfaces, and application services. Depends only on Domain.
-- **Infrastructure**: Contains implementations of external concerns. Depends on Domain and Application.
+- **Domain**: Contains business entities, Result monad, and domain services. No external dependencies.
+- **Application**: Contains use cases and interfaces. Depends only on Domain.
+- **Infrastructure**: Contains implementations using Result<T> pattern. Depends on Domain and Application.
 - **WebApi**: The entry point of the application. Depends on Application and Infrastructure.
+
+## 🎯 Functional Programming Features
+
+### Result Monad Pattern
+
+The project uses a custom `Result<T>` monad for error handling:
+
+```csharp
+// Service methods return Result<T> instead of throwing exceptions
+public async Task<Result<string>> GetCompletionAsync(string prompt, string language = "python")
+{
+    if (_token == null || IsTokenInvalid(_token))
+    {
+        var tokenResult = await GetTokenInternalAsync();
+        if (tokenResult.IsFailure)
+            return Result.Failure<string>($"Failed to get token: {tokenResult.Error}");
+    }
+    
+    // ... implementation
+    return Result.Success(completion);
+}
+
+// Consumers handle both success and failure cases explicitly
+var result = await copilotService.GetCompletionAsync("def fibonacci(n):");
+return result.Match(
+    onSuccess: completion => Ok(completion),
+    onFailure: error => BadRequest(error)
+);
+```
+
+### Benefits of Result Pattern
+
+- **🚫 No Exceptions**: Eliminates exception-based control flow for business logic
+- **📝 Explicit Error Handling**: Callers must handle both success and failure cases
+- **🔗 Composability**: Results can be chained using `Bind`, `Map`, etc.
+- **🧪 Testability**: More predictable and easier to test
+- **📊 Better Error Information**: Descriptive error messages with context
 
 ## 🚀 Getting Started
 
@@ -97,39 +150,77 @@ dotnet test tests/MCP.Domain.Tests
 ## 📦 Dependencies
 
 ### Core Dependencies
-- **.NET 9.0** - Latest .NET framework
+- **.NET 9.0** - Latest .NET framework with performance improvements
 - **ASP.NET Core** - Web framework for APIs
+- **Microsoft.Extensions.Logging** - Structured logging with ILogger<T>
+- **Microsoft.Extensions.Options** - Configuration options pattern
+- **System.Text.Json** - High-performance JSON serialization
 
 ### Testing
-- **xUnit** - Testing framework
-- **Microsoft.AspNetCore.Mvc.Testing** - Integration testing
+- **xUnit** - Modern testing framework
+- **Microsoft.AspNetCore.Mvc.Testing** - Integration testing support
+- **Microsoft.Extensions.Logging.Abstractions** - NullLogger for testing
+
+### Development Tools
+- **Nullable Reference Types** - Enhanced null safety
+- **Result Monad** - Custom functional error handling
+- **Options Pattern** - Configuration binding with validation
 
 ## 🛠️ Development Guidelines
+
+### Error Handling Strategy
+
+#### ✅ Use Result<T> for Business Logic
+```csharp
+// ✅ Good - Return Result<T> for operations that can fail
+public async Task<Result<User>> GetUserAsync(int id)
+{
+    if (id <= 0)
+        return Result.Failure<User>("Invalid user ID");
+        
+    var user = await _repository.GetAsync(id);
+    return user != null 
+        ? Result.Success(user)
+        : Result.Failure<User>("User not found");
+}
+```
+
+#### ✅ Use Exceptions for Infrastructure Issues
+```csharp
+// ✅ Good - Constructor validation with exceptions
+public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILogger<CopilotService> logger)
+{
+    _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+    _options = options ?? throw new ArgumentNullException(nameof(options));
+    _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+}
+```
 
 ### Code Organization
 
 1. **Domain Layer**
-   - Entities and value objects
-   - Domain services and specifications
-   - Repository interfaces
-   - Domain events
+   - Result<T> monad and common abstractions
+   - Business entities and value objects
+   - Domain service interfaces
+   - No external dependencies
 
 2. **Application Layer**
-   - Use cases (commands/queries)
+   - Use cases returning Result<T>
    - DTOs and mapping profiles
-   - Validation rules
-   - Application services
+   - Validation with Result pattern
+   - Application service interfaces
 
 3. **Infrastructure Layer**
-   - Data access implementations
-   - External service integrations
-   - Configuration and dependency injection
+   - Service implementations using Result<T>
+   - External API integrations with error handling
+   - Configuration options and DI setup
+   - Logging and monitoring
 
 4. **WebApi Layer**
-   - Controllers
-   - Middleware
-   - Configuration
-   - Program.cs setup
+   - Controllers handling Result<T> responses
+   - Middleware and exception handling
+   - Configuration and DI registration
+   - OpenAPI/Swagger documentation
 
 ### Naming Conventions
 
@@ -140,10 +231,69 @@ dotnet test tests/MCP.Domain.Tests
 
 ### Testing Strategy
 
-- **Unit Tests**: Test individual components in isolation
-- **Integration Tests**: Test API endpoints and database interactions
-- **Test Coverage**: Aim for >80% code coverage
-- **Test Naming**: Use descriptive test method names
+#### Unit Tests with Result Pattern
+```csharp
+[Fact]
+public async Task GetCompletionAsync_WithValidPrompt_ShouldReturnSuccess()
+{
+    // Arrange
+    var prompt = "def fibonacci(n):";
+    
+    // Act
+    var result = await _copilotService.GetCompletionAsync(prompt);
+    
+    // Assert
+    Assert.True(result.IsSuccess);
+    Assert.NotEmpty(result.Value);
+}
+
+[Fact]
+public async Task GetCompletionAsync_WithInvalidToken_ShouldReturnFailure()
+{
+    // Arrange
+    // Setup service with invalid token
+    
+    // Act
+    var result = await _copilotService.GetCompletionAsync("test");
+    
+    // Assert
+    Assert.True(result.IsFailure);
+    Assert.Contains("token", result.Error.ToLower());
+}
+```
+
+#### Testing Categories
+- **Unit Tests**: Test individual components with Result<T> patterns
+- **Integration Tests**: Test API endpoints and external service interactions
+- **Test Coverage**: Aim for >80% code coverage with focus on error paths
+- **Test Naming**: Descriptive names indicating expected behavior and outcomes
+
+### Configuration Management
+
+#### Options Pattern with Validation
+```csharp
+// appsettings.json
+{
+  "CopilotService": {
+    "ClientId": "your-client-id",
+    "UserAgent": "GitHubCopilotChat/1.0",
+    "EditorVersion": "vscode/1.80.0",
+    "EditorPluginVersion": "copilot-chat/0.8.0",
+    "AcceptEncoding": "gzip, deflate, br"
+  }
+}
+
+// Options class with validation
+public class CopilotServiceOptions
+{
+    public string ClientId { get; set; } = string.Empty;
+    public string UserAgent { get; set; } = string.Empty;
+    public string DeviceCodeUrl { get; set; } = string.Empty;
+    public string AccessTokenUrl { get; set; } = string.Empty;
+    public string TokenUrl { get; set; } = string.Empty;
+    public string CompletionUrl { get; set; } = string.Empty;
+}
+```
 
 ## 📝 Contributing
 

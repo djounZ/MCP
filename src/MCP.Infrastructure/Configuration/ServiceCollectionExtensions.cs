@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Http;
 using MCP.Domain.Interfaces;
-using MCP.Domain.Services.External;
+using MCP.Infrastructure.Services;
 using MCP.Infrastructure.Repositories;
 
 namespace MCP.Infrastructure.Configuration;

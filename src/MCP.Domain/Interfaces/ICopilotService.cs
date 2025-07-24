@@ -1,4 +1,4 @@
-namespace MCP.Domain.Services.External;
+namespace MCP.Domain.Interfaces;
 
 /// <summary>
 /// Interface for GitHub Copilot service

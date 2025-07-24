@@ -1,7 +1,8 @@
 using System.Text;
 using System.Text.Json;
+using MCP.Domain.Interfaces;
 
-namespace MCP.Domain.Services.External
+namespace MCP.Infrastructure.Services
 {
     public class CopilotService : ICopilotService, IDisposable
     {

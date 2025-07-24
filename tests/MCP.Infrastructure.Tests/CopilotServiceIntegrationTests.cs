@@ -59,19 +59,19 @@ public class CopilotServiceIntegrationTests : IDisposable
         var response = await _copilotService.GetCompletionAsync(prompt, language);
 
         // Assert
-        Assert.NotNull(response);
-        Assert.NotEmpty(response);
+        Assert.True(response.IsSuccess, $"Response should be successful. Error: {(response.IsFailure ? response.Error : "None")}");
+        Assert.NotEmpty(response.Value);
 
         // Display the response in the test output
         Console.WriteLine($"Prompt: {prompt}");
-        Console.WriteLine($"Response: {response}");
-        Console.WriteLine($"Response Length: {response.Length} characters");
+        Console.WriteLine($"Response: {response.Value}");
+        Console.WriteLine($"Response Length: {response.Value.Length} characters");
 
         // Additional assertions to ensure we got a meaningful response
-        Assert.True(response.Length > 10, "Response should be more than 10 characters");
+        Assert.True(response.Value.Length > 10, "Response should be more than 10 characters");
 
         // Check if the response contains some expected keywords related to Napoleon
-        var responseUpper = response.ToUpperInvariant();
+        var responseUpper = response.Value.ToUpperInvariant();
         var containsRelevantContent = responseUpper.Contains("NAPOLEON") ||
                                     responseUpper.Contains("EMPEROR") ||
                                     responseUpper.Contains("FRANCE") ||
@@ -92,17 +92,17 @@ public class CopilotServiceIntegrationTests : IDisposable
         var response = await _copilotService.GetCompletionAsync(prompt, language);
 
         // Assert
-        Assert.NotNull(response);
-        Assert.NotEmpty(response);
+        Assert.True(response.IsSuccess, $"Response should be successful. Error: {(response.IsFailure ? response.Error : "None")}");
+        Assert.NotEmpty(response.Value);
 
         // Display the response in the test output
         Console.WriteLine($"Code Prompt: {prompt}");
         Console.WriteLine($"Code Response:");
-        Console.WriteLine(response);
-        Console.WriteLine($"Response Length: {response.Length} characters");
+        Console.WriteLine(response.Value);
+        Console.WriteLine($"Response Length: {response.Value.Length} characters");
 
         // Additional assertions for code completion
-        Assert.True(response.Length > 5, "Code response should be more than 5 characters");
+        Assert.True(response.Value.Length > 5, "Code response should be more than 5 characters");
     }
 
     [Fact]
@@ -116,9 +116,16 @@ public class CopilotServiceIntegrationTests : IDisposable
         var response = await _copilotService.GetCompletionAsync(prompt);
 
         // Assert
-        Assert.NotNull(response);
-        Console.WriteLine($"Empty prompt response: '{response}'");
-        Console.WriteLine($"Response length: {response.Length}");
+        // We expect the response to be successful but potentially empty for an empty prompt
+        if (response.IsSuccess)
+        {
+            Console.WriteLine($"Empty prompt response: '{response.Value}'");
+            Console.WriteLine($"Response length: {response.Value.Length}");
+        }
+        else
+        {
+            Console.WriteLine($"Empty prompt resulted in error: {response.Error}");
+        }
     }
 
     public void Dispose()

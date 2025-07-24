@@ -3,6 +3,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using MCP.Domain.Common;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Constants;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
@@ -31,13 +32,10 @@ namespace MCP.Infrastructure.Services
                 {
                     if (!_disposed)
                     {
-                        try
+                        var tokenResult = await GetTokenInternalAsync();
+                        if (tokenResult.IsFailure)
                         {
-                            await GetTokenAsync();
-                        }
-                        catch (ObjectDisposedException)
-                        {
-                            _logger.LogWarning("HttpClient was disposed during token refresh.");
+                            _logger.LogWarning("Token refresh failed: {Error}", tokenResult.Error);
                         }
                     }
                 }
@@ -48,64 +46,103 @@ namespace MCP.Infrastructure.Services
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(25));
         }
 
-    public async Task SetupAsync()
+    public async Task<Result<Unit>> SetupAsync()
     {
-        var requestData = new
+        try
         {
-            client_id = _options.ClientId,
-            scope = "read:user"
-        };
-
-        var headers = new Dictionary<string, string>
-        {
-            [HeaderKeys.Accept] = ContentTypes.ApplicationJson,
-            [HeaderKeys.EditorVersion] = _options.EditorVersion,
-            [HeaderKeys.EditorPluginVersion] = _options.EditorPluginVersion,
-            [HeaderKeys.ContentType] = ContentTypes.ApplicationJson,
-            [HeaderKeys.UserAgent] = _options.UserAgent,
-            [HeaderKeys.AcceptEncoding] = _options.AcceptEncoding
-        };
-
-
-        var response = await SendPostRequestAsync(_options.DeviceCodeUrl, requestData, headers);
-        var deviceCodeResponse = System.Text.Json.JsonSerializer.Deserialize<Models.Copilot.CopilotDeviceCodeResponse>(response);
-        if (deviceCodeResponse == null)
-        {
-            _logger.LogError("Failed to parse device code response from Copilot.");
-            throw new InvalidOperationException("Failed to parse device code response.");
-        }
-
-        _logger.LogInformation("Prompting user to authenticate Copilot. VerificationUri: {VerificationUri}, UserCode: {UserCode}", deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
-        Console.WriteLine($"Please visit {deviceCodeResponse.VerificationUri} and enter code {deviceCodeResponse.UserCode} to authenticate.");
-
-
-        string? accessToken = null;
-        while (accessToken == null)
-        {
-            await Task.Delay(5000);
-
-            var tokenRequestData = new
+            var requestData = new
             {
                 client_id = _options.ClientId,
-                device_code = deviceCodeResponse.DeviceCode,
-                grant_type = "urn:ietf:params:oauth:grant-type:device_code"
+                scope = "read:user"
             };
 
-            var tokenResponse = await SendPostRequestAsync(_options.AccessTokenUrl, tokenRequestData, headers);
-            using var tokenResponseJsonDoc = JsonDocument.Parse(tokenResponse);
-            var tokenRoot = tokenResponseJsonDoc.RootElement;
-            if (tokenRoot.TryGetProperty("access_token", out var accessTokenProp))
+            var headers = new Dictionary<string, string>
             {
-                accessToken = accessTokenProp.GetString();
+                [HeaderKeys.Accept] = ContentTypes.ApplicationJson,
+                [HeaderKeys.EditorVersion] = _options.EditorVersion,
+                [HeaderKeys.EditorPluginVersion] = _options.EditorPluginVersion,
+                [HeaderKeys.ContentType] = ContentTypes.ApplicationJson,
+                [HeaderKeys.UserAgent] = _options.UserAgent,
+                [HeaderKeys.AcceptEncoding] = _options.AcceptEncoding
+            };
+
+            var responseResult = await SendPostRequestAsync(_options.DeviceCodeUrl, requestData, headers);
+            if (responseResult.IsFailure)
+                return Result.Failure<Unit>($"Failed to get device code: {responseResult.Error}");
+
+            Models.Copilot.CopilotDeviceCodeResponse? deviceCodeResponse;
+            try
+            {
+                deviceCodeResponse = JsonSerializer.Deserialize<Models.Copilot.CopilotDeviceCodeResponse>(responseResult.Value);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Failed to parse device code response from Copilot.");
+                return Result.Failure<Unit>("Failed to parse device code response.");
+            }
+
+            if (deviceCodeResponse == null)
+            {
+                _logger.LogError("Failed to parse device code response from Copilot.");
+                return Result.Failure<Unit>("Failed to parse device code response.");
+            }
+
+            _logger.LogInformation("Prompting user to authenticate Copilot. VerificationUri: {VerificationUri}, UserCode: {UserCode}", 
+                deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
+            Console.WriteLine($"Please visit {deviceCodeResponse.VerificationUri} and enter code {deviceCodeResponse.UserCode} to authenticate.");
+
+            string? accessToken = null;
+            while (accessToken == null)
+            {
+                await Task.Delay(5000);
+
+                var tokenRequestData = new
+                {
+                    client_id = _options.ClientId,
+                    device_code = deviceCodeResponse.DeviceCode,
+                    grant_type = "urn:ietf:params:oauth:grant-type:device_code"
+                };
+
+                var tokenResponseResult = await SendPostRequestAsync(_options.AccessTokenUrl, tokenRequestData, headers);
+                if (tokenResponseResult.IsFailure)
+                    continue; // Keep trying
+
+                try
+                {
+                    using var tokenResponseJsonDoc = JsonDocument.Parse(tokenResponseResult.Value);
+                    var tokenRoot = tokenResponseJsonDoc.RootElement;
+                    if (tokenRoot.TryGetProperty("access_token", out var accessTokenProp))
+                    {
+                        accessToken = accessTokenProp.GetString();
+                    }
+                }
+                catch (JsonException)
+                {
+                    // Continue trying
+                }
+            }
+
+            try
+            {
+                await File.WriteAllTextAsync(".copilot_token", accessToken);
+                _logger.LogInformation("Authentication success! Token saved to .copilot_token.");
+                Console.WriteLine("Authentication success!");
+                return Result.Success();
+            }
+            catch (IOException ex)
+            {
+                _logger.LogError(ex, "Failed to save token to file.");
+                return Result.Failure<Unit>("Failed to save token to file.");
             }
         }
-
-        await File.WriteAllTextAsync(".copilot_token", accessToken);
-        _logger.LogInformation("Authentication success! Token saved to .copilot_token.");
-        Console.WriteLine("Authentication success!");
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during setup.");
+            return Result.Failure<Unit>($"Unexpected error during setup: {ex.Message}");
+        }
     }
 
-    public async Task GetTokenAsync()
+    private async Task<Result<Unit>> GetTokenInternalAsync()
     {
         string accessToken;
         while (true)
@@ -117,7 +154,14 @@ namespace MCP.Infrastructure.Services
             }
             catch (FileNotFoundException)
             {
-                await SetupAsync();
+                var setupResult = await SetupAsync();
+                if (setupResult.IsFailure)
+                    return setupResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading token file");
+                return Result.Failure<Unit>($"Error reading token file: {ex.Message}");
             }
         }
 
@@ -129,25 +173,40 @@ namespace MCP.Infrastructure.Services
             [HeaderKeys.UserAgent] = _options.UserAgent
         };
 
-        var response = await SendGetRequestAsync(_options.TokenUrl, headers);
-        using var responseJsonDoc = JsonDocument.Parse(response);
-        var responseRoot = responseJsonDoc.RootElement;
-        if (responseRoot.TryGetProperty("token", out var tokenProp))
+        var responseResult = await SendGetRequestAsync(_options.TokenUrl, headers);
+        if (responseResult.IsFailure)
+            return Result.Failure<Unit>($"Failed to get token: {responseResult.Error}");
+
+        try
         {
-            _token = tokenProp.GetString();
-            _logger.LogInformation("Token successfully retrieved from Copilot API.");
+            using var responseJsonDoc = JsonDocument.Parse(responseResult.Value);
+            var responseRoot = responseJsonDoc.RootElement;
+            if (responseRoot.TryGetProperty("token", out var tokenProp))
+            {
+                _token = tokenProp.GetString();
+                _logger.LogInformation("Token successfully retrieved from Copilot API.");
+                return Result.Success();
+            }
+            else
+            {
+                _logger.LogWarning("Token property not found in Copilot API response.");
+                return Result.Failure<Unit>("Token property not found in API response");
+            }
         }
-        else
+        catch (JsonException ex)
         {
-            _logger.LogWarning("Token property not found in Copilot API response.");
+            _logger.LogError(ex, "Failed to parse token response");
+            return Result.Failure<Unit>("Failed to parse token response");
         }
     }
 
-    public async Task<string> GetCompletionAsync(string prompt, string language = "python")
+    public async Task<Result<string>> GetCompletionAsync(string prompt, string language = "python")
     {
         if (_token == null || IsTokenInvalid(_token))
         {
-            await GetTokenAsync();
+            var tokenResult = await GetTokenInternalAsync();
+            if (tokenResult.IsFailure)
+                return Result.Failure<string>($"Failed to get token: {tokenResult.Error}");
         }
 
         var requestData = new
@@ -171,13 +230,17 @@ namespace MCP.Infrastructure.Services
 
         try
         {
-            var response = await SendPostRequestAsync(_options.CompletionUrl, requestData, headers);
-            return ParseStreamingResponse(response);
+            var responseResult = await SendPostRequestAsync(_options.CompletionUrl, requestData, headers);
+            if (responseResult.IsFailure)
+                return Result.Failure<string>($"Failed to get completion: {responseResult.Error}");
+
+            var completion = ParseStreamingResponse(responseResult.Value);
+            return Result.Success(completion);
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while requesting Copilot completion.");
-            return string.Empty;
+            return Result.Failure<string>($"Error occurred while requesting Copilot completion: {ex.Message}");
         }
     }
 
@@ -258,48 +321,91 @@ namespace MCP.Infrastructure.Services
         return 0;
     }
 
-    private async Task<string> SendPostRequestAsync(string url, object data, Dictionary<string, string> headers)
+    private async Task<Result<string>> SendPostRequestAsync(string url, object data, Dictionary<string, string> headers)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, url);
-
-        foreach (KeyValuePair<string, string> header in headers)
+        try
         {
-            if (header.Key == HeaderKeys.ContentType)
-                continue; // This will be set by StringContent
-            request.Headers.Add(header.Key, header.Value);
+            using var request = new HttpRequestMessage(HttpMethod.Post, url);
+
+            foreach (KeyValuePair<string, string> header in headers)
+            {
+                if (header.Key == HeaderKeys.ContentType)
+                    continue; // This will be set by StringContent
+                request.Headers.Add(header.Key, header.Value);
+            }
+
+            string json = JsonSerializer.Serialize(data);
+            request.Content = new StringContent(json, Encoding.UTF8, ContentTypes.ApplicationJson);
+
+            using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            
+            if (!response.IsSuccessStatusCode)
+                return Result.Failure<string>($"HTTP request failed with status code: {response.StatusCode}");
+
+            await using Stream responseStream = await response.Content.ReadAsStreamAsync();
+            Stream contentStream = response.Content.Headers.ContentEncoding.Contains(ContentEncodings.Gzip)
+                ? new System.IO.Compression.GZipStream(responseStream, System.IO.Compression.CompressionMode.Decompress)
+                : responseStream;
+
+            using var reader = new StreamReader(contentStream, Encoding.UTF8);
+            string result = await reader.ReadToEndAsync();
+
+            if (contentStream is System.IO.Compression.GZipStream gzipStream)
+                await gzipStream.DisposeAsync();
+
+            return Result.Success(result);
         }
-
-        string json = JsonSerializer.Serialize(data);
-        request.Content = new StringContent(json, Encoding.UTF8, ContentTypes.ApplicationJson);
-
-        using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
-
-        await using Stream responseStream = await response.Content.ReadAsStreamAsync();
-        Stream contentStream = response.Content.Headers.ContentEncoding.Contains(ContentEncodings.Gzip)
-            ? new System.IO.Compression.GZipStream(responseStream, System.IO.Compression.CompressionMode.Decompress)
-            : responseStream;
-
-        using var reader = new StreamReader(contentStream, Encoding.UTF8);
-        string result = await reader.ReadToEndAsync();
-
-        if (contentStream is System.IO.Compression.GZipStream gzipStream)
-            await gzipStream.DisposeAsync();
-
-        return result;
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP request exception in SendPostRequestAsync");
+            return Result.Failure<string>($"HTTP request failed: {ex.Message}");
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogError(ex, "Request timeout in SendPostRequestAsync");
+            return Result.Failure<string>("Request timeout");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in SendPostRequestAsync");
+            return Result.Failure<string>($"Unexpected error: {ex.Message}");
+        }
     }
 
-    private async Task<string> SendGetRequestAsync(string url, Dictionary<string, string> headers)
+    private async Task<Result<string>> SendGetRequestAsync(string url, Dictionary<string, string> headers)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
-
-        foreach (var header in headers)
+        try
         {
-            request.Headers.Add(header.Key, header.Value);
-        }
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-        var response = await _httpClient.SendAsync(request);
-        return await response.Content.ReadAsStringAsync();
+            foreach (var header in headers)
+            {
+                request.Headers.Add(header.Key, header.Value);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+            
+            if (!response.IsSuccessStatusCode)
+                return Result.Failure<string>($"HTTP GET request failed with status code: {response.StatusCode}");
+
+            var content = await response.Content.ReadAsStringAsync();
+            return Result.Success(content);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP request exception in SendGetRequestAsync");
+            return Result.Failure<string>($"HTTP request failed: {ex.Message}");
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogError(ex, "Request timeout in SendGetRequestAsync");
+            return Result.Failure<string>("Request timeout");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in SendGetRequestAsync");
+            return Result.Failure<string>($"Unexpected error: {ex.Message}");
+        }
     }
 
     public void Dispose()

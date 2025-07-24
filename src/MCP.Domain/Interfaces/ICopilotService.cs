@@ -1,3 +1,5 @@
+using MCP.Domain.Common;
+
 namespace MCP.Domain.Interfaces;
 
 /// <summary>
@@ -8,13 +10,13 @@ public interface ICopilotService
     /// <summary>
     /// Setup authentication with GitHub Copilot
     /// </summary>
-    Task SetupAsync();
+    Task<Result<Unit>> SetupAsync();
 
     /// <summary>
     /// Get code completion from Copilot
     /// </summary>
     /// <param name="prompt">The code prompt</param>
     /// <param name="language">Programming language (default: python)</param>
-    /// <returns>Generated code completion</returns>
-    Task<string> GetCompletionAsync(string prompt, string language = "python");
+    /// <returns>Generated code completion or error</returns>
+    Task<Result<string>> GetCompletionAsync(string prompt, string language = "python");
 }

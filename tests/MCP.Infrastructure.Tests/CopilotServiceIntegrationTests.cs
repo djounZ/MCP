@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Services;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
@@ -40,7 +39,8 @@ public class CopilotServiceIntegrationTests : IDisposable
             .AddTypedClient<ICopilotService>((httpClient, sp) =>
             {
                 var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<CopilotServiceOptions>>().Value;
-                return new CopilotService(httpClient, options);
+                var logger = Microsoft.Extensions.Logging.Abstractions.NullLogger<CopilotService>.Instance;
+                return new CopilotService(httpClient, options, logger);
             });
 
         _serviceProvider = services.BuildServiceProvider();
@@ -61,22 +61,22 @@ public class CopilotServiceIntegrationTests : IDisposable
         // Assert
         Assert.NotNull(response);
         Assert.NotEmpty(response);
-        
+
         // Display the response in the test output
         Console.WriteLine($"Prompt: {prompt}");
         Console.WriteLine($"Response: {response}");
         Console.WriteLine($"Response Length: {response.Length} characters");
-        
+
         // Additional assertions to ensure we got a meaningful response
         Assert.True(response.Length > 10, "Response should be more than 10 characters");
-        
+
         // Check if the response contains some expected keywords related to Napoleon
         var responseUpper = response.ToUpperInvariant();
-        var containsRelevantContent = responseUpper.Contains("NAPOLEON") || 
-                                    responseUpper.Contains("EMPEROR") || 
+        var containsRelevantContent = responseUpper.Contains("NAPOLEON") ||
+                                    responseUpper.Contains("EMPEROR") ||
                                     responseUpper.Contains("FRANCE") ||
                                     responseUpper.Contains("BONAPARTE");
-        
+
         Console.WriteLine($"Contains relevant Napoleon content: {containsRelevantContent}");
     }
 
@@ -94,13 +94,13 @@ public class CopilotServiceIntegrationTests : IDisposable
         // Assert
         Assert.NotNull(response);
         Assert.NotEmpty(response);
-        
+
         // Display the response in the test output
         Console.WriteLine($"Code Prompt: {prompt}");
         Console.WriteLine($"Code Response:");
         Console.WriteLine(response);
         Console.WriteLine($"Response Length: {response.Length} characters");
-        
+
         // Additional assertions for code completion
         Assert.True(response.Length > 5, "Code response should be more than 5 characters");
     }

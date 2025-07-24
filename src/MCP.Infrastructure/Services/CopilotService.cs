@@ -2,43 +2,48 @@
 
 using System.Text;
 using System.Text.Json;
-using System.IO;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Constants;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Services
 {
-    public class CopilotService : ICopilotService, IDisposable
+    public sealed class CopilotService : ICopilotService, IDisposable
     {
         private readonly HttpClient _httpClient;
         private readonly Timer _tokenRefreshTimer;
         private readonly CopilotServiceOptions _options;
+        private readonly ILogger<CopilotService> _logger;
         private string? _token;
         private bool _disposed;
 
-        public CopilotService(HttpClient httpClient, CopilotServiceOptions options)
+        public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILogger<CopilotService> logger)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _options = options ?? throw new ArgumentNullException(nameof(options));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Start token refresh timer
             _tokenRefreshTimer = new Timer(async _ =>
             {
-                if (!_disposed)
+                try
                 {
-                    try
+                    if (!_disposed)
                     {
-                        await GetTokenAsync();
+                        try
+                        {
+                            await GetTokenAsync();
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            _logger.LogWarning("HttpClient was disposed during token refresh.");
+                        }
                     }
-                    catch (ObjectDisposedException)
-                    {
-                        // HttpClient was disposed, ignore
-                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred during token refresh timer callback.");
                 }
             }, null, TimeSpan.Zero, TimeSpan.FromMinutes(25));
         }
@@ -65,8 +70,12 @@ namespace MCP.Infrastructure.Services
         var response = await SendPostRequestAsync(_options.DeviceCodeUrl, requestData, headers);
         var deviceCodeResponse = System.Text.Json.JsonSerializer.Deserialize<Models.Copilot.CopilotDeviceCodeResponse>(response);
         if (deviceCodeResponse == null)
+        {
+            _logger.LogError("Failed to parse device code response from Copilot.");
             throw new InvalidOperationException("Failed to parse device code response.");
+        }
 
+        _logger.LogInformation("Prompting user to authenticate Copilot. VerificationUri: {VerificationUri}, UserCode: {UserCode}", deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
         Console.WriteLine($"Please visit {deviceCodeResponse.VerificationUri} and enter code {deviceCodeResponse.UserCode} to authenticate.");
 
 
@@ -92,6 +101,7 @@ namespace MCP.Infrastructure.Services
         }
 
         await File.WriteAllTextAsync(".copilot_token", accessToken);
+        _logger.LogInformation("Authentication success! Token saved to .copilot_token.");
         Console.WriteLine("Authentication success!");
     }
 
@@ -125,6 +135,11 @@ namespace MCP.Infrastructure.Services
         if (responseRoot.TryGetProperty("token", out var tokenProp))
         {
             _token = tokenProp.GetString();
+            _logger.LogInformation("Token successfully retrieved from Copilot API.");
+        }
+        else
+        {
+            _logger.LogWarning("Token property not found in Copilot API response.");
         }
     }
 
@@ -159,9 +174,10 @@ namespace MCP.Infrastructure.Services
             var response = await SendPostRequestAsync(_options.CompletionUrl, requestData, headers);
             return ParseStreamingResponse(response);
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            return "";
+            _logger.LogError(ex, "Error occurred while requesting Copilot completion.");
+            return string.Empty;
         }
     }
 
@@ -292,7 +308,7 @@ namespace MCP.Infrastructure.Services
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!_disposed && disposing)
         {

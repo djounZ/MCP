@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Http;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Services;
 using MCP.Infrastructure.Repositories;
@@ -30,7 +29,8 @@ public static class ServiceCollectionExtensions
             .AddTypedClient((httpClient, sp) =>
             {
                 var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<CopilotServiceOptions>>().Value;
-                return new CopilotService(httpClient, options);
+                var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CopilotService>>();
+                return new CopilotService(httpClient, options, logger);
             });
 
         // Add other infrastructure services here

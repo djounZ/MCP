@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Services;
+using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Tests.Integration;
 
@@ -19,10 +20,29 @@ public class CopilotServiceIntegrationTests : IDisposable
     {
         // Setup dependency injection container
         var services = new ServiceCollection();
-        
-        // Register HttpClient and CopilotService
-        services.AddHttpClient<ICopilotService, CopilotService>();
-        
+
+        // Register options system and CopilotServiceOptions with test or real values
+        services.AddOptions();
+        services.Configure<CopilotServiceOptions>(options =>
+        {
+            options.ClientId = "Iv1.b507a08c87ecfe98";
+            options.DeviceCodeUrl = "https://github.com/login/device/code";
+            options.AccessTokenUrl = "https://github.com/login/oauth/access_token";
+            options.TokenUrl = "https://api.github.com/copilot_internal/v2/token";
+            options.CompletionUrl = "https://copilot-proxy.githubusercontent.com/v1/engines/copilot-codex/completions";
+        });
+
+        // Register CopilotService using the same pattern as production (typed client with options)
+        services.AddHttpClient<ICopilotService>(httpClient =>
+            {
+                // Configure HttpClient if needed
+            })
+            .AddTypedClient<ICopilotService>((httpClient, sp) =>
+            {
+                var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<CopilotServiceOptions>>().Value;
+                return new CopilotService(httpClient, options);
+            });
+
         _serviceProvider = services.BuildServiceProvider();
         _copilotService = _serviceProvider.GetRequiredService<ICopilotService>();
     }

@@ -1,5 +1,6 @@
 ﻿using MCP.Infrastructure.Services;
 using MCP.Domain.Interfaces;
+using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Tests.Unit;
 
@@ -13,7 +14,8 @@ public class CopilotServiceUnitTests
     public void CopilotService_Constructor_WithNullHttpClient_ShouldThrowArgumentNullException()
     {
         // Arrange & Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new CopilotService(null!));
+        var options = new CopilotServiceOptions();
+        Assert.Throws<ArgumentNullException>(() => new CopilotService(null!, options));
     }
 
     [Fact]
@@ -22,9 +24,10 @@ public class CopilotServiceUnitTests
     {
         // Arrange
         using var httpClient = new HttpClient();
+        var options = new CopilotServiceOptions();
 
         // Act
-        using var service = new CopilotService(httpClient);
+        using var service = new CopilotService(httpClient, options);
 
         // Assert
         Assert.NotNull(service);
@@ -38,7 +41,8 @@ public class CopilotServiceUnitTests
     {
         // Arrange
         using var httpClient = new HttpClient();
-        var service = new CopilotService(httpClient);
+        var options = new CopilotServiceOptions();
+        var service = new CopilotService(httpClient, options);
 
         // Act & Assert
         var exception = Record.Exception(() => service.Dispose());
@@ -51,7 +55,8 @@ public class CopilotServiceUnitTests
     {
         // Arrange
         using var httpClient = new HttpClient();
-        var service = new CopilotService(httpClient);
+        var options = new CopilotServiceOptions();
+        var service = new CopilotService(httpClient, options);
 
         // Act & Assert
         var exception1 = Record.Exception(() => service.Dispose());

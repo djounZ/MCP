@@ -4,6 +4,7 @@ using Microsoft.Extensions.Http;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Services;
 using MCP.Infrastructure.Repositories;
+using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Configuration;
 
@@ -21,8 +22,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Register external services
-        services.AddHttpClient<ICopilotService, CopilotService>();
+        // Register CopilotServiceOptions from configuration
+        services.Configure<CopilotServiceOptions>(configuration.GetSection("CopilotService"));
+
+        // Register CopilotService with options from IOptions
+        services.AddHttpClient<ICopilotService, CopilotService>()
+            .AddTypedClient((httpClient, sp) =>
+            {
+                var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<CopilotServiceOptions>>().Value;
+                return new CopilotService(httpClient, options);
+            });
 
         // Add other infrastructure services here
         // Example: Database context, external API clients, etc.

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Http;
 using MCP.Domain.Interfaces;
+using MCP.Domain.Services.External;
 using MCP.Infrastructure.Repositories;
 
 namespace MCP.Infrastructure.Configuration;
@@ -18,6 +20,9 @@ public static class ServiceCollectionExtensions
         // Register repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // Register external services
+        services.AddHttpClient<ICopilotService, CopilotService>();
 
         // Add other infrastructure services here
         // Example: Database context, external API clients, etc.

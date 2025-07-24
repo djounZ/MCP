@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Services;
+using Xunit.Abstractions;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Tests.Integration;
@@ -14,9 +15,12 @@ public class CopilotServiceIntegrationTests : IDisposable
 {
     private readonly ServiceProvider _serviceProvider;
     private readonly ICopilotService _copilotService;
+    private readonly ITestOutputHelper _output;
 
-    public CopilotServiceIntegrationTests()
+    public CopilotServiceIntegrationTests(ITestOutputHelper output)
     {
+        _output = output;
+        
         // Setup dependency injection container
         var services = new ServiceCollection();
 
@@ -63,9 +67,9 @@ public class CopilotServiceIntegrationTests : IDisposable
         Assert.NotEmpty(response.Value);
 
         // Display the response in the test output
-        Console.WriteLine($"Prompt: {prompt}");
-        Console.WriteLine($"Response: {response.Value}");
-        Console.WriteLine($"Response Length: {response.Value.Length} characters");
+        _output.WriteLine($"Prompt: {prompt}");
+        _output.WriteLine($"Response: {response.Value}");
+        _output.WriteLine($"Response Length: {response.Value.Length} characters");
 
         // Additional assertions to ensure we got a meaningful response
         Assert.True(response.Value.Length > 10, "Response should be more than 10 characters");
@@ -77,7 +81,7 @@ public class CopilotServiceIntegrationTests : IDisposable
                                     responseUpper.Contains("FRANCE") ||
                                     responseUpper.Contains("BONAPARTE");
 
-        Console.WriteLine($"Contains relevant Napoleon content: {containsRelevantContent}");
+        _output.WriteLine($"Contains relevant Napoleon content: {containsRelevantContent}");
     }
 
     [Fact]
@@ -96,10 +100,10 @@ public class CopilotServiceIntegrationTests : IDisposable
         Assert.NotEmpty(response.Value);
 
         // Display the response in the test output
-        Console.WriteLine($"Code Prompt: {prompt}");
-        Console.WriteLine($"Code Response:");
-        Console.WriteLine(response.Value);
-        Console.WriteLine($"Response Length: {response.Value.Length} characters");
+        _output.WriteLine($"Code Prompt: {prompt}");
+        _output.WriteLine($"Code Response:");
+        _output.WriteLine(response.Value);
+        _output.WriteLine($"Response Length: {response.Value.Length} characters");
 
         // Additional assertions for code completion
         Assert.True(response.Value.Length > 5, "Code response should be more than 5 characters");
@@ -119,12 +123,12 @@ public class CopilotServiceIntegrationTests : IDisposable
         // We expect the response to be successful but potentially empty for an empty prompt
         if (response.IsSuccess)
         {
-            Console.WriteLine($"Empty prompt response: '{response.Value}'");
-            Console.WriteLine($"Response length: {response.Value.Length}");
+            _output.WriteLine($"Empty prompt response: '{response.Value}'");
+            _output.WriteLine($"Response length: {response.Value.Length}");
         }
         else
         {
-            Console.WriteLine($"Empty prompt resulted in error: {response.Error}");
+            _output.WriteLine($"Empty prompt resulted in error: {response.Error}");
         }
     }
 

@@ -89,7 +89,8 @@ namespace MCP.Infrastructure.Services
 
             _logger.LogInformation("Prompting user to authenticate Copilot. VerificationUri: {VerificationUri}, UserCode: {UserCode}", 
                 deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
-            Console.WriteLine($"Please visit {deviceCodeResponse.VerificationUri} and enter code {deviceCodeResponse.UserCode} to authenticate.");
+            _logger.LogInformation("Please visit {VerificationUri} and enter code {UserCode} to authenticate", 
+                deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
 
             string? accessToken = null;
             while (accessToken == null)
@@ -126,7 +127,6 @@ namespace MCP.Infrastructure.Services
             {
                 await File.WriteAllTextAsync(".copilot_token", accessToken);
                 _logger.LogInformation("Authentication success! Token saved to .copilot_token.");
-                Console.WriteLine("Authentication success!");
                 return Result.Success();
             }
             catch (IOException ex)

@@ -7,4 +7,10 @@ public class CopilotServiceOptions
     public string AccessTokenUrl { get; set; } = string.Empty;
     public string TokenUrl { get; set; } = string.Empty;
     public string CompletionUrl { get; set; } = string.Empty;
+
+    // Technical headers
+    public string EditorVersion { get; set; } = string.Empty;
+    public string EditorPluginVersion { get; set; } = string.Empty;
+    public string UserAgent { get; set; } = string.Empty;
+    public string AcceptEncoding { get; set; } = string.Empty;
 }

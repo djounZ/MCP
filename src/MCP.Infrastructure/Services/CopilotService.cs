@@ -2,42 +2,46 @@
 
 using System.Text;
 using System.Text.Json;
+using System.IO;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Constants;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
-namespace MCP.Infrastructure.Services;
-
-
-public class CopilotService : ICopilotService, IDisposable
+namespace MCP.Infrastructure.Services
 {
-    private readonly HttpClient _httpClient;
-    private readonly Timer _tokenRefreshTimer;
-    private readonly CopilotServiceOptions _options;
-    private string? _token;
-    private bool _disposed;
-
-    public CopilotService(HttpClient httpClient, CopilotServiceOptions options)
+    public class CopilotService : ICopilotService, IDisposable
     {
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        private readonly HttpClient _httpClient;
+        private readonly Timer _tokenRefreshTimer;
+        private readonly CopilotServiceOptions _options;
+        private string? _token;
+        private bool _disposed;
 
-        // Start token refresh timer
-        _tokenRefreshTimer = new Timer(async _ =>
+        public CopilotService(HttpClient httpClient, CopilotServiceOptions options)
         {
-            if (!_disposed)
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+
+            // Start token refresh timer
+            _tokenRefreshTimer = new Timer(async _ =>
             {
-                try
+                if (!_disposed)
                 {
-                    await GetTokenAsync();
+                    try
+                    {
+                        await GetTokenAsync();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // HttpClient was disposed, ignore
+                    }
                 }
-                catch (ObjectDisposedException)
-                {
-                    // HttpClient was disposed, ignore
-                }
-            }
-        }, null, TimeSpan.Zero, TimeSpan.FromMinutes(25));
-    }
+            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(25));
+        }
 
     public async Task SetupAsync()
     {
@@ -49,23 +53,22 @@ public class CopilotService : ICopilotService, IDisposable
 
         var headers = new Dictionary<string, string>
         {
-            ["accept"] = ContentTypes.Json,
-            ["editor-version"] = "Neovim/0.6.1",
-            ["editor-plugin-version"] = "copilot.vim/1.16.0",
-            ["content-type"] = ContentTypes.Json,
-            ["user-agent"] = "GithubCopilot/1.155.0",
-            ["accept-encoding"] = $"{ContentEncodings.Gzip},{ContentEncodings.Deflate},{ContentEncodings.Brotli}"
+            [HeaderKeys.Accept] = ContentTypes.ApplicationJson,
+            [HeaderKeys.EditorVersion] = _options.EditorVersion,
+            [HeaderKeys.EditorPluginVersion] = _options.EditorPluginVersion,
+            [HeaderKeys.ContentType] = ContentTypes.ApplicationJson,
+            [HeaderKeys.UserAgent] = _options.UserAgent,
+            [HeaderKeys.AcceptEncoding] = _options.AcceptEncoding
         };
 
+
         var response = await SendPostRequestAsync(_options.DeviceCodeUrl, requestData, headers);
-        using var responseJsonDoc = JsonDocument.Parse(response);
-        var responseRoot = responseJsonDoc.RootElement;
+        var deviceCodeResponse = System.Text.Json.JsonSerializer.Deserialize<Models.Copilot.CopilotDeviceCodeResponse>(response);
+        if (deviceCodeResponse == null)
+            throw new InvalidOperationException("Failed to parse device code response.");
 
-        var deviceCode = responseRoot.GetProperty("device_code").GetString();
-        var userCode = responseRoot.GetProperty("user_code").GetString();
-        var verificationUri = responseRoot.GetProperty("verification_uri").GetString();
+        Console.WriteLine($"Please visit {deviceCodeResponse.VerificationUri} and enter code {deviceCodeResponse.UserCode} to authenticate.");
 
-        Console.WriteLine($"Please visit {verificationUri} and enter code {userCode} to authenticate.");
 
         string? accessToken = null;
         while (accessToken == null)
@@ -75,7 +78,7 @@ public class CopilotService : ICopilotService, IDisposable
             var tokenRequestData = new
             {
                 client_id = _options.ClientId,
-                device_code = deviceCode,
+                device_code = deviceCodeResponse.DeviceCode,
                 grant_type = "urn:ietf:params:oauth:grant-type:device_code"
             };
 
@@ -110,10 +113,10 @@ public class CopilotService : ICopilotService, IDisposable
 
         var headers = new Dictionary<string, string>
         {
-            ["authorization"] = $"token {accessToken}",
-            ["editor-version"] = "Neovim/0.6.1",
-            ["editor-plugin-version"] = "copilot.vim/1.16.0",
-            ["user-agent"] = "GithubCopilot/1.155.0"
+            [HeaderKeys.Authorization] = $"token {accessToken}",
+            [HeaderKeys.EditorVersion] = _options.EditorVersion,
+            [HeaderKeys.EditorPluginVersion] = _options.EditorPluginVersion,
+            [HeaderKeys.UserAgent] = _options.UserAgent
         };
 
         var response = await SendGetRequestAsync(_options.TokenUrl, headers);
@@ -148,7 +151,7 @@ public class CopilotService : ICopilotService, IDisposable
 
         var headers = new Dictionary<string, string>
         {
-            ["authorization"] = $"Bearer {_token}"
+            [HeaderKeys.Authorization] = $"Bearer {_token}"
         };
 
         try
@@ -245,13 +248,13 @@ public class CopilotService : ICopilotService, IDisposable
 
         foreach (KeyValuePair<string, string> header in headers)
         {
-            if (header.Key == "content-type")
+            if (header.Key == HeaderKeys.ContentType)
                 continue; // This will be set by StringContent
             request.Headers.Add(header.Key, header.Value);
         }
 
         string json = JsonSerializer.Serialize(data);
-        request.Content = new StringContent(json, Encoding.UTF8, ContentTypes.Json);
+        request.Content = new StringContent(json, Encoding.UTF8, ContentTypes.ApplicationJson);
 
         using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
@@ -296,5 +299,7 @@ public class CopilotService : ICopilotService, IDisposable
             _tokenRefreshTimer?.Dispose();
             _disposed = true;
         }
+    }
+
     }
 }

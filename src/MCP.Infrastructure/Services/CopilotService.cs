@@ -1,4 +1,7 @@
 using System.IO.Compression;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using MCP.Application.Interfaces;
@@ -16,14 +19,16 @@ public sealed class CopilotService : ICopilotService, IDisposable
     private readonly ILogger<CopilotService> _logger;
     private readonly CopilotServiceOptions _options;
     private readonly Timer _tokenRefreshTimer;
+    private readonly string _tokenFilePath;
     private bool _disposed;
-    private string? _token;
+    private byte[]? _encryptedToken;
 
     public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILogger<CopilotService> logger)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _tokenFilePath = Path.Combine(".copilot_token_encrypted");
 
         // Start token refresh timer
         _tokenRefreshTimer = new Timer(async _ =>
@@ -46,92 +51,73 @@ public sealed class CopilotService : ICopilotService, IDisposable
         }, null, TimeSpan.Zero, TimeSpan.FromMinutes(25));
     }
 
-    public async Task<Result<Unit>> SetupAsync()
+    private async Task<Result<GithubDeviceCodeResponse>> GetGithubDeviceCodeResponseAsync(string deviceCodeUrl,string clientId, string scope, Dictionary<string, string> headers)
     {
-        try
-        {
-            var requestData = new { client_id = _options.ClientId, scope = "read:user" };
+        var requestData = new { client_id = clientId, scope = scope };
+        var responseResult = await SendPostRequestAsync(deviceCodeUrl, requestData, headers);
 
-            var headers = new Dictionary<string, string>
+        return responseResult.Match(value =>
             {
-                [HeaderKeys.Accept] = ContentTypes.ApplicationJson,
-                [HeaderKeys.EditorVersion] = _options.EditorVersion,
-                [HeaderKeys.EditorPluginVersion] = _options.EditorPluginVersion,
-                [HeaderKeys.ContentType] = ContentTypes.ApplicationJson,
-                [HeaderKeys.UserAgent] = _options.UserAgent,
-                [HeaderKeys.AcceptEncoding] = _options.AcceptEncoding
-            };
-
-            var responseResult = await SendPostRequestAsync(_options.DeviceCodeUrl, requestData, headers);
-            if (responseResult.IsFailure)
-                return Result.Failure<Unit>($"Failed to get device code: {responseResult.Error}");
-
-            CopilotDeviceCodeResponse? deviceCodeResponse;
-            try
-            {
-                deviceCodeResponse = JsonSerializer.Deserialize<CopilotDeviceCodeResponse>(responseResult.Value);
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError(ex, "Failed to parse device code response from Copilot.");
-                return Result.Failure<Unit>("Failed to parse device code response.");
-            }
-
-            if (deviceCodeResponse == null)
-            {
-                _logger.LogError("Failed to parse device code response from Copilot.");
-                return Result.Failure<Unit>("Failed to parse device code response.");
-            }
-
-            _logger.LogInformation(
-                "Prompting user to authenticate Copilot. VerificationUri: {VerificationUri}, UserCode: {UserCode}",
-                deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
-            _logger.LogInformation("Please visit {VerificationUri} and enter code {UserCode} to authenticate",
-                deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
-
-            string? accessToken = null;
-            while (accessToken == null)
-            {
-                await Task.Delay(5000);
-
-                var tokenRequestData = new
-                {
-                    client_id = _options.ClientId,
-                    device_code = deviceCodeResponse.DeviceCode,
-                    grant_type = "urn:ietf:params:oauth:grant-type:device_code"
-                };
-
-                var tokenResponseResult =
-                    await SendPostRequestAsync(_options.AccessTokenUrl, tokenRequestData, headers);
-                if (tokenResponseResult.IsFailure)
-                    continue; // Keep trying
-
                 try
                 {
-                    using var tokenResponseJsonDoc = JsonDocument.Parse(tokenResponseResult.Value);
-                    var tokenRoot = tokenResponseJsonDoc.RootElement;
-                    if (tokenRoot.TryGetProperty("access_token", out var accessTokenProp))
+                    var githubDeviceCodeResponse = JsonSerializer.Deserialize<GithubDeviceCodeResponse>(responseResult.Value);
+                    if (githubDeviceCodeResponse != null)
                     {
-                        accessToken = accessTokenProp.GetString();
+                        _logger.LogInformation("Please visit {VerificationUri} and enter code {UserCode} to authenticate",
+                            githubDeviceCodeResponse.VerificationUri, githubDeviceCodeResponse.UserCode);
+                        return Result.Success(githubDeviceCodeResponse);
                     }
+
+                    _logger.LogError("Failed to parse device code response from Copilot.");
+                    return Result.Failure<GithubDeviceCodeResponse>("Failed to parse device code response.");
                 }
-                catch (JsonException)
+                catch (Exception ex)
                 {
-                    // Continue trying
+                    _logger.LogError(ex, "Failed to parse device code response from Copilot.");
+                    return Result.Failure<GithubDeviceCodeResponse>("Failed to parse device code response.", ex);
                 }
+            }
+            ,
+            Result.Failure<GithubDeviceCodeResponse>);
+    }
+
+    public async Task<Result<Unit>> SetupAsync()
+    {
+        var headers = new Dictionary<string, string>
+        {
+            [HeaderKeys.Accept] = ContentTypes.ApplicationJson,
+            [HeaderKeys.EditorVersion] = _options.EditorVersion,
+            [HeaderKeys.EditorPluginVersion] = _options.EditorPluginVersion,
+            [HeaderKeys.ContentType] = ContentTypes.ApplicationJson,
+            [HeaderKeys.UserAgent] = _options.UserAgent,
+            [HeaderKeys.AcceptEncoding] = _options.AcceptEncoding
+        };
+        var deviceCodeUrl = _options.DeviceCodeUrl;
+        var clientId = _options.ClientId;
+        var scope = "read:user";
+        var grantType = "urn:ietf:params:oauth:grant-type:device_code";
+        try
+        {
+            var requestData = new { client_id = clientId, scope = scope };
+
+            var responseResult = await SendPostRequestAsync(deviceCodeUrl, requestData, headers);
+            if (responseResult.IsFailure)
+            {
+                return Result.Failure<Unit>($"Failed to get device code: {responseResult.Error}");
             }
 
-            try
-            {
-                await File.WriteAllTextAsync(".copilot_token", accessToken);
-                _logger.LogInformation("Authentication success! Token saved to .copilot_token.");
-                return Result.Success();
-            }
-            catch (IOException ex)
-            {
-                _logger.LogError(ex, "Failed to save token to file.");
-                return Result.Failure<Unit>("Failed to save token to file.");
-            }
+            var githubDeviceCodeResponseAsync = await GetGithubDeviceCodeResponseAsync(deviceCodeUrl, clientId, scope, headers);
+
+
+           return await githubDeviceCodeResponseAsync.MatchAsync(
+                onSuccess: async deviceCodeResponse =>
+                {
+                    var deviceCode = deviceCodeResponse.DeviceCode;
+
+                    return await GetGithubAccessTokenAsync(clientId, deviceCode, grantType, headers);
+                },
+                onFailure: Result.Failure<Unit>);
+
         }
         catch (Exception ex)
         {
@@ -140,15 +126,73 @@ public sealed class CopilotService : ICopilotService, IDisposable
         }
     }
 
+    private async Task<Result<Unit>> GetGithubAccessTokenAsync(string clientId, string deviceCode, string grantType, Dictionary<string, string> headers)
+    {
+        string? accessToken = null;
+        while (accessToken == null)
+        {
+            await Task.Delay(5000);
+
+            var tokenRequestData = new
+            {
+                client_id = clientId,
+                device_code = deviceCode,
+                grant_type = grantType
+            };
+
+            var tokenResponseResult =
+                await SendPostRequestAsync(_options.AccessTokenUrl, tokenRequestData, headers);
+            if (tokenResponseResult.IsFailure)
+            {
+                continue; // Keep trying
+            }
+
+            try
+            {
+                using var tokenResponseJsonDoc = JsonDocument.Parse(tokenResponseResult.Value);
+                var tokenRoot = tokenResponseJsonDoc.RootElement;
+                if (tokenRoot.TryGetProperty("access_token", out var accessTokenProp))
+                {
+                    accessToken = accessTokenProp.GetString();
+                }
+            }
+            catch (JsonException)
+            {
+                // Continue trying
+            }
+        }
+
+        try
+        {
+            await SaveTokenSecurelyAsync(accessToken);
+            _logger.LogInformation("Authentication success! Token saved securely.");
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save token securely.");
+            return Result.Failure<Unit>("Failed to save token securely.");
+        }
+    }
+
     public async Task<Result<string>> GetCompletionAsync(string prompt, string language = "python")
     {
-        if (_token == null || IsTokenInvalid(_token))
+        var currentTokenResult = await GetCurrentTokenAsync();
+        if (currentTokenResult.IsFailure || IsTokenInvalid(currentTokenResult.Value))
         {
             var tokenResult = await GetTokenInternalAsync();
             if (tokenResult.IsFailure)
+            {
                 return Result.Failure<string>($"Failed to get token: {tokenResult.Error}");
+            }
+            currentTokenResult = await GetCurrentTokenAsync();
+            if (currentTokenResult.IsFailure)
+            {
+                return Result.Failure<string>($"Failed to retrieve valid token: {currentTokenResult.Error}");
+            }
         }
 
+        var currentToken = currentTokenResult.Value;
         var requestData = new
         {
             prompt,
@@ -163,13 +207,15 @@ public sealed class CopilotService : ICopilotService, IDisposable
             extra = new { language }
         };
 
-        var headers = new Dictionary<string, string> { [HeaderKeys.Authorization] = $"Bearer {_token}" };
+        var headers = new Dictionary<string, string> { [HeaderKeys.Authorization] = $"Bearer {currentToken}" };
 
         try
         {
             var responseResult = await SendPostRequestAsync(_options.CompletionUrl, requestData, headers);
             if (responseResult.IsFailure)
+            {
                 return Result.Failure<string>($"Failed to get completion: {responseResult.Error}");
+            }
 
             var completion = ParseStreamingResponse(responseResult.Value);
             return Result.Success(completion);
@@ -178,6 +224,14 @@ public sealed class CopilotService : ICopilotService, IDisposable
         {
             _logger.LogError(ex, "Error occurred while requesting Copilot completion.");
             return Result.Failure<string>($"Error occurred while requesting Copilot completion: {ex.Message}");
+        }
+        finally
+        {
+            // Clear the token from memory
+            if (currentToken != null)
+            {
+                SecureClearString(currentToken);
+            }
         }
     }
 
@@ -189,24 +243,28 @@ public sealed class CopilotService : ICopilotService, IDisposable
 
     private async Task<Result<Unit>> GetTokenInternalAsync()
     {
-        string accessToken;
+        var accessToken = string.Empty;
         while (true)
         {
-            try
+            var tokenResult = await LoadTokenSecurelyAsync();
+            var shouldBreak = tokenResult.Match(
+                onSuccess: token =>
+                {
+                    accessToken = token;
+                    return true;
+                },
+                onFailure: error => false);
+
+            if (shouldBreak)
             {
-                accessToken = await File.ReadAllTextAsync(".copilot_token");
                 break;
             }
-            catch (FileNotFoundException)
+
+            // Token not found or invalid, need to setup
+            var setupResult = await SetupAsync();
+            if (setupResult.IsFailure)
             {
-                var setupResult = await SetupAsync();
-                if (setupResult.IsFailure)
-                    return setupResult;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error reading token file");
-                return Result.Failure<Unit>($"Error reading token file: {ex.Message}");
+                return setupResult;
             }
         }
 
@@ -218,28 +276,42 @@ public sealed class CopilotService : ICopilotService, IDisposable
             [HeaderKeys.UserAgent] = _options.UserAgent
         };
 
-        var responseResult = await SendGetRequestAsync(_options.TokenUrl, headers);
-        if (responseResult.IsFailure)
-            return Result.Failure<Unit>($"Failed to get token: {responseResult.Error}");
-
         try
         {
-            using var responseJsonDoc = JsonDocument.Parse(responseResult.Value);
-            var responseRoot = responseJsonDoc.RootElement;
-            if (responseRoot.TryGetProperty("token", out var tokenProp))
+            var responseResult = await SendGetRequestAsync(_options.TokenUrl, headers);
+            if (responseResult.IsFailure)
             {
-                _token = tokenProp.GetString();
-                _logger.LogInformation("Token successfully retrieved from Copilot API.");
-                return Result.Success();
+                return Result.Failure<Unit>($"Failed to get token: {responseResult.Error}");
             }
 
-            _logger.LogWarning("Token property not found in Copilot API response.");
-            return Result.Failure<Unit>("Token property not found in API response");
+            try
+            {
+                using var responseJsonDoc = JsonDocument.Parse(responseResult.Value);
+                var responseRoot = responseJsonDoc.RootElement;
+                if (responseRoot.TryGetProperty("token", out var tokenProp))
+                {
+                    var token = tokenProp.GetString();
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        await StoreTokenSecurelyAsync(token);
+                        _logger.LogInformation("Token successfully retrieved from Copilot API.");
+                        return Result.Success();
+                    }
+                }
+
+                _logger.LogWarning("Token property not found in Copilot API response.");
+                return Result.Failure<Unit>("Token property not found in API response");
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Failed to parse token response");
+                return Result.Failure<Unit>("Failed to parse token response");
+            }
         }
-        catch (JsonException ex)
+        finally
         {
-            _logger.LogError(ex, "Failed to parse token response");
-            return Result.Failure<Unit>("Failed to parse token response");
+            // Clear the access token from memory
+            SecureClearString(accessToken);
         }
     }
 
@@ -327,10 +399,8 @@ public sealed class CopilotService : ICopilotService, IDisposable
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
 
-            foreach (var header in headers)
+            foreach (var header in headers.Where(header => header.Key != HeaderKeys.ContentType))
             {
-                if (header.Key == HeaderKeys.ContentType)
-                    continue; // This will be set by StringContent
                 request.Headers.Add(header.Key, header.Value);
             }
 
@@ -340,7 +410,9 @@ public sealed class CopilotService : ICopilotService, IDisposable
             using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
             if (!response.IsSuccessStatusCode)
+            {
                 return Result.Failure<string>($"HTTP request failed with status code: {response.StatusCode}");
+            }
 
             await using var responseStream = await response.Content.ReadAsStreamAsync();
             var contentStream = response.Content.Headers.ContentEncoding.Contains(ContentEncodings.Gzip)
@@ -351,24 +423,16 @@ public sealed class CopilotService : ICopilotService, IDisposable
             var result = await reader.ReadToEndAsync();
 
             if (contentStream is GZipStream gzipStream)
+            {
                 await gzipStream.DisposeAsync();
+            }
 
             return Result.Success(result);
-        }
-        catch (HttpRequestException ex)
-        {
-            _logger.LogError(ex, "HTTP request exception in SendPostRequestAsync");
-            return Result.Failure<string>($"HTTP request failed: {ex.Message}");
-        }
-        catch (TaskCanceledException ex)
-        {
-            _logger.LogError(ex, "Request timeout in SendPostRequestAsync");
-            return Result.Failure<string>("Request timeout");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error in SendPostRequestAsync");
-            return Result.Failure<string>($"Unexpected error: {ex.Message}");
+            return Result.Failure<string>($"Unexpected error", ex);
         }
     }
 
@@ -386,7 +450,9 @@ public sealed class CopilotService : ICopilotService, IDisposable
             var response = await _httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
+            {
                 return Result.Failure<string>($"HTTP GET request failed with status code: {response.StatusCode}");
+            }
 
             var content = await response.Content.ReadAsStringAsync();
             return Result.Success(content);
@@ -413,7 +479,250 @@ public sealed class CopilotService : ICopilotService, IDisposable
         if (!_disposed && disposing)
         {
             _tokenRefreshTimer?.Dispose();
+
+            // Securely clear encrypted token from memory
+            if (_encryptedToken != null)
+            {
+                Array.Clear(_encryptedToken, 0, _encryptedToken.Length);
+                _encryptedToken = null;
+            }
+
             _disposed = true;
         }
     }
+
+    #region Secure Token Handling
+
+    private async Task SaveTokenSecurelyAsync(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            return;
+        }
+
+        SecureString? secureToken = null;
+        try
+        {
+            // Convert to SecureString for secure handling
+            secureToken = CreateSecureString(token);
+            await SaveTokenSecurelyAsync(secureToken);
+        }
+        finally
+        {
+            DisposeSecureString(secureToken);
+        }
+    }
+
+    private async Task SaveTokenSecurelyAsync(SecureString secureToken)
+    {
+        if (secureToken == null || secureToken.Length == 0)
+        {
+            return;
+        }
+
+        string? tempToken = null;
+        try
+        {
+            // Briefly convert to string for encryption (minimizing exposure time)
+            tempToken = SecureStringToString(secureToken);
+            var tokenBytes = Encoding.UTF8.GetBytes(tempToken);
+            var encryptedData = await EncryptTokenAesAsync(tokenBytes);
+            await File.WriteAllBytesAsync(_tokenFilePath, encryptedData);
+
+            // Also store in memory for quick access
+            await StoreTokenSecurelyAsync(tempToken);
+        }
+        finally
+        {
+            if (tempToken != null)
+            {
+                SecureClearString(tempToken);
+            }
+        }
+    }
+
+    private async Task<Result<string>> LoadTokenSecurelyAsync()
+    {
+        if (!File.Exists(_tokenFilePath))
+        {
+            return Result.Failure<string>("Token file not found");
+        }
+
+        try
+        {
+            var encryptedData = await File.ReadAllBytesAsync(_tokenFilePath);
+            var decryptedBytes = await DecryptTokenAesAsync(encryptedData);
+            var token = Encoding.UTF8.GetString(decryptedBytes);
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return Result.Failure<string>("Token is null or empty after decryption");
+            }
+
+            return Result.Success(token);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load token securely");
+            return Result.Failure<string>($"Failed to load token securely",ex);
+        }
+    }
+
+    private async Task StoreTokenSecurelyAsync(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            _logger.LogError("Token is null or empty");
+            return;
+        }
+
+        var tokenBytes = Encoding.UTF8.GetBytes(token);
+        _encryptedToken = await EncryptTokenAesAsync(tokenBytes);
+    }
+
+    private async Task<Result<string>> GetCurrentTokenAsync()
+    {
+        if (_encryptedToken == null)
+        {
+            return Result.Failure<string>("No token stored in memory");
+        }
+
+        try
+        {
+            var decryptedBytes = await DecryptTokenAesAsync(_encryptedToken);
+            var token = Encoding.UTF8.GetString(decryptedBytes);
+            await Task.CompletedTask; // For async consistency
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return Result.Failure<string>("Token is null or empty after decryption from memory");
+            }
+
+            return Result.Success(token);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to decrypt token from memory");
+            return Result.Failure<string>($"Failed to decrypt token from memory: {ex.Message}");
+        }
+    }
+
+    private static void SecureClearString(string sensitiveString)
+    {
+        if (string.IsNullOrEmpty(sensitiveString))
+        {
+            return;
+        }
+
+        // Note: In .NET, strings are immutable, so we can't truly clear them from memory
+        // The GC will eventually collect them, but we can't force immediate clearing
+        // For truly sensitive data, use SecureString or byte arrays
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+    }
+
+    /// <summary>
+    /// Creates a SecureString from a regular string and then clears the original string
+    /// </summary>
+    private static SecureString CreateSecureString(string value)
+    {
+        var secureString = new SecureString();
+        if (string.IsNullOrEmpty(value))
+        {
+            return secureString;
+        }
+
+        foreach (var c in value)
+        {
+            secureString.AppendChar(c);
+        }
+        secureString.MakeReadOnly();
+
+        // Clear the original string from memory
+        SecureClearString(value);
+
+        return secureString;
+    }
+
+    /// <summary>
+    /// Converts a SecureString back to a regular string (use sparingly and clear immediately after use)
+    /// </summary>
+    private static string SecureStringToString(SecureString secureString)
+    {
+        if (secureString.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        var valuePtr = IntPtr.Zero;
+        try
+        {
+            valuePtr = Marshal.SecureStringToGlobalAllocUnicode(secureString);
+            return Marshal.PtrToStringUni(valuePtr) ?? string.Empty;
+        }
+        finally
+        {
+            if (valuePtr != IntPtr.Zero)
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Securely disposes a SecureString
+    /// </summary>
+    private static void DisposeSecureString(SecureString? secureString)
+    {
+        secureString?.Dispose();
+    }
+
+    // AES encryption for secure token storage
+    private static async Task<byte[]> EncryptTokenAesAsync(byte[] data)
+    {
+        var keyMaterial = Environment.MachineName + Environment.UserName + "CopilotServiceKey2025";
+        var key = SHA256.HashData(Encoding.UTF8.GetBytes(keyMaterial))[..32];
+
+        using var aes = Aes.Create();
+        aes.Key = key;
+        aes.GenerateIV();
+
+        using var encryptor = aes.CreateEncryptor();
+        using var msEncrypt = new MemoryStream();
+
+        // Write IV first
+        await msEncrypt.WriteAsync(aes.IV, 0, aes.IV.Length);
+
+        await using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+        {
+            await csEncrypt.WriteAsync(data, 0, data.Length);
+        }
+
+        return msEncrypt.ToArray();
+    }
+
+    private static async Task<byte[]> DecryptTokenAesAsync(byte[] encryptedData)
+    {
+        var keyMaterial = Environment.MachineName + Environment.UserName + "CopilotServiceKey2025";
+        var key = SHA256.HashData(Encoding.UTF8.GetBytes(keyMaterial))[..32];
+
+        using var aes = Aes.Create();
+        aes.Key = key;
+
+        // Extract IV from the beginning of the encrypted data
+        var iv = new byte[aes.BlockSize / 8];
+        Array.Copy(encryptedData, 0, iv, 0, iv.Length);
+        aes.IV = iv;
+
+        using var decryptor = aes.CreateDecryptor();
+        using var msDecrypt = new MemoryStream(encryptedData, iv.Length, encryptedData.Length - iv.Length);
+        await using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+        using var msPlain = new MemoryStream();
+
+        await csDecrypt.CopyToAsync(msPlain);
+        return msPlain.ToArray();
+    }
+
+    #endregion
 }

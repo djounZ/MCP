@@ -9,7 +9,21 @@ public abstract class DomainException : Exception
     {
     }
 
-    protected DomainException(string message, Exception innerException) : base(message, innerException)
+    protected DomainException(string message, Exception? innerException) : base(message, innerException)
+    {
+    }
+}
+
+/// <summary>
+///     Generic domain exception for general domain-related errors
+/// </summary>
+public class GenericDomainException : DomainException
+{
+    public GenericDomainException(string message) : base(message)
+    {
+    }
+
+    public GenericDomainException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 }
@@ -33,5 +47,66 @@ public class BusinessRuleViolationException : DomainException
     public BusinessRuleViolationException(string rule)
         : base($"Business rule violation: {rule}")
     {
+    }
+}
+
+/// <summary>
+///     Exception thrown when an authentication or authorization error occurs
+/// </summary>
+public class AuthenticationException : DomainException
+{
+    public AuthenticationException(string message)
+        : base($"Authentication failed: {message}")
+    {
+    }
+}
+
+/// <summary>
+///     Exception thrown when a network or external service error occurs
+/// </summary>
+public class ExternalServiceException : DomainException
+{
+    public string ServiceName { get; }
+
+    public ExternalServiceException(string serviceName, string message)
+        : base($"External service '{serviceName}' error: {message}")
+    {
+        ServiceName = serviceName;
+    }
+
+    public ExternalServiceException(string serviceName, string message, Exception innerException)
+        : base($"External service '{serviceName}' error: {message}", innerException)
+    {
+        ServiceName = serviceName;
+    }
+}
+
+/// <summary>
+///     Exception thrown when a configuration or setup error occurs
+/// </summary>
+public class ConfigurationException : DomainException
+{
+    public ConfigurationException(string message)
+        : base($"Configuration error: {message}")
+    {
+    }
+
+    public ConfigurationException(string message, Exception innerException)
+        : base($"Configuration error: {message}", innerException)
+    {
+    }
+}
+
+/// <summary>
+///     Exception thrown when a validation error occurs
+/// </summary>
+public class ValidationException : DomainException
+{
+    public string PropertyName { get; }
+
+    public ValidationException(string propertyName, string message)
+        : base($"Validation failed for '{propertyName}': {message}")
+    {
+        PropertyName = propertyName;
     }
 }

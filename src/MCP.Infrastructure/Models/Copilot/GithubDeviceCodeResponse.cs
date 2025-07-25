@@ -1,6 +1,6 @@
 namespace MCP.Infrastructure.Models.Copilot;
 
-public class CopilotDeviceCodeResponse
+public class GithubDeviceCodeResponse
 {
     public string DeviceCode { get; set; } = string.Empty;
     public string UserCode { get; set; } = string.Empty;

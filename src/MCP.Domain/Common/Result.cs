@@ -1,3 +1,5 @@
+using MCP.Domain.Exceptions;
+
 namespace MCP.Domain.Common;
 
 public abstract record Result<T>
@@ -6,25 +8,35 @@ public abstract record Result<T>
     public bool IsFailure => !IsSuccess;
 
     public abstract T Value { get; }
-    public abstract string Error { get; }
+    public abstract DomainException Error { get; }
 
     public static Result<T> Success(T value)
     {
         return new SuccessResult<T>(value);
     }
 
-    public static Result<T> Failure(string error)
+    public static Result<T> Failure(DomainException error)
     {
         return new FailureResult<T>(error);
     }
 
-    public TResult Match<TResult>(Func<T, TResult> onSuccess, Func<string, TResult> onFailure)
+
+    public static Result<T> Failure(string errorMessage, Exception? error)
+    {
+        return new FailureResult<T>(new GenericDomainException(errorMessage, error));
+    }
+
+    public TResult Match<TResult>(Func<T, TResult> onSuccess, Func<DomainException, TResult> onFailure)
     {
         return IsSuccess ? onSuccess(Value) : onFailure(Error);
     }
 
+    public async Task<TResult> MatchAsync<TResult>(Func<T, Task<TResult>> onSuccess, Func<DomainException, TResult> onFailure)
+    {
+        return IsSuccess ? await onSuccess(Value) : onFailure(Error);
+    }
     public async Task<TResult> MatchAsync<TResult>(Func<T, Task<TResult>> onSuccess,
-        Func<string, Task<TResult>> onFailure)
+        Func<DomainException, Task<TResult>> onFailure)
     {
         return IsSuccess ? await onSuccess(Value) : await onFailure(Error);
     }
@@ -59,19 +71,19 @@ internal record SuccessResult<T> : Result<T>
 
     public override bool IsSuccess => true;
     public override T Value { get; }
-    public override string Error => throw new InvalidOperationException("Success result has no error");
+    public override DomainException Error => throw new InvalidOperationException("Success result has no error");
 }
 
 internal record FailureResult<T> : Result<T>
 {
-    public FailureResult(string error)
+    public FailureResult(DomainException error)
     {
         Error = error;
     }
 
     public override bool IsSuccess => false;
     public override T Value => throw new InvalidOperationException("Failure result has no value");
-    public override string Error { get; }
+    public override DomainException Error { get; }
 }
 
 public static class Result
@@ -81,9 +93,14 @@ public static class Result
         return Result<T>.Success(value);
     }
 
-    public static Result<T> Failure<T>(string error)
+    public static Result<T> Failure<T>(DomainException error)
     {
         return Result<T>.Failure(error);
+    }
+
+    public static Result<T> Failure<T>(string errorMessage, Exception? error = null)
+    {
+        return Result<T>.Failure(errorMessage, error);
     }
 
     public static Result<Unit> Success()
@@ -91,9 +108,14 @@ public static class Result
         return Result<Unit>.Success(Unit.Value);
     }
 
-    public static Result<Unit> Failure(string error)
+    public static Result<Unit> Failure(DomainException error)
     {
         return Result<Unit>.Failure(error);
+    }
+
+    public static Result<Unit> Failure(string errorMessage, Exception? error)
+    {
+        return Result<Unit>.Failure(errorMessage, error);
     }
 }
 

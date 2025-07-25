@@ -17,7 +17,9 @@ public abstract class BaseEntity
     public override bool Equals(object? obj)
     {
         if (obj is not BaseEntity other || GetType() != other.GetType())
+        {
             return false;
+        }
 
         return Id == other.Id;
     }

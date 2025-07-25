@@ -8,11 +8,6 @@ namespace MCP.Application.Interfaces;
 public interface ICopilotService
 {
     /// <summary>
-    ///     Setup authentication with GitHub Copilot
-    /// </summary>
-    Task<Result<Unit>> SetupAsync();
-
-    /// <summary>
     ///     Get code completion from Copilot
     /// </summary>
     /// <param name="prompt">The code prompt</param>

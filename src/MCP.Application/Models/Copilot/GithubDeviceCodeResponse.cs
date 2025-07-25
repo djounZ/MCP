@@ -1,4 +1,4 @@
-namespace MCP.Infrastructure.Models.Copilot;
+namespace MCP.Application.Models.Copilot;
 
 public class GithubDeviceCodeResponse
 {

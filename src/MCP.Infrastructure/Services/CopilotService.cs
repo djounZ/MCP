@@ -5,9 +5,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using MCP.Application.Interfaces;
+using MCP.Application.Models.Copilot;
 using MCP.Domain.Common;
 using MCP.Infrastructure.Constants;
-using MCP.Infrastructure.Models.Copilot;
 using Microsoft.Extensions.Logging;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
@@ -234,6 +234,13 @@ public sealed class CopilotService : ICopilotService, IDisposable
             }
         }
     }
+
+    public Task<Result<GithubDeviceCodeResponse>> RegisterDevice()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool IsDeviceRegistered { get; }
 
     public void Dispose()
     {

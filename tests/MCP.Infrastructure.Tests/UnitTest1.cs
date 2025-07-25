@@ -1,6 +1,7 @@
 ﻿using MCP.Application.Interfaces;
 using MCP.Infrastructure.Services;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Tests.Unit;
@@ -15,7 +16,7 @@ public class CopilotServiceUnitTests
     public void CopilotService_Constructor_WithNullHttpClient_ShouldThrowArgumentNullException()
     {
         // Arrange & Act & Assert
-        var options = new CopilotServiceOptions();
+        var options = Microsoft.Extensions.Options.Options.Create(new CopilotServiceOptions());
         var logger = NullLogger<CopilotService>.Instance;
         Assert.Throws<ArgumentNullException>(() => new CopilotService(null!, options, logger));
     }
@@ -26,7 +27,7 @@ public class CopilotServiceUnitTests
     {
         // Arrange
         using var httpClient = new HttpClient();
-        var options = new CopilotServiceOptions();
+        var options = Microsoft.Extensions.Options.Options.Create(new CopilotServiceOptions());
 
         // Act
         var logger = NullLogger<CopilotService>.Instance;
@@ -44,7 +45,7 @@ public class CopilotServiceUnitTests
     {
         // Arrange
         using var httpClient = new HttpClient();
-        var options = new CopilotServiceOptions();
+        var options = Microsoft.Extensions.Options.Options.Create(new CopilotServiceOptions());
         var logger = NullLogger<CopilotService>.Instance;
         var service = new CopilotService(httpClient, options, logger);
 
@@ -59,7 +60,7 @@ public class CopilotServiceUnitTests
     {
         // Arrange
         using var httpClient = new HttpClient();
-        var options = new CopilotServiceOptions();
+        var options = Microsoft.Extensions.Options.Options.Create(new CopilotServiceOptions());
         var logger = NullLogger<CopilotService>.Instance;
         var service = new CopilotService(httpClient, options, logger);
 

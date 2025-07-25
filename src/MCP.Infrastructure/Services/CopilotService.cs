@@ -5,12 +5,13 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using MCP.Application.Interfaces;
+using MCP.Application.Models;
 using MCP.Application.Models.Copilot;
 using MCP.Domain.Common;
 using MCP.Infrastructure.Constants;
+using MCP.Infrastructure.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Services;
 
@@ -240,7 +241,7 @@ public sealed class CopilotService : ICopilotService, IDisposable
         }
     }
 
-    public async Task<Result<GithubDeviceCodeResponse>> RegisterDeviceAsync()
+    public async Task<Result<CopilotDeviceCodeResponse>> RegisterDeviceAsync()
     {
         var headers = new Dictionary<string, string>
         {
@@ -255,7 +256,12 @@ public sealed class CopilotService : ICopilotService, IDisposable
         var clientId = _options.ClientId;
         var scope = "read:user";
 
-        return await GetGithubDeviceCodeResponseAsync(deviceCodeUrl, clientId, scope, headers);
+        var githubResult = await GetGithubDeviceCodeResponseAsync(deviceCodeUrl, clientId, scope, headers);
+        
+        return githubResult.Match(
+            onSuccess: githubResponse => Result.Success(MapToApplicationModel(githubResponse)),
+            onFailure: error => Result.Failure<CopilotDeviceCodeResponse>(error)
+        );
     }
 
     public bool IsDeviceRegistered
@@ -777,4 +783,21 @@ public sealed class CopilotService : ICopilotService, IDisposable
     }
 
     #endregion
+
+    /// <summary>
+    /// Maps GitHub-specific device code response to application layer model
+    /// </summary>
+    /// <param name="githubResponse">The GitHub-specific response</param>
+    /// <returns>Application layer device code response</returns>
+    private static CopilotDeviceCodeResponse MapToApplicationModel(GithubDeviceCodeResponse githubResponse)
+    {
+        return new CopilotDeviceCodeResponse
+        {
+            DeviceCode = githubResponse.DeviceCode,
+            UserCode = githubResponse.UserCode,
+            VerificationUri = githubResponse.VerificationUri,
+            ExpiresIn = githubResponse.ExpiresIn,
+            Interval = githubResponse.Interval
+        };
+    }
 }

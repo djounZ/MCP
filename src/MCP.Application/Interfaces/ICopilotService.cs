@@ -1,4 +1,4 @@
-using MCP.Application.Models.Copilot;
+using MCP.Application.Models;
 using MCP.Domain.Common;
 
 namespace MCP.Application.Interfaces;
@@ -16,7 +16,7 @@ public interface ICopilotService
     /// <returns>Generated code completion or error</returns>
     Task<Result<string>> GetCompletionAsync(string prompt, string language = "python");
 
-    Task<Result<GithubDeviceCodeResponse>> RegisterDeviceAsync();
+    Task<Result<CopilotDeviceCodeResponse>> RegisterDeviceAsync();
 
     bool IsDeviceRegistered { get; }
 }

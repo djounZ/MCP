@@ -1,17 +1,20 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Net;
+using System.Text;
 using MCP.Application.Interfaces;
-using Microsoft.Extensions.Logging;
 
 namespace MCP.WebApi.Services;
 
 /// <summary>
 /// Service that handles startup operations for the Web API
 /// </summary>
-public class StartupService
+public class StartupService : IDisposable
 {
     private readonly ICopilotService _copilotService;
     private readonly ILogger<StartupService> _logger;
+    private HttpListener? _httpListener;
+    private readonly TaskCompletionSource<bool> _authenticationCompleted = new();
 
     public StartupService(ICopilotService copilotService, ILogger<StartupService> logger)
     {
@@ -45,11 +48,12 @@ public class StartupService
                     _logger.LogInformation("Verification URI: {VerificationUri}", deviceResponse.VerificationUri);
 
                     // Create and open HTML authentication page
-                    var htmlFilePath = await CreateAuthenticationPageAsync(deviceResponse.UserCode, deviceResponse.VerificationUri);
+                    var callbackPort = await StartCallbackServerAsync();
+                    var htmlFilePath = await CreateAuthenticationPageAsync(deviceResponse.UserCode, deviceResponse.VerificationUri, callbackPort);
                     var browserProcess = await OpenBrowserAsync(htmlFilePath);
 
-                    // Wait for the browser process to close
-                    await WaitForBrowserCloseAsync(htmlFilePath, browserProcess);
+                    // Wait for the user to click the close button
+                    await WaitForCloseButtonClickAsync(htmlFilePath);
 
                     _logger.LogInformation("Authentication completed. Starting the application...");
                     return true;
@@ -75,8 +79,9 @@ public class StartupService
     /// </summary>
     /// <param name="userCode">The device code to display</param>
     /// <param name="verificationUri">The GitHub verification URI</param>
+    /// <param name="callbackPort">The port for the callback server</param>
     /// <returns>The path to the created HTML file</returns>
-    private async Task<string> CreateAuthenticationPageAsync(string userCode, string verificationUri)
+    private async Task<string> CreateAuthenticationPageAsync(string userCode, string verificationUri, int callbackPort)
     {
         // Validate inputs and provide fallback values
         if (string.IsNullOrEmpty(userCode))
@@ -228,7 +233,7 @@ public class StartupService
         <div class=""logo"">GH</div>
         <h1>GitHub Copilot Authentication</h1>
         <p class=""subtitle"">Complete the authentication process to continue</p>
-        
+
         <div class=""code-box"">
             <div>Enter this code:</div>
             <div class=""code"">{userCode}</div>
@@ -260,10 +265,10 @@ public class StartupService
         <a href=""{verificationUri}"" class=""btn"" target=""_blank"" rel=""noopener"">
             Continue to GitHub
         </a>
-        
+
         <br>
-        
-        <button onclick=""window.close()"" class=""btn btn-secondary"">
+
+        <button onclick=""closeWindow()"" class=""btn btn-secondary"">
             Close Window (After Authentication)
         </button>
 
@@ -286,13 +291,13 @@ public class StartupService
                     }}, 1000);
                 }}.bind(this));
             }});
-            
-            // Handle window closing
+
+            // Track authentication start
             let authenticationStarted = false;
             document.querySelector('a[href=""{verificationUri}""]').addEventListener('click', function() {{
                 authenticationStarted = true;
             }});
-            
+
             // Warn user if they try to close without authenticating
             window.addEventListener('beforeunload', function(e) {{
                 if (!authenticationStarted) {{
@@ -301,6 +306,40 @@ public class StartupService
                 }}
             }});
         }});
+
+        // Function to handle close window button click
+        function closeWindow() {{
+            // Call the callback endpoint to signal authentication completion
+            fetch('http://localhost:{callbackPort}/auth-complete', {{
+                method: 'POST',
+                headers: {{
+                    'Content-Type': 'application/json'
+                }},
+                body: JSON.stringify({{ completed: true }})
+            }})
+            .then(() => {{
+                // Show confirmation message
+                document.body.innerHTML = `
+                    <div style=""text-align: center; padding: 50px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"">
+                        <h2 style=""color: #28a745;"">✅ Authentication Complete!</h2>
+                        <p>The MCP application is starting now. You can close this tab.</p>
+                        <button onclick=""window.close()"" style=""background: #28a745; color: white; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; cursor: pointer;"">
+                            Close Tab
+                        </button>
+                    </div>
+                `;
+
+                // Auto-close after 3 seconds
+                setTimeout(() => {{
+                    window.close();
+                }}, 3000);
+            }})
+            .catch(error => {{
+                console.error('Error signaling authentication completion:', error);
+                // Still allow closing even if callback fails
+                window.close();
+            }});
+        }}
     </script>
 </body>
 </html>";
@@ -325,7 +364,7 @@ public class StartupService
         try
         {
             _logger.LogInformation("Opening authentication page...");
-            
+
             return await Task.Run(() =>
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -365,71 +404,178 @@ public class StartupService
     }
 
     /// <summary>
-    /// Waits for the browser process to close
+    /// Starts a simple HTTP server to handle the callback when user clicks close button
     /// </summary>
-    /// <param name="htmlFilePath">The path to the HTML file to clean up after</param>
-    /// <param name="browserProcess">The browser process to monitor</param>
-    private async Task WaitForBrowserCloseAsync(string htmlFilePath, Process? browserProcess)
+    /// <returns>The port number the server is listening on</returns>
+    private Task<int> StartCallbackServerAsync()
     {
-        _logger.LogInformation("Waiting for authentication to complete and browser to close...");
+        _httpListener = new HttpListener();
+        var port = 8081; // Start with a default port
+        var maxAttempts = 10;
 
-        if (browserProcess != null)
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             try
             {
-                _logger.LogDebug("Monitoring browser process: {ProcessName} (ID: {ProcessId})", 
-                    browserProcess.ProcessName, browserProcess.Id);
+                var prefix = $"http://localhost:{port}/";
+                _httpListener.Prefixes.Add(prefix);
+                _httpListener.Start();
 
-                // Wait for the specific browser process to exit
-                await browserProcess.WaitForExitAsync();
-                
-                _logger.LogInformation("Browser process has closed. Authentication likely complete.");
+                _logger.LogInformation("Callback server started on port {Port}", port);
+
+                // Start handling requests in the background
+                _ = Task.Run(HandleCallbackRequestsAsync);
+
+                return Task.FromResult(port);
             }
-            catch (Exception ex)
+            catch (HttpListenerException ex) when (ex.ErrorCode == 32) // Port already in use
             {
-                _logger.LogWarning(ex, "Error while waiting for browser process to close. Falling back to timeout.");
-                
-                // Fallback: wait for a reasonable amount of time if process monitoring fails
-                await Task.Delay(30000); // 30 seconds fallback
-            }
-            finally
-            {
-                // Ensure the process is disposed
-                try
-                {
-                    browserProcess?.Dispose();
-                }
-                catch
-                {
-                    // Ignore disposal errors
-                }
+                _httpListener.Prefixes.Clear();
+                port++;
+                _logger.LogDebug("Port {Port} is in use, trying {NextPort}", port - 1, port);
             }
         }
-        else
-        {
-            _logger.LogWarning("No browser process to monitor. Using fallback timeout.");
-            
-            // Fallback: wait for user input since we can't monitor the process
-            Console.WriteLine("Press any key after you have completed the authentication and closed the browser...");
-            await Task.Run(() => Console.ReadKey(true));
-        }
 
-        // Give time for authentication to complete before cleaning up
-        _logger.LogInformation("Waiting a moment for authentication to complete...");
-        await Task.Delay(5000); // Wait 5 seconds before cleanup
+        throw new InvalidOperationException($"Unable to start callback server after {maxAttempts} attempts");
+    }
 
-        // Clean up the temporary HTML file
+    /// <summary>
+    /// Handles incoming callback requests from the HTML page
+    /// </summary>
+    private async Task HandleCallbackRequestsAsync()
+    {
         try
         {
-            if (File.Exists(htmlFilePath))
+            while (_httpListener != null && _httpListener.IsListening)
             {
-                File.Delete(htmlFilePath);
-                _logger.LogDebug("Cleaned up temporary HTML file: {FilePath}", htmlFilePath);
+                var context = await _httpListener.GetContextAsync();
+                var request = context.Request;
+                var response = context.Response;
+
+                // Set CORS headers to allow requests from the HTML page
+                response.Headers.Add("Access-Control-Allow-Origin", "*");
+                response.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS");
+                response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+
+                if (string.Equals(request.HttpMethod,  "Options", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Handle preflight request
+                    response.StatusCode = 200;
+                    response.Close();
+                    continue;
+                }
+
+                if (string.Equals(request.HttpMethod,  "Post", StringComparison.OrdinalIgnoreCase) && request.Url?.AbsolutePath == "/auth-complete")
+                {
+                    _logger.LogInformation("Received authentication completion signal from user");
+
+                    // Send success response
+                    var responseString = "{\"status\":\"success\"}";
+                    var buffer = Encoding.UTF8.GetBytes(responseString);
+                    response.ContentType = "application/json";
+                    response.StatusCode = 200;
+                    response.ContentLength64 = buffer.Length;
+                    await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    response.Close();
+
+                    // Signal that authentication is complete
+                    _authenticationCompleted.TrySetResult(true);
+                    break;
+                }
+                else
+                {
+                    // Handle other requests
+                    response.StatusCode = 404;
+                    response.Close();
+                }
             }
+        }
+        catch (ObjectDisposedException)
+        {
+            // Listener was disposed, which is expected during shutdown
+            _logger.LogDebug("Callback server was disposed");
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to clean up temporary HTML file: {FilePath}", htmlFilePath);
+            _logger.LogError(ex, "Error in callback server");
+            _authenticationCompleted.TrySetException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Waits for the user to click the close button in the authentication page
+    /// </summary>
+    /// <param name="htmlFilePath">The path to the HTML file to clean up after</param>
+    private async Task WaitForCloseButtonClickAsync(string htmlFilePath)
+    {
+        _logger.LogInformation("Waiting for user to complete authentication and click close button...");
+
+        try
+        {
+            // Wait for the user to click the close button (which will trigger the callback)
+            var timeoutTask = Task.Delay(TimeSpan.FromMinutes(10)); // 10 minute timeout
+            var completedTask = await Task.WhenAny(_authenticationCompleted.Task, timeoutTask);
+
+            if (completedTask == timeoutTask)
+            {
+                _logger.LogWarning("Authentication timed out after 10 minutes");
+                throw new TimeoutException("Authentication process timed out");
+            }
+
+            var result = await _authenticationCompleted.Task;
+            if (result)
+            {
+                _logger.LogInformation("User confirmed authentication completion");
+            }
+        }
+        finally
+        {
+            // Stop the callback server
+            try
+            {
+                _httpListener?.Stop();
+                _httpListener?.Close();
+                _httpListener = null;
+                _logger.LogDebug("Callback server stopped");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error stopping callback server");
+            }
+
+            // Clean up the temporary HTML file
+            try
+            {
+                if (File.Exists(htmlFilePath))
+                {
+                    File.Delete(htmlFilePath);
+                    _logger.LogDebug("Cleaned up temporary HTML file: {FilePath}", htmlFilePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to clean up temporary HTML file: {FilePath}", htmlFilePath);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Disposes of the resources used by the StartupService
+    /// </summary>
+    public void Dispose()
+    {
+        try
+        {
+            _httpListener?.Stop();
+            _httpListener?.Close();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error disposing callback server");
+        }
+        finally
+        {
+            _httpListener = null;
         }
     }
 }

@@ -49,7 +49,7 @@ public class CopilotServiceIntegrationTests : IDisposable
             })
             .AddTypedClient<ICopilotService>((httpClient, sp) =>
             {
-                var options = sp.GetRequiredService<IOptions<CopilotServiceOptions>>().Value;
+                var options = sp.GetRequiredService<IOptions<CopilotServiceOptions>>();
                 var logger = NullLogger<CopilotService>.Instance;
                 return new CopilotService(httpClient, options, logger);
             });

@@ -3,8 +3,8 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using MCP.Application.Interfaces;
 using MCP.Domain.Common;
-using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Constants;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 

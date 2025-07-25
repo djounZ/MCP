@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using MCP.Domain.Interfaces;
+using MCP.Application.Interfaces;
 using MCP.Infrastructure.Services;
 using Xunit.Abstractions;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;

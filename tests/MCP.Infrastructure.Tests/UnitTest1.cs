@@ -1,5 +1,5 @@
 ﻿using MCP.Infrastructure.Services;
-using MCP.Domain.Interfaces;
+using MCP.Application.Interfaces;
 using Microsoft.Extensions.Logging.Abstractions;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 

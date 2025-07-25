@@ -58,9 +58,10 @@ MCP/
 ### 🔄 Dependency Flow
 
 ```
-WebApi → Infrastructure
-  ↓           ↓
-Application → Domain (Result<T>)
+WebApi → Application + Infrastructure
+Infrastructure → Domain + Application
+Application → Domain
+Domain → (no dependencies)
 ```
 
 - **Domain**: Contains business entities, Result monad, and domain services. No external dependencies.

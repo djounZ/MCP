@@ -1,6 +1,6 @@
 using MCP.Domain.Common;
 
-namespace MCP.Domain.Interfaces;
+namespace MCP.Application.Interfaces;
 
 /// <summary>
 /// Interface for GitHub Copilot service

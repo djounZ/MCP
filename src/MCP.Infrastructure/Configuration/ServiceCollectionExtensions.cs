@@ -27,14 +27,8 @@ public static class ServiceCollectionExtensions
         // Register CopilotServiceOptions from configuration
         services.Configure<CopilotServiceOptions>(configuration.GetSection("CopilotService"));
 
-        // Register CopilotService with options from IOptions
-        services.AddHttpClient<ICopilotService, CopilotService>()
-            .AddTypedClient((httpClient, sp) =>
-            {
-                var options = sp.GetRequiredService<IOptions<CopilotServiceOptions>>().Value;
-                var logger = sp.GetRequiredService<ILogger<CopilotService>>();
-                return new CopilotService(httpClient, options, logger);
-            });
+        // Register CopilotService with HttpClient
+        services.AddHttpClient<ICopilotService, CopilotService>();
 
         // Register JWT token service
         services.AddScoped<IJwtTokenService, JwtTokenService>();

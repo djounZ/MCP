@@ -9,6 +9,7 @@ using MCP.Application.Models.Copilot;
 using MCP.Domain.Common;
 using MCP.Infrastructure.Constants;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Services;
@@ -23,26 +24,26 @@ public sealed class CopilotService : ICopilotService, IDisposable
     private bool _disposed;
     private byte[]? _encryptedToken;
 
-    public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILogger<CopilotService> logger)
+    public CopilotService(HttpClient httpClient, IOptions<CopilotServiceOptions> options, ILogger<CopilotService> logger)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _tokenFilePath = Path.Combine(".copilot_token_encrypted");
 
         // Start token refresh timer
-        _tokenRefreshTimer = new Timer(async _ =>
+        _tokenRefreshTimer = new Timer(_ =>
         {
             try
             {
-                if (!_disposed)
+                /*if (!_disposed)
                 {
                     var tokenResult = await GetTokenInternalAsync();
                     if (tokenResult.IsFailure)
                     {
                         _logger.LogWarning("Token refresh failed: {Error}", tokenResult.Error);
                     }
-                }
+                }*/
             }
             catch (Exception ex)
             {
@@ -60,20 +61,24 @@ public sealed class CopilotService : ICopilotService, IDisposable
             {
                 try
                 {
+                    _logger.LogDebug("GitHub device code response: {Response}", responseResult.Value);
+                    
                     var githubDeviceCodeResponse = JsonSerializer.Deserialize<GithubDeviceCodeResponse>(responseResult.Value);
-                    if (githubDeviceCodeResponse != null)
+                    if (githubDeviceCodeResponse != null && 
+                        !string.IsNullOrEmpty(githubDeviceCodeResponse.UserCode) && 
+                        !string.IsNullOrEmpty(githubDeviceCodeResponse.VerificationUri))
                     {
                         _logger.LogInformation("Please visit {VerificationUri} and enter code {UserCode} to authenticate",
                             githubDeviceCodeResponse.VerificationUri, githubDeviceCodeResponse.UserCode);
                         return Result.Success(githubDeviceCodeResponse);
                     }
 
-                    _logger.LogError("Failed to parse device code response from Copilot.");
-                    return Result.Failure<GithubDeviceCodeResponse>("Failed to parse device code response.");
+                    _logger.LogError("Failed to parse device code response from GitHub or missing required fields. Response: {Response}", responseResult.Value);
+                    return Result.Failure<GithubDeviceCodeResponse>("Failed to parse device code response or missing required fields.");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to parse device code response from Copilot.");
+                    _logger.LogError(ex, "Failed to parse device code response from GitHub. Response: {Response}", responseResult.Value);
                     return Result.Failure<GithubDeviceCodeResponse>("Failed to parse device code response.", ex);
                 }
             }
@@ -253,7 +258,34 @@ public sealed class CopilotService : ICopilotService, IDisposable
         return await GetGithubDeviceCodeResponseAsync(deviceCodeUrl, clientId, scope, headers);
     }
 
-    public bool IsDeviceRegistered { get; } = false;
+    public bool IsDeviceRegistered
+    {
+        get
+        {
+            try
+            {
+                // Check if token file exists
+                if (!File.Exists(_tokenFilePath))
+                {
+                    return false;
+                }
+
+                // Try to load the token
+                var tokenResult = LoadTokenSecurelyAsync().GetAwaiter().GetResult();
+                if (tokenResult.IsFailure)
+                {
+                    return false;
+                }
+
+                // Check if token is valid (not expired)
+                return !IsTokenInvalid(tokenResult.Value);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
 
     public void Dispose()
     {

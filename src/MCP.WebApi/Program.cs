@@ -1,6 +1,7 @@
 using MCP.Application.Configuration;
 using MCP.Infrastructure.Configuration;
 using MCP.WebApi.Extensions;
+using MCP.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add application and infrastructure services
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Add startup service
+builder.Services.AddSingleton<StartupService>();
 
 // Add security services
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -52,5 +56,9 @@ app.UseAuthorization();
 app.MapAuthEndpoints();
 app.MapSecuredHealthEndpoints();
 app.MapWeatherEndpoints();
+
+// Initialize startup operations (device registration and browser opening)
+var startupService = app.Services.GetRequiredService<StartupService>();
+await startupService.InitializeAsync();
 
 app.Run();

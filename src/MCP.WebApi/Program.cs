@@ -1,7 +1,6 @@
 using MCP.Application.Configuration;
 using MCP.Infrastructure.Configuration;
 using MCP.WebApi.Extensions;
-using MCP.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +16,6 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApiKeyAuthentication(builder.Configuration);
 builder.Services.AddCustomAuthorization();
 builder.Services.AddCustomRateLimiting();
-builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

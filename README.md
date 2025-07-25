@@ -1,22 +1,25 @@
-# MCP - .NET 9 Clean Architecture with Functional Error Handling
+# MCP - .NET 9 Clean Architecture with Functional Error Handling & Security
 
-A well-structured .NET 9 solution following Clean Architecture principles with modern functional programming patterns, featuring Result monad for robust error handling.
+A production-ready .NET 9 solution following Clean Architecture principles with modern functional programming patterns, comprehensive security, and minimal APIs for high performance.
 
 ## 🏗️ Architecture
 
-This project implements Clean Architecture with functional programming patterns:
+This project implements Clean Architecture with functional programming patterns and modern security:
 
 - **Domain** (`MCP.Domain`) - Core business logic, entities, and Result monad
-- **Application** (`MCP.Application`) - Use cases and business rules
+- **Application** (`MCP.Application`) - Use cases, business rules, and service interfaces
 - **Infrastructure** (`MCP.Infrastructure`) - External concerns with monadic error handling
-- **WebApi** (`MCP.WebApi`) - REST API endpoints and presentation layer
+- **WebApi** (`MCP.WebApi`) - Minimal API endpoints with JWT authentication
 
 ## ✨ Key Features
 
 - **🎯 Clean Architecture** - Separation of concerns with clear dependency boundaries
 - **🔄 Result Monad Pattern** - Functional error handling without exceptions
+- **🔐 Comprehensive Security** - JWT Bearer + API Key authentication, role-based authorization
+- **⚡ Minimal APIs** - High-performance endpoint routing for better throughput
+- **🛡️ Rate Limiting** - Built-in protection with tiered policies (global, API, admin)
 - **📊 Structured Logging** - Comprehensive logging with ILogger<T>
-- **⚙️ Configuration-Driven** - Options pattern with appsettings.json
+- **⚙️ Configuration-Driven** - Options pattern with centralized package versioning
 - **🧪 Comprehensive Testing** - Unit and integration tests with high coverage
 - **🔒 Type Safety** - Strong typing with nullable reference types
 - **🚀 .NET 9** - Latest .NET features and performance improvements
@@ -31,18 +34,25 @@ MCP/
 │   │   ├── Interfaces/       # Domain service interfaces
 │   │   └── Models/           # Domain entities and value objects
 │   ├── MCP.Application/      # Use cases and application services
+│   │   ├── Interfaces/       # Service contracts (IJwtTokenService, etc.)
+│   │   ├── Commands/         # CQRS command handlers
+│   │   └── Queries/          # CQRS query handlers
 │   ├── MCP.Infrastructure/   # External dependencies with monadic error handling
-│   │   ├── Constants/        # Application constants (HeaderKeys, ContentTypes)
-│   │   ├── Options/          # Configuration options (CopilotServiceOptions)
-│   │   └── Services/         # Service implementations with Result<T>
-│   └── MCP.WebApi/          # Presentation layer (REST API)
+│   │   ├── Configuration/    # Centralized DI extensions
+│   │   ├── Services/         # Service implementations (JWT, Copilot)
+│   │   ├── Authentication/   # API Key authentication handlers
+│   │   └── Options/          # Configuration options classes
+│   └── MCP.WebApi/          # Minimal API endpoints with security
+│       ├── Extensions/       # Security, auth, and endpoint extensions
+│       └── Authentication/   # JWT and API key authentication
 ├── tests/
 │   ├── MCP.Domain.Tests/           # Unit tests for Domain
 │   ├── MCP.Application.Tests/      # Unit tests for Application
 │   ├── MCP.Infrastructure.Tests/   # Unit tests for Infrastructure (Result pattern)
 │   └── MCP.WebApi.IntegrationTests/ # Integration tests for WebApi
-├── docs/                    # Documentation
-└── scripts/                 # Build and deployment scripts
+├── docs/                    # Documentation (including security.md)
+├── scripts/                 # Build and deployment scripts
+└── Directory.Build.props    # Centralized package version management
 ```
 
 ### 🔄 Dependency Flow
@@ -54,9 +64,40 @@ Application → Domain (Result<T>)
 ```
 
 - **Domain**: Contains business entities, Result monad, and domain services. No external dependencies.
-- **Application**: Contains use cases and interfaces. Depends only on Domain.
-- **Infrastructure**: Contains implementations using Result<T> pattern. Depends on Domain and Application.
-- **WebApi**: The entry point of the application. Depends on Application and Infrastructure.
+- **Application**: Contains use cases, service interfaces (IJwtTokenService), and business rules. Depends only on Domain.
+- **Infrastructure**: Contains service implementations using Result<T> pattern. Depends on Domain and Application.
+- **WebApi**: Minimal API endpoints with security. Depends on Application and Infrastructure.
+
+## 🔐 Security Features
+
+### Authentication & Authorization
+- **JWT Bearer Authentication** - Stateless token-based authentication
+- **API Key Authentication** - Header-based authentication for service-to-service calls
+- **Role-Based Authorization** - Fine-grained access control with Admin/User/Guest roles
+- **Rate Limiting** - Built-in protection with configurable policies:
+  - Global: 100 requests/minute per IP
+  - API endpoints: 60 requests/minute per user
+  - Admin endpoints: 20 requests/minute per user
+
+### Security Configuration
+```csharp
+// JWT Authentication
+services.AddJwtAuthentication(configuration);
+
+// API Key Authentication  
+services.AddApiKeyAuthentication(configuration);
+
+// Role-based Authorization
+services.AddCustomAuthorization();
+
+// Rate Limiting with tiered policies
+services.AddCustomRateLimiting();
+```
+
+### Authentication Endpoints
+- `POST /api/auth/login` - Login with username/password → JWT token
+- `POST /api/auth/validate` - Validate JWT token
+- `POST /api/auth/refresh` - Refresh JWT token
 
 ## 🎯 Functional Programming Features
 
@@ -94,6 +135,42 @@ return result.Match(
 - **🔗 Composability**: Results can be chained using `Bind`, `Map`, etc.
 - **🧪 Testability**: More predictable and easier to test
 - **📊 Better Error Information**: Descriptive error messages with context
+
+## ⚡ Minimal APIs
+
+The project uses .NET 9 minimal APIs for high performance:
+
+```csharp
+// Traditional controller approach replaced with extension methods
+public static class CopilotEndpointsExtensions
+{
+    public static WebApplication MapCopilotEndpoints(this WebApplication app)
+    {
+        app.MapPost("/api/copilot/completion", 
+            [Authorize(Roles = "Admin,User")] async (
+                CompletionRequest request, 
+                ICopilotService copilotService) =>
+        {
+            var result = await copilotService.GetCompletionAsync(request.Prompt, request.Language);
+            return result.Match(
+                onSuccess: completion => Results.Ok(new { completion }),
+                onFailure: error => Results.BadRequest(new { error })
+            );
+        })
+        .RequireRateLimiting("ApiPolicy")
+        .WithName("GetCompletion")
+        .WithOpenApi();
+        
+        return app;
+    }
+}
+```
+
+### Benefits of Minimal APIs
+- **⚡ Higher Performance** - Reduced overhead and faster throughput
+- **🎯 Focused Endpoints** - Clear, purpose-built endpoint definitions
+- **🔧 Better DI Integration** - Direct parameter injection
+- **📝 Simplified Testing** - Easier to test individual endpoints
 
 ## 🚀 Getting Started
 
@@ -151,10 +228,17 @@ dotnet test tests/MCP.Domain.Tests
 
 ### Core Dependencies
 - **.NET 9.0** - Latest .NET framework with performance improvements
-- **ASP.NET Core** - Web framework for APIs
+- **ASP.NET Core** - Web framework for minimal APIs
+- **Microsoft.AspNetCore.Authentication.JwtBearer** - JWT authentication
+- **System.IdentityModel.Tokens.Jwt** - JWT token handling
 - **Microsoft.Extensions.Logging** - Structured logging with ILogger<T>
 - **Microsoft.Extensions.Options** - Configuration options pattern
 - **System.Text.Json** - High-performance JSON serialization
+
+### Security Dependencies
+- **Microsoft.IdentityModel.Tokens** - Token validation and security
+- **Rate Limiting** - Built-in .NET 9 rate limiting middleware
+- **Authentication Middleware** - Custom API key authentication handlers
 
 ### Testing
 - **xUnit** - Modern testing framework
@@ -162,6 +246,7 @@ dotnet test tests/MCP.Domain.Tests
 - **Microsoft.Extensions.Logging.Abstractions** - NullLogger for testing
 
 ### Development Tools
+- **Directory.Build.props** - Centralized package version management
 - **Nullable Reference Types** - Enhanced null safety
 - **Result Monad** - Custom functional error handling
 - **Options Pattern** - Configuration binding with validation
@@ -206,21 +291,39 @@ public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILog
 
 2. **Application Layer**
    - Use cases returning Result<T>
+   - Service interfaces (IJwtTokenService, ICopilotService)
    - DTOs and mapping profiles
    - Validation with Result pattern
-   - Application service interfaces
 
 3. **Infrastructure Layer**
    - Service implementations using Result<T>
+   - JWT token service implementation
    - External API integrations with error handling
-   - Configuration options and DI setup
-   - Logging and monitoring
+   - Configuration options and centralized DI setup
 
 4. **WebApi Layer**
-   - Controllers handling Result<T> responses
-   - Middleware and exception handling
-   - Configuration and DI registration
-   - OpenAPI/Swagger documentation
+   - Minimal API endpoints with security
+   - JWT and API key authentication
+   - Rate limiting and CORS configuration
+   - Extension methods for endpoint registration
+
+### Package Management
+
+All package versions are centralized in `Directory.Build.props`:
+
+```xml
+<PropertyGroup>
+  <!-- JWT & Auth packages -->
+  <SystemIdentityModelTokensJwtVersion>8.13.0</SystemIdentityModelTokensJwtVersion>
+  <MicrosoftIdentityModelTokensVersion>8.13.0</MicrosoftIdentityModelTokensVersion>
+  <MicrosoftAspNetCoreAuthenticationJwtBearerVersion>9.0.0</MicrosoftAspNetCoreAuthenticationJwtBearerVersion>
+</PropertyGroup>
+```
+
+Projects reference versions using MSBuild properties:
+```xml
+<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(SystemIdentityModelTokensJwtVersion)" />
+```
 
 ### Naming Conventions
 
@@ -262,36 +365,91 @@ public async Task GetCompletionAsync_WithInvalidToken_ShouldReturnFailure()
 }
 ```
 
-#### Testing Categories
-- **Unit Tests**: Test individual components with Result<T> patterns
-- **Integration Tests**: Test API endpoints and external service interactions
-- **Test Coverage**: Aim for >80% code coverage with focus on error paths
-- **Test Naming**: Descriptive names indicating expected behavior and outcomes
+#### Integration Tests with Security
+```csharp
+[Fact]
+public async Task GetCompletion_WithValidJwtToken_ShouldReturnSuccess()
+{
+    // Arrange
+    var token = GenerateTestJwtToken("testuser", ["User"]);
+    _client.DefaultRequestHeaders.Authorization = new("Bearer", token);
+    
+    var request = new { prompt = "def fibonacci(n):", language = "python" };
+    
+    // Act
+    var response = await _client.PostAsJsonAsync("/api/copilot/completion", request);
+    
+    // Assert
+    response.EnsureSuccessStatusCode();
+    var content = await response.Content.ReadAsStringAsync();
+    Assert.Contains("fibonacci", content);
+}
+
+[Fact]
+public async Task GetCompletion_WithInvalidApiKey_ShouldReturnUnauthorized()
+{
+    // Arrange
+    _client.DefaultRequestHeaders.Add("X-API-Key", "invalid-key");
+    
+    // Act
+    var response = await _client.PostAsJsonAsync("/api/copilot/completion", new { });
+    
+    // Assert
+    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+}
+```
 
 ### Configuration Management
 
-#### Options Pattern with Validation
-```csharp
-// appsettings.json
+#### Security Configuration
+```json
 {
+  "Jwt": {
+    "SecretKey": "your-super-secret-key-here-must-be-long-enough",
+    "Issuer": "MCP-API",
+    "Audience": "MCP-Client",
+    "ExpiryMinutes": 60
+  },
+  "ApiKeys": {
+    "ValidKeys": [
+      {
+        "Key": "api-key-1",
+        "UserName": "service-user-1",
+        "Roles": ["User"]
+      },
+      {
+        "Key": "admin-api-key",
+        "UserName": "admin-service",
+        "Roles": ["Admin", "User"]
+      }
+    ]
+  },
   "CopilotService": {
     "ClientId": "your-client-id",
     "UserAgent": "GitHubCopilotChat/1.0",
     "EditorVersion": "vscode/1.80.0",
-    "EditorPluginVersion": "copilot-chat/0.8.0",
-    "AcceptEncoding": "gzip, deflate, br"
+    "EditorPluginVersion": "copilot-chat/0.8.0"
   }
 }
+```
 
-// Options class with validation
-public class CopilotServiceOptions
+#### Rate Limiting Configuration
+```json
 {
-    public string ClientId { get; set; } = string.Empty;
-    public string UserAgent { get; set; } = string.Empty;
-    public string DeviceCodeUrl { get; set; } = string.Empty;
-    public string AccessTokenUrl { get; set; } = string.Empty;
-    public string TokenUrl { get; set; } = string.Empty;
-    public string CompletionUrl { get; set; } = string.Empty;
+  "RateLimiting": {
+    "GlobalPolicy": {
+      "PermitLimit": 100,
+      "Window": "00:01:00"
+    },
+    "ApiPolicy": {
+      "PermitLimit": 60,
+      "Window": "00:01:00"
+    },
+    "AdminPolicy": {
+      "PermitLimit": 20,
+      "Window": "00:01:00"
+    }
+  }
 }
 ```
 

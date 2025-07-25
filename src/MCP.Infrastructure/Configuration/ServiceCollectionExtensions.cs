@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using MCP.Domain.Interfaces;
+using MCP.Application.Interfaces;
 using MCP.Infrastructure.Services;
 using MCP.Infrastructure.Repositories;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
@@ -32,6 +33,9 @@ public static class ServiceCollectionExtensions
                 var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CopilotService>>();
                 return new CopilotService(httpClient, options, logger);
             });
+
+        // Register JWT token service
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         // Add other infrastructure services here
         // Example: Database context, external API clients, etc.

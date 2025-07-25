@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using MCP.WebApi.Services;
+using MCP.Application.Interfaces;
 using System.Security.Claims;
 
 namespace MCP.WebApi.Extensions;

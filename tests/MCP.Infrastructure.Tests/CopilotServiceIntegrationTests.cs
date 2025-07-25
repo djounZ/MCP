@@ -35,6 +35,11 @@ public class CopilotServiceIntegrationTests : IDisposable
             options.AccessTokenUrl = "https://github.com/login/oauth/access_token";
             options.TokenUrl = "https://api.github.com/copilot_internal/v2/token";
             options.CompletionUrl = "https://copilot-proxy.githubusercontent.com/v1/engines/copilot-codex/completions";
+            options.EditorVersion = "Neovim/0.6.1";
+            options.EditorPluginVersion = "copilot.vim/1.16.0";
+            options.UserAgent = "GithubCopilot/1.155.0";
+            options.AcceptEncoding = "gzip,deflate,br";
+
         });
 
         // Register CopilotService using the same pattern as production (typed client with options)
@@ -143,5 +148,12 @@ public class CopilotServiceIntegrationTests : IDisposable
         {
             _output.WriteLine($"Empty prompt resulted in error: {response.Error}");
         }
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Me()
+    {
+        var registerDeviceAsync = await _copilotService.RegisterDeviceAsync();
     }
 }

@@ -235,12 +235,25 @@ public sealed class CopilotService : ICopilotService, IDisposable
         }
     }
 
-    public Task<Result<GithubDeviceCodeResponse>> RegisterDevice()
+    public async Task<Result<GithubDeviceCodeResponse>> RegisterDeviceAsync()
     {
-        throw new NotImplementedException();
+        var headers = new Dictionary<string, string>
+        {
+            [HeaderKeys.Accept] = ContentTypes.ApplicationJson,
+            [HeaderKeys.EditorVersion] = _options.EditorVersion,
+            [HeaderKeys.EditorPluginVersion] = _options.EditorPluginVersion,
+            [HeaderKeys.ContentType] = ContentTypes.ApplicationJson,
+            [HeaderKeys.UserAgent] = _options.UserAgent,
+            [HeaderKeys.AcceptEncoding] = _options.AcceptEncoding
+        };
+        var deviceCodeUrl = _options.DeviceCodeUrl;
+        var clientId = _options.ClientId;
+        var scope = "read:user";
+
+        return await GetGithubDeviceCodeResponseAsync(deviceCodeUrl, clientId, scope, headers);
     }
 
-    public bool IsDeviceRegistered { get; }
+    public bool IsDeviceRegistered { get; } = false;
 
     public void Dispose()
     {

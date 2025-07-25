@@ -16,7 +16,7 @@ public interface ICopilotService
     /// <returns>Generated code completion or error</returns>
     Task<Result<string>> GetCompletionAsync(string prompt, string language = "python");
 
-    Task<Result<GithubDeviceCodeResponse>> RegisterDevice();
+    Task<Result<GithubDeviceCodeResponse>> RegisterDeviceAsync();
 
     bool IsDeviceRegistered { get; }
 }

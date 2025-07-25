@@ -1,6 +1,7 @@
 using MCP.Application.Configuration;
 using MCP.Infrastructure.Configuration;
 using MCP.WebApi.Extensions;
+using MCP.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add application and infrastructure services
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Add security services
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddApiKeyAuthentication(builder.Configuration);
+builder.Services.AddCustomAuthorization();
+builder.Services.AddCustomRateLimiting();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -36,10 +44,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("DefaultCorsPolicy");
-// Note: Removed UseRouting() and UseAuthorization() as they're not needed for this minimal API
 
-// Configure API endpoints
-app.MapHealthEndpoints();
+// Add security middleware
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Configure API endpoints - secured versions
+app.MapAuthEndpoints();
+app.MapSecuredHealthEndpoints();
 app.MapWeatherEndpoints();
 
 app.Run();

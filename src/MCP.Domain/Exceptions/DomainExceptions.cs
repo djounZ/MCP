@@ -1,7 +1,7 @@
 namespace MCP.Domain.Exceptions;
 
 /// <summary>
-/// Base class for all domain exceptions
+///     Base class for all domain exceptions
 /// </summary>
 public abstract class DomainException : Exception
 {
@@ -15,22 +15,22 @@ public abstract class DomainException : Exception
 }
 
 /// <summary>
-/// Exception thrown when a domain entity is not found
+///     Exception thrown when a domain entity is not found
 /// </summary>
 public class EntityNotFoundException : DomainException
 {
-    public EntityNotFoundException(string entityName, object id) 
+    public EntityNotFoundException(string entityName, object id)
         : base($"Entity '{entityName}' with id '{id}' was not found.")
     {
     }
 }
 
 /// <summary>
-/// Exception thrown when a domain business rule is violated
+///     Exception thrown when a domain business rule is violated
 /// </summary>
 public class BusinessRuleViolationException : DomainException
 {
-    public BusinessRuleViolationException(string rule) 
+    public BusinessRuleViolationException(string rule)
         : base($"Business rule violation: {rule}")
     {
     }

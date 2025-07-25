@@ -5,16 +5,19 @@ This project separates unit tests from integration tests using test categories.
 ## Running Tests
 
 ### Run All Tests
+
 ```bash
 dotnet test
 ```
 
 ### Run Unit Tests Only (Fast, no external dependencies)
+
 ```bash
 dotnet test --filter "Category=Unit"
 ```
 
 ### Run Integration Tests Only (Requires GitHub Copilot authentication)
+
 ```bash
 dotnet test --filter "Category=Integration"
 ```
@@ -25,13 +28,14 @@ The CopilotService integration tests require:
 
 1. **GitHub Copilot subscription** - You need an active GitHub Copilot subscription
 2. **Authentication setup** - The first time you run integration tests, you'll need to:
-   - Visit the GitHub authentication URL shown in the console
-   - Enter the device code to authenticate
-   - The authentication token will be saved locally
+    - Visit the GitHub authentication URL shown in the console
+    - Enter the device code to authenticate
+    - The authentication token will be saved locally
 
 ### Example Integration Test
 
 The `GetCompletionAsync_WithNapoleonPrompt_ShouldReturnNonEmptyResponse` test:
+
 - Sends the prompt: "Hello, who was Napoleon?"
 - Verifies the response is not empty
 - Displays the response in the test output

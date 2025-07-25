@@ -3,12 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MCP.Application.Configuration;
 
 /// <summary>
-/// Extension methods for configuring application services
+///     Extension methods for configuring application services
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds application services to the dependency injection container
+    ///     Adds application services to the dependency injection container
     /// </summary>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {

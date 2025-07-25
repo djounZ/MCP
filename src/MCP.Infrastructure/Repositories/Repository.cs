@@ -3,7 +3,7 @@ using MCP.Domain.Interfaces;
 namespace MCP.Infrastructure.Repositories;
 
 /// <summary>
-/// Generic repository implementation
+///     Generic repository implementation
 /// </summary>
 public sealed class Repository<T> : IRepository<T> where T : class
 {

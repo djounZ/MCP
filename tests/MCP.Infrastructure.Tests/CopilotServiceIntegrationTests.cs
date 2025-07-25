@@ -1,26 +1,28 @@
-using Microsoft.Extensions.DependencyInjection;
 using MCP.Application.Interfaces;
 using MCP.Infrastructure.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Xunit.Abstractions;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Tests.Integration;
 
 /// <summary>
-/// Integration tests for CopilotService
-/// Note: These tests require actual GitHub Copilot authentication and network access
-/// They should be run separately from unit tests
+///     Integration tests for CopilotService
+///     Note: These tests require actual GitHub Copilot authentication and network access
+///     They should be run separately from unit tests
 /// </summary>
 public class CopilotServiceIntegrationTests : IDisposable
 {
-    private readonly ServiceProvider _serviceProvider;
     private readonly ICopilotService _copilotService;
     private readonly ITestOutputHelper _output;
+    private readonly ServiceProvider _serviceProvider;
 
     public CopilotServiceIntegrationTests(ITestOutputHelper output)
     {
         _output = output;
-        
+
         // Setup dependency injection container
         var services = new ServiceCollection();
 
@@ -42,13 +44,23 @@ public class CopilotServiceIntegrationTests : IDisposable
             })
             .AddTypedClient<ICopilotService>((httpClient, sp) =>
             {
-                var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<CopilotServiceOptions>>().Value;
-                var logger = Microsoft.Extensions.Logging.Abstractions.NullLogger<CopilotService>.Instance;
+                var options = sp.GetRequiredService<IOptions<CopilotServiceOptions>>().Value;
+                var logger = NullLogger<CopilotService>.Instance;
                 return new CopilotService(httpClient, options, logger);
             });
 
         _serviceProvider = services.BuildServiceProvider();
         _copilotService = _serviceProvider.GetRequiredService<ICopilotService>();
+    }
+
+    public void Dispose()
+    {
+        if (_copilotService is IDisposable disposableService)
+        {
+            disposableService.Dispose();
+        }
+
+        _serviceProvider?.Dispose();
     }
 
     [Fact]
@@ -63,7 +75,8 @@ public class CopilotServiceIntegrationTests : IDisposable
         var response = await _copilotService.GetCompletionAsync(prompt, language);
 
         // Assert
-        Assert.True(response.IsSuccess, $"Response should be successful. Error: {(response.IsFailure ? response.Error : "None")}");
+        Assert.True(response.IsSuccess,
+            $"Response should be successful. Error: {(response.IsFailure ? response.Error : "None")}");
         Assert.NotEmpty(response.Value);
 
         // Display the response in the test output
@@ -77,9 +90,9 @@ public class CopilotServiceIntegrationTests : IDisposable
         // Check if the response contains some expected keywords related to Napoleon
         var responseUpper = response.Value.ToUpperInvariant();
         var containsRelevantContent = responseUpper.Contains("NAPOLEON") ||
-                                    responseUpper.Contains("EMPEROR") ||
-                                    responseUpper.Contains("FRANCE") ||
-                                    responseUpper.Contains("BONAPARTE");
+                                      responseUpper.Contains("EMPEROR") ||
+                                      responseUpper.Contains("FRANCE") ||
+                                      responseUpper.Contains("BONAPARTE");
 
         _output.WriteLine($"Contains relevant Napoleon content: {containsRelevantContent}");
     }
@@ -90,18 +103,18 @@ public class CopilotServiceIntegrationTests : IDisposable
     {
         // Arrange
         const string prompt = "def fibonacci(n):";
-        const string language = "python";
 
         // Act
-        var response = await _copilotService.GetCompletionAsync(prompt, language);
+        var response = await _copilotService.GetCompletionAsync(prompt);
 
         // Assert
-        Assert.True(response.IsSuccess, $"Response should be successful. Error: {(response.IsFailure ? response.Error : "None")}");
+        Assert.True(response.IsSuccess,
+            $"Response should be successful. Error: {(response.IsFailure ? response.Error : "None")}");
         Assert.NotEmpty(response.Value);
 
         // Display the response in the test output
         _output.WriteLine($"Code Prompt: {prompt}");
-        _output.WriteLine($"Code Response:");
+        _output.WriteLine("Code Response:");
         _output.WriteLine(response.Value);
         _output.WriteLine($"Response Length: {response.Value.Length} characters");
 
@@ -130,14 +143,5 @@ public class CopilotServiceIntegrationTests : IDisposable
         {
             _output.WriteLine($"Empty prompt resulted in error: {response.Error}");
         }
-    }
-
-    public void Dispose()
-    {
-        if (_copilotService is IDisposable disposableService)
-        {
-            disposableService.Dispose();
-        }
-        _serviceProvider?.Dispose();
     }
 }

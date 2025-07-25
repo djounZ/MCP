@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Options;
 
 namespace MCP.WebApi.Extensions;
 
 /// <summary>
-/// Options for API Key authentication
+///     Options for API Key authentication
 /// </summary>
 public class ApiKeyAuthenticationSchemeOptions : AuthenticationSchemeOptions
 {
@@ -14,7 +14,7 @@ public class ApiKeyAuthenticationSchemeOptions : AuthenticationSchemeOptions
 }
 
 /// <summary>
-/// Authentication handler for API Key authentication
+///     Authentication handler for API Key authentication
 /// </summary>
 public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationSchemeOptions>
 {
@@ -47,8 +47,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, userName),
-                new Claim(ClaimTypes.NameIdentifier, userName),
+                new Claim(ClaimTypes.Name, userName), new Claim(ClaimTypes.NameIdentifier, userName),
                 new Claim("apikey", providedApiKey)
             };
 
@@ -70,7 +69,8 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
             return Task.FromResult(AuthenticateResult.Success(ticket));
         }
 
-        Logger.LogWarning("Invalid API Key provided: {ApiKey}", providedApiKey[..Math.Min(8, providedApiKey.Length)] + "...");
+        Logger.LogWarning("Invalid API Key provided: {ApiKey}",
+            providedApiKey[..Math.Min(8, providedApiKey.Length)] + "...");
         return Task.FromResult(AuthenticateResult.Fail("Invalid API Key"));
     }
 

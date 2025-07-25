@@ -1,7 +1,7 @@
 namespace MCP.Domain.Interfaces;
 
 /// <summary>
-/// Generic repository interface for domain entities
+///     Generic repository interface for domain entities
 /// </summary>
 public interface IRepository<T> where T : class
 {
@@ -14,7 +14,7 @@ public interface IRepository<T> where T : class
 }
 
 /// <summary>
-/// Unit of Work interface for managing transactions
+///     Unit of Work interface for managing transactions
 /// </summary>
 public interface IUnitOfWork
 {

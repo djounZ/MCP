@@ -1,15 +1,15 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MCP.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using MCP.Application.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MCP.Infrastructure.Services;
 
 /// <summary>
-/// Implementation of JWT token service
+///     Implementation of JWT token service
 /// </summary>
 public class JwtTokenService : IJwtTokenService
 {
@@ -43,7 +43,8 @@ public class JwtTokenService : IJwtTokenService
             new(ClaimTypes.NameIdentifier, userName),
             new(JwtRegisteredClaimNames.Sub, userName),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                ClaimValueTypes.Integer64)
         };
 
         // Add role claims
@@ -54,16 +55,16 @@ public class JwtTokenService : IJwtTokenService
         }
 
         var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
-            claims: claims,
+            issuer,
+            audience,
+            claims,
             expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
             signingCredentials: credentials
         );
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-        
-        _logger.LogInformation("JWT token generated for user: {UserName}, expires: {Expiry}", 
+
+        _logger.LogInformation("JWT token generated for user: {UserName}, expires: {Expiry}",
             userName, DateTime.UtcNow.AddMinutes(expiryMinutes));
 
         return tokenString;

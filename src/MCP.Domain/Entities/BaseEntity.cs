@@ -1,7 +1,7 @@
 namespace MCP.Domain.Entities;
 
 /// <summary>
-/// Base class for all domain entities
+///     Base class for all domain entities
 /// </summary>
 public abstract class BaseEntity
 {

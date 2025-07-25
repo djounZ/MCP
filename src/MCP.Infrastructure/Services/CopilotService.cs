@@ -1,60 +1,56 @@
-
-
+using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using MCP.Application.Interfaces;
 using MCP.Domain.Common;
 using MCP.Infrastructure.Constants;
+using MCP.Infrastructure.Models.Copilot;
+using Microsoft.Extensions.Logging;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
-namespace MCP.Infrastructure.Services
+namespace MCP.Infrastructure.Services;
+
+public sealed class CopilotService : ICopilotService, IDisposable
 {
-    public sealed class CopilotService : ICopilotService, IDisposable
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<CopilotService> _logger;
+    private readonly CopilotServiceOptions _options;
+    private readonly Timer _tokenRefreshTimer;
+    private bool _disposed;
+    private string? _token;
+
+    public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILogger<CopilotService> logger)
     {
-        private readonly HttpClient _httpClient;
-        private readonly Timer _tokenRefreshTimer;
-        private readonly CopilotServiceOptions _options;
-        private readonly ILogger<CopilotService> _logger;
-        private string? _token;
-        private bool _disposed;
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILogger<CopilotService> logger)
+        // Start token refresh timer
+        _tokenRefreshTimer = new Timer(async _ =>
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _options = options ?? throw new ArgumentNullException(nameof(options));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            // Start token refresh timer
-            _tokenRefreshTimer = new Timer(async _ =>
+            try
             {
-                try
+                if (!_disposed)
                 {
-                    if (!_disposed)
+                    var tokenResult = await GetTokenInternalAsync();
+                    if (tokenResult.IsFailure)
                     {
-                        var tokenResult = await GetTokenInternalAsync();
-                        if (tokenResult.IsFailure)
-                        {
-                            _logger.LogWarning("Token refresh failed: {Error}", tokenResult.Error);
-                        }
+                        _logger.LogWarning("Token refresh failed: {Error}", tokenResult.Error);
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error occurred during token refresh timer callback.");
-                }
-            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(25));
-        }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during token refresh timer callback.");
+            }
+        }, null, TimeSpan.Zero, TimeSpan.FromMinutes(25));
+    }
 
     public async Task<Result<Unit>> SetupAsync()
     {
         try
         {
-            var requestData = new
-            {
-                client_id = _options.ClientId,
-                scope = "read:user"
-            };
+            var requestData = new { client_id = _options.ClientId, scope = "read:user" };
 
             var headers = new Dictionary<string, string>
             {
@@ -70,10 +66,10 @@ namespace MCP.Infrastructure.Services
             if (responseResult.IsFailure)
                 return Result.Failure<Unit>($"Failed to get device code: {responseResult.Error}");
 
-            Models.Copilot.CopilotDeviceCodeResponse? deviceCodeResponse;
+            CopilotDeviceCodeResponse? deviceCodeResponse;
             try
             {
-                deviceCodeResponse = JsonSerializer.Deserialize<Models.Copilot.CopilotDeviceCodeResponse>(responseResult.Value);
+                deviceCodeResponse = JsonSerializer.Deserialize<CopilotDeviceCodeResponse>(responseResult.Value);
             }
             catch (JsonException ex)
             {
@@ -87,9 +83,10 @@ namespace MCP.Infrastructure.Services
                 return Result.Failure<Unit>("Failed to parse device code response.");
             }
 
-            _logger.LogInformation("Prompting user to authenticate Copilot. VerificationUri: {VerificationUri}, UserCode: {UserCode}", 
+            _logger.LogInformation(
+                "Prompting user to authenticate Copilot. VerificationUri: {VerificationUri}, UserCode: {UserCode}",
                 deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
-            _logger.LogInformation("Please visit {VerificationUri} and enter code {UserCode} to authenticate", 
+            _logger.LogInformation("Please visit {VerificationUri} and enter code {UserCode} to authenticate",
                 deviceCodeResponse.VerificationUri, deviceCodeResponse.UserCode);
 
             string? accessToken = null;
@@ -104,7 +101,8 @@ namespace MCP.Infrastructure.Services
                     grant_type = "urn:ietf:params:oauth:grant-type:device_code"
                 };
 
-                var tokenResponseResult = await SendPostRequestAsync(_options.AccessTokenUrl, tokenRequestData, headers);
+                var tokenResponseResult =
+                    await SendPostRequestAsync(_options.AccessTokenUrl, tokenRequestData, headers);
                 if (tokenResponseResult.IsFailure)
                     continue; // Keep trying
 
@@ -140,6 +138,53 @@ namespace MCP.Infrastructure.Services
             _logger.LogError(ex, "Unexpected error during setup.");
             return Result.Failure<Unit>($"Unexpected error during setup: {ex.Message}");
         }
+    }
+
+    public async Task<Result<string>> GetCompletionAsync(string prompt, string language = "python")
+    {
+        if (_token == null || IsTokenInvalid(_token))
+        {
+            var tokenResult = await GetTokenInternalAsync();
+            if (tokenResult.IsFailure)
+                return Result.Failure<string>($"Failed to get token: {tokenResult.Error}");
+        }
+
+        var requestData = new
+        {
+            prompt,
+            suffix = "",
+            max_tokens = 1000,
+            temperature = 0,
+            top_p = 1,
+            n = 1,
+            stop = new[] { "\n" },
+            nwo = "github/copilot.vim",
+            stream = true,
+            extra = new { language }
+        };
+
+        var headers = new Dictionary<string, string> { [HeaderKeys.Authorization] = $"Bearer {_token}" };
+
+        try
+        {
+            var responseResult = await SendPostRequestAsync(_options.CompletionUrl, requestData, headers);
+            if (responseResult.IsFailure)
+                return Result.Failure<string>($"Failed to get completion: {responseResult.Error}");
+
+            var completion = ParseStreamingResponse(responseResult.Value);
+            return Result.Success(completion);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while requesting Copilot completion.");
+            return Result.Failure<string>($"Error occurred while requesting Copilot completion: {ex.Message}");
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     private async Task<Result<Unit>> GetTokenInternalAsync()
@@ -187,60 +232,14 @@ namespace MCP.Infrastructure.Services
                 _logger.LogInformation("Token successfully retrieved from Copilot API.");
                 return Result.Success();
             }
-            else
-            {
-                _logger.LogWarning("Token property not found in Copilot API response.");
-                return Result.Failure<Unit>("Token property not found in API response");
-            }
+
+            _logger.LogWarning("Token property not found in Copilot API response.");
+            return Result.Failure<Unit>("Token property not found in API response");
         }
         catch (JsonException ex)
         {
             _logger.LogError(ex, "Failed to parse token response");
             return Result.Failure<Unit>("Failed to parse token response");
-        }
-    }
-
-    public async Task<Result<string>> GetCompletionAsync(string prompt, string language = "python")
-    {
-        if (_token == null || IsTokenInvalid(_token))
-        {
-            var tokenResult = await GetTokenInternalAsync();
-            if (tokenResult.IsFailure)
-                return Result.Failure<string>($"Failed to get token: {tokenResult.Error}");
-        }
-
-        var requestData = new
-        {
-            prompt = prompt,
-            suffix = "",
-            max_tokens = 1000,
-            temperature = 0,
-            top_p = 1,
-            n = 1,
-            stop = new[] { "\n" },
-            nwo = "github/copilot.vim",
-            stream = true,
-            extra = new { language = language }
-        };
-
-        var headers = new Dictionary<string, string>
-        {
-            [HeaderKeys.Authorization] = $"Bearer {_token}"
-        };
-
-        try
-        {
-            var responseResult = await SendPostRequestAsync(_options.CompletionUrl, requestData, headers);
-            if (responseResult.IsFailure)
-                return Result.Failure<string>($"Failed to get completion: {responseResult.Error}");
-
-            var completion = ParseStreamingResponse(responseResult.Value);
-            return Result.Success(completion);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while requesting Copilot completion.");
-            return Result.Failure<string>($"Error occurred while requesting Copilot completion: {ex.Message}");
         }
     }
 
@@ -318,6 +317,7 @@ namespace MCP.Infrastructure.Services
                 }
             }
         }
+
         return 0;
     }
 
@@ -327,30 +327,30 @@ namespace MCP.Infrastructure.Services
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
 
-            foreach (KeyValuePair<string, string> header in headers)
+            foreach (var header in headers)
             {
                 if (header.Key == HeaderKeys.ContentType)
                     continue; // This will be set by StringContent
                 request.Headers.Add(header.Key, header.Value);
             }
 
-            string json = JsonSerializer.Serialize(data);
+            var json = JsonSerializer.Serialize(data);
             request.Content = new StringContent(json, Encoding.UTF8, ContentTypes.ApplicationJson);
 
-            using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
             if (!response.IsSuccessStatusCode)
                 return Result.Failure<string>($"HTTP request failed with status code: {response.StatusCode}");
 
-            await using Stream responseStream = await response.Content.ReadAsStreamAsync();
-            Stream contentStream = response.Content.Headers.ContentEncoding.Contains(ContentEncodings.Gzip)
-                ? new System.IO.Compression.GZipStream(responseStream, System.IO.Compression.CompressionMode.Decompress)
+            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            var contentStream = response.Content.Headers.ContentEncoding.Contains(ContentEncodings.Gzip)
+                ? new GZipStream(responseStream, CompressionMode.Decompress)
                 : responseStream;
 
             using var reader = new StreamReader(contentStream, Encoding.UTF8);
-            string result = await reader.ReadToEndAsync();
+            var result = await reader.ReadToEndAsync();
 
-            if (contentStream is System.IO.Compression.GZipStream gzipStream)
+            if (contentStream is GZipStream gzipStream)
                 await gzipStream.DisposeAsync();
 
             return Result.Success(result);
@@ -384,7 +384,7 @@ namespace MCP.Infrastructure.Services
             }
 
             var response = await _httpClient.SendAsync(request);
-            
+
             if (!response.IsSuccessStatusCode)
                 return Result.Failure<string>($"HTTP GET request failed with status code: {response.StatusCode}");
 
@@ -408,12 +408,6 @@ namespace MCP.Infrastructure.Services
         }
     }
 
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
     private void Dispose(bool disposing)
     {
         if (!_disposed && disposing)
@@ -421,7 +415,5 @@ namespace MCP.Infrastructure.Services
             _tokenRefreshTimer?.Dispose();
             _disposed = true;
         }
-    }
-
     }
 }

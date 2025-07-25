@@ -1,12 +1,12 @@
-﻿using MCP.Infrastructure.Services;
-using MCP.Application.Interfaces;
+﻿using MCP.Application.Interfaces;
+using MCP.Infrastructure.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Tests.Unit;
 
 /// <summary>
-/// Unit tests for CopilotService (isolated, no external dependencies)
+///     Unit tests for CopilotService (isolated, no external dependencies)
 /// </summary>
 public class CopilotServiceUnitTests
 {
@@ -66,7 +66,7 @@ public class CopilotServiceUnitTests
         // Act & Assert
         var exception1 = Record.Exception(() => service.Dispose());
         var exception2 = Record.Exception(() => service.Dispose());
-        
+
         Assert.Null(exception1);
         Assert.Null(exception2);
     }

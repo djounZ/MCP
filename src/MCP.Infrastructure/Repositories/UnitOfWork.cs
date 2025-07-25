@@ -3,7 +3,7 @@ using MCP.Domain.Interfaces;
 namespace MCP.Infrastructure.Repositories;
 
 /// <summary>
-/// Unit of Work implementation for managing transactions
+///     Unit of Work implementation for managing transactions
 /// </summary>
 public sealed class UnitOfWork : IUnitOfWork
 {

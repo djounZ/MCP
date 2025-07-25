@@ -1,52 +1,52 @@
 <Project>
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
-    <LangVersion>latest</LangVersion>
-    <AnalysisLevel>latest</AnalysisLevel>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <WarningsAsErrors/>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+        <LangVersion>latest</LangVersion>
+        <AnalysisLevel>latest</AnalysisLevel>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <Authors>Your Name</Authors>
-    <Company>Your Company</Company>
-    <Product>MCP</Product>
-    <Copyright>Copyright © $(Company) $([System.DateTime]::Now.Year)</Copyright>
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Authors>Your Name</Authors>
+        <Company>Your Company</Company>
+        <Product>MCP</Product>
+        <Copyright>Copyright © $(Company) $([System.DateTime]::Now.Year)</Copyright>
+        <Version>1.0.0</Version>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+    </PropertyGroup>
 
-  <!-- Package Versions -->
-  <PropertyGroup>
-    <!-- Microsoft packages -->
-    <MicrosoftAspNetCoreOpenApiVersion>9.0.6</MicrosoftAspNetCoreOpenApiVersion>
-    <MicrosoftExtensionsConfigurationAbstractionsVersion>9.0.7</MicrosoftExtensionsConfigurationAbstractionsVersion>
-    <MicrosoftExtensionsDependencyInjectionVersion>9.0.7</MicrosoftExtensionsDependencyInjectionVersion>
-    <MicrosoftExtensionsDependencyInjectionAbstractionsVersion>9.0.7</MicrosoftExtensionsDependencyInjectionAbstractionsVersion>
-    <MicrosoftExtensionsHttpVersion>9.0.7</MicrosoftExtensionsHttpVersion>
-    <MicrosoftNETTestSdkVersion>17.12.0</MicrosoftNETTestSdkVersion>
-    <MicrosoftCodeAnalysisAnalyzersVersion>3.3.4</MicrosoftCodeAnalysisAnalyzersVersion>
-    
-    <!-- Testing packages -->
-    <XunitVersion>2.9.2</XunitVersion>
-    <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
-    <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
-    <!-- JWT & Auth packages -->
-    <SystemIdentityModelTokensJwtVersion>8.13.0</SystemIdentityModelTokensJwtVersion>
-    <MicrosoftIdentityModelTokensVersion>8.13.0</MicrosoftIdentityModelTokensVersion>
-    <MicrosoftAspNetCoreAuthenticationJwtBearerVersion>9.0.0</MicrosoftAspNetCoreAuthenticationJwtBearerVersion>
-  </PropertyGroup>
+    <!-- Package Versions -->
+    <PropertyGroup>
+        <!-- Microsoft packages -->
+        <MicrosoftAspNetCoreOpenApiVersion>9.0.6</MicrosoftAspNetCoreOpenApiVersion>
+        <MicrosoftExtensionsConfigurationAbstractionsVersion>9.0.7</MicrosoftExtensionsConfigurationAbstractionsVersion>
+        <MicrosoftExtensionsDependencyInjectionVersion>9.0.7</MicrosoftExtensionsDependencyInjectionVersion>
+        <MicrosoftExtensionsDependencyInjectionAbstractionsVersion>9.0.7</MicrosoftExtensionsDependencyInjectionAbstractionsVersion>
+        <MicrosoftExtensionsHttpVersion>9.0.7</MicrosoftExtensionsHttpVersion>
+        <MicrosoftNETTestSdkVersion>17.12.0</MicrosoftNETTestSdkVersion>
+        <MicrosoftCodeAnalysisAnalyzersVersion>3.3.4</MicrosoftCodeAnalysisAnalyzersVersion>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="$(MicrosoftCodeAnalysisAnalyzersVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+        <!-- Testing packages -->
+        <XunitVersion>2.9.2</XunitVersion>
+        <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
+        <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
+        <!-- JWT & Auth packages -->
+        <SystemIdentityModelTokensJwtVersion>8.13.0</SystemIdentityModelTokensJwtVersion>
+        <MicrosoftIdentityModelTokensVersion>8.13.0</MicrosoftIdentityModelTokensVersion>
+        <MicrosoftAspNetCoreAuthenticationJwtBearerVersion>9.0.0</MicrosoftAspNetCoreAuthenticationJwtBearerVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="$(MicrosoftCodeAnalysisAnalyzersVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 </Project>

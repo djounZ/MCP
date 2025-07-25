@@ -1,6 +1,7 @@
 # MCP - .NET 9 Clean Architecture with Functional Error Handling & Security
 
-A production-ready .NET 9 solution following Clean Architecture principles with modern functional programming patterns, comprehensive security, and minimal APIs for high performance.
+A production-ready .NET 9 solution following Clean Architecture principles with modern functional programming patterns,
+comprehensive security, and minimal APIs for high performance.
 
 ## 🏗️ Architecture
 
@@ -65,22 +66,25 @@ Domain → (no dependencies)
 ```
 
 - **Domain**: Contains business entities, Result monad, and domain services. No external dependencies.
-- **Application**: Contains use cases, service interfaces (IJwtTokenService), and business rules. Depends only on Domain.
+- **Application**: Contains use cases, service interfaces (IJwtTokenService), and business rules. Depends only on
+  Domain.
 - **Infrastructure**: Contains service implementations using Result<T> pattern. Depends on Domain and Application.
 - **WebApi**: Minimal API endpoints with security. Depends on Application and Infrastructure.
 
 ## 🔐 Security Features
 
 ### Authentication & Authorization
+
 - **JWT Bearer Authentication** - Stateless token-based authentication
 - **API Key Authentication** - Header-based authentication for service-to-service calls
 - **Role-Based Authorization** - Fine-grained access control with Admin/User/Guest roles
 - **Rate Limiting** - Built-in protection with configurable policies:
-  - Global: 100 requests/minute per IP
-  - API endpoints: 60 requests/minute per user
-  - Admin endpoints: 20 requests/minute per user
+    - Global: 100 requests/minute per IP
+    - API endpoints: 60 requests/minute per user
+    - Admin endpoints: 20 requests/minute per user
 
 ### Security Configuration
+
 ```csharp
 // JWT Authentication
 services.AddJwtAuthentication(configuration);
@@ -96,6 +100,7 @@ services.AddCustomRateLimiting();
 ```
 
 ### Authentication Endpoints
+
 - `POST /api/auth/login` - Login with username/password → JWT token
 - `POST /api/auth/validate` - Validate JWT token
 - `POST /api/auth/refresh` - Refresh JWT token
@@ -168,6 +173,7 @@ public static class CopilotEndpointsExtensions
 ```
 
 ### Benefits of Minimal APIs
+
 - **⚡ Higher Performance** - Reduced overhead and faster throughput
 - **🎯 Focused Endpoints** - Clear, purpose-built endpoint definitions
 - **🔧 Better DI Integration** - Direct parameter injection
@@ -209,6 +215,7 @@ dotnet run --project src/MCP.WebApi --launch-profile https
 ```
 
 The API will be available at:
+
 - HTTPS: `https://localhost:7000`
 - HTTP: `http://localhost:5000`
 
@@ -228,6 +235,7 @@ dotnet test tests/MCP.Domain.Tests
 ## 📦 Dependencies
 
 ### Core Dependencies
+
 - **.NET 9.0** - Latest .NET framework with performance improvements
 - **ASP.NET Core** - Web framework for minimal APIs
 - **Microsoft.AspNetCore.Authentication.JwtBearer** - JWT authentication
@@ -237,16 +245,19 @@ dotnet test tests/MCP.Domain.Tests
 - **System.Text.Json** - High-performance JSON serialization
 
 ### Security Dependencies
+
 - **Microsoft.IdentityModel.Tokens** - Token validation and security
 - **Rate Limiting** - Built-in .NET 9 rate limiting middleware
 - **Authentication Middleware** - Custom API key authentication handlers
 
 ### Testing
+
 - **xUnit** - Modern testing framework
 - **Microsoft.AspNetCore.Mvc.Testing** - Integration testing support
 - **Microsoft.Extensions.Logging.Abstractions** - NullLogger for testing
 
 ### Development Tools
+
 - **Directory.Build.props** - Centralized package version management
 - **Nullable Reference Types** - Enhanced null safety
 - **Result Monad** - Custom functional error handling
@@ -257,6 +268,7 @@ dotnet test tests/MCP.Domain.Tests
 ### Error Handling Strategy
 
 #### ✅ Use Result<T> for Business Logic
+
 ```csharp
 // ✅ Good - Return Result<T> for operations that can fail
 public async Task<Result<User>> GetUserAsync(int id)
@@ -272,6 +284,7 @@ public async Task<Result<User>> GetUserAsync(int id)
 ```
 
 #### ✅ Use Exceptions for Infrastructure Issues
+
 ```csharp
 // ✅ Good - Constructor validation with exceptions
 public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILogger<CopilotService> logger)
@@ -285,28 +298,28 @@ public CopilotService(HttpClient httpClient, CopilotServiceOptions options, ILog
 ### Code Organization
 
 1. **Domain Layer**
-   - Result<T> monad and common abstractions
-   - Business entities and value objects
-   - Domain service interfaces
-   - No external dependencies
+    - Result<T> monad and common abstractions
+    - Business entities and value objects
+    - Domain service interfaces
+    - No external dependencies
 
 2. **Application Layer**
-   - Use cases returning Result<T>
-   - Service interfaces (IJwtTokenService, ICopilotService)
-   - DTOs and mapping profiles
-   - Validation with Result pattern
+    - Use cases returning Result<T>
+    - Service interfaces (IJwtTokenService, ICopilotService)
+    - DTOs and mapping profiles
+    - Validation with Result pattern
 
 3. **Infrastructure Layer**
-   - Service implementations using Result<T>
-   - JWT token service implementation
-   - External API integrations with error handling
-   - Configuration options and centralized DI setup
+    - Service implementations using Result<T>
+    - JWT token service implementation
+    - External API integrations with error handling
+    - Configuration options and centralized DI setup
 
 4. **WebApi Layer**
-   - Minimal API endpoints with security
-   - JWT and API key authentication
-   - Rate limiting and CORS configuration
-   - Extension methods for endpoint registration
+    - Minimal API endpoints with security
+    - JWT and API key authentication
+    - Rate limiting and CORS configuration
+    - Extension methods for endpoint registration
 
 ### Package Management
 
@@ -322,6 +335,7 @@ All package versions are centralized in `Directory.Build.props`:
 ```
 
 Projects reference versions using MSBuild properties:
+
 ```xml
 <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(SystemIdentityModelTokensJwtVersion)" />
 ```
@@ -336,6 +350,7 @@ Projects reference versions using MSBuild properties:
 ### Testing Strategy
 
 #### Unit Tests with Result Pattern
+
 ```csharp
 [Fact]
 public async Task GetCompletionAsync_WithValidPrompt_ShouldReturnSuccess()
@@ -367,6 +382,7 @@ public async Task GetCompletionAsync_WithInvalidToken_ShouldReturnFailure()
 ```
 
 #### Integration Tests with Security
+
 ```csharp
 [Fact]
 public async Task GetCompletion_WithValidJwtToken_ShouldReturnSuccess()
@@ -403,6 +419,7 @@ public async Task GetCompletion_WithInvalidApiKey_ShouldReturnUnauthorized()
 ### Configuration Management
 
 #### Security Configuration
+
 ```json
 {
   "Jwt": {
@@ -435,6 +452,7 @@ public async Task GetCompletion_WithInvalidApiKey_ShouldReturnUnauthorized()
 ```
 
 #### Rate Limiting Configuration
+
 ```json
 {
   "RateLimiting": {

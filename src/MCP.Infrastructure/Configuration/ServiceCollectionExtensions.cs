@@ -1,20 +1,22 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using MCP.Domain.Interfaces;
 using MCP.Application.Interfaces;
-using MCP.Infrastructure.Services;
+using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Repositories;
+using MCP.Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Configuration;
 
 /// <summary>
-/// Extension methods for configuring infrastructure services
+///     Extension methods for configuring infrastructure services
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds infrastructure services to the dependency injection container
+    ///     Adds infrastructure services to the dependency injection container
     /// </summary>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
@@ -29,8 +31,8 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<ICopilotService, CopilotService>()
             .AddTypedClient((httpClient, sp) =>
             {
-                var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<CopilotServiceOptions>>().Value;
-                var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CopilotService>>();
+                var options = sp.GetRequiredService<IOptions<CopilotServiceOptions>>().Value;
+                var logger = sp.GetRequiredService<ILogger<CopilotService>>();
                 return new CopilotService(httpClient, options, logger);
             });
 

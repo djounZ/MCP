@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add application and infrastructure services
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddMCPInfrastructure(builder.Configuration);
 
 // Add startup service
 builder.Services.AddSingleton<StartupService>();
@@ -58,7 +58,7 @@ app.MapSecuredHealthEndpoints();
 app.MapWeatherEndpoints();
 
 // Initialize startup operations (device registration and browser opening)
-var startupService = app.Services.GetRequiredService<StartupService>();
-await startupService.InitializeAsync();
-
+// var startupService = app.Services.GetRequiredService<StartupService>();
+// await startupService.InitializeAsync();
+await app.Services.UseMCPInfrastructureAsync(CancellationToken.None);
 app.Run();

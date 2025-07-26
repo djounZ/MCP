@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
+        <ProjectReference Include="..\AI.GithubCopilot\AI.GithubCopilot.csproj" />
         <ProjectReference Include="..\MCP.Domain\MCP.Domain.csproj"/>
         <ProjectReference Include="..\MCP.Application\MCP.Application.csproj"/>
     </ItemGroup>

@@ -1,3 +1,4 @@
+using AI.GithubCopilot.Configuration;
 using MCP.Application.Interfaces;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Repositories;
@@ -16,7 +17,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     ///     Adds infrastructure services to the dependency injection container
     /// </summary>
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddMCPInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         // Register repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -35,6 +36,7 @@ public static class ServiceCollectionExtensions
         // Add other infrastructure services here
         // Example: Database context, external API clients, etc.
 
+        services.AddGithubCopilot(configuration);
         return services;
     }
 }

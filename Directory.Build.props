@@ -25,6 +25,8 @@
     <!-- Package Versions -->
     <PropertyGroup>
         <!-- Microsoft packages -->
+        <MicrosoftExtensionsHostingAbstractionsVersion>9.0.7</MicrosoftExtensionsHostingAbstractionsVersion>
+        <MicrosoftExtensionsLoggingAbstractions>9.0.7</MicrosoftExtensionsLoggingAbstractions>
         <MicrosoftAspNetCoreOpenApiVersion>9.0.6</MicrosoftAspNetCoreOpenApiVersion>
         <MicrosoftExtensionsConfigurationAbstractionsVersion>9.0.7</MicrosoftExtensionsConfigurationAbstractionsVersion>
         <MicrosoftExtensionsDependencyInjectionVersion>9.0.7</MicrosoftExtensionsDependencyInjectionVersion>
@@ -32,7 +34,7 @@
         <MicrosoftExtensionsHttpVersion>9.0.7</MicrosoftExtensionsHttpVersion>
         <MicrosoftNETTestSdkVersion>17.12.0</MicrosoftNETTestSdkVersion>
         <MicrosoftCodeAnalysisAnalyzersVersion>3.3.4</MicrosoftCodeAnalysisAnalyzersVersion>
-
+        <MicrosoftExtensionsAIAbstractions>9.7.1</MicrosoftExtensionsAIAbstractions>
         <!-- Testing packages -->
         <XunitVersion>2.9.2</XunitVersion>
         <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>

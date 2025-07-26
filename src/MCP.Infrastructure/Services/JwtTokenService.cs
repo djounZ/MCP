@@ -11,20 +11,12 @@ namespace MCP.Infrastructure.Services;
 /// <summary>
 ///     Implementation of JWT token service
 /// </summary>
-public class JwtTokenService : IJwtTokenService
+public class JwtTokenService(IConfiguration configuration, ILogger<JwtTokenService> logger)
+    : IJwtTokenService
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<JwtTokenService> _logger;
-
-    public JwtTokenService(IConfiguration configuration, ILogger<JwtTokenService> logger)
-    {
-        _configuration = configuration;
-        _logger = logger;
-    }
-
     public string GenerateToken(string userName, string[] roles, int expiryMinutes = 60)
     {
-        var jwtSection = _configuration.GetSection("Jwt");
+        var jwtSection = configuration.GetSection("Jwt");
         var secretKey = jwtSection["SecretKey"];
         var issuer = jwtSection["Issuer"];
         var audience = jwtSection["Audience"];
@@ -64,7 +56,7 @@ public class JwtTokenService : IJwtTokenService
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        _logger.LogInformation("JWT token generated for user: {UserName}, expires: {Expiry}",
+        logger.LogInformation("JWT token generated for user: {UserName}, expires: {Expiry}",
             userName, DateTime.UtcNow.AddMinutes(expiryMinutes));
 
         return tokenString;
@@ -74,14 +66,14 @@ public class JwtTokenService : IJwtTokenService
     {
         try
         {
-            var jwtSection = _configuration.GetSection("Jwt");
+            var jwtSection = configuration.GetSection("Jwt");
             var secretKey = jwtSection["SecretKey"];
             var issuer = jwtSection["Issuer"];
             var audience = jwtSection["Audience"];
 
             if (string.IsNullOrEmpty(secretKey))
             {
-                _logger.LogError("JWT SecretKey is not configured");
+                logger.LogError("JWT SecretKey is not configured");
                 return null;
             }
 
@@ -105,7 +97,7 @@ public class JwtTokenService : IJwtTokenService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "JWT token validation failed");
+            logger.LogWarning(ex, "JWT token validation failed");
             return null;
         }
     }

@@ -21,7 +21,7 @@ public abstract record Result<T>
     }
 
 
-    public static Result<T> Failure(string errorMessage, Exception? error)
+    public static Result<T> Failure(string errorMessage, Exception? error = null)
     {
         return new FailureResult<T>(new GenericDomainException(errorMessage, error));
     }
@@ -62,28 +62,18 @@ public abstract record Result<T>
     }
 }
 
-internal record SuccessResult<T> : Result<T>
+internal record SuccessResult<T>(T Value) : Result<T>
 {
-    public SuccessResult(T value)
-    {
-        Value = value;
-    }
-
     public override bool IsSuccess => true;
-    public override T Value { get; }
+    public override T Value { get; } = Value;
     public override DomainException Error => throw new InvalidOperationException("Success result has no error");
 }
 
-internal record FailureResult<T> : Result<T>
+internal record FailureResult<T>(DomainException Error) : Result<T>
 {
-    public FailureResult(DomainException error)
-    {
-        Error = error;
-    }
-
     public override bool IsSuccess => false;
     public override T Value => throw new InvalidOperationException("Failure result has no value");
-    public override DomainException Error { get; }
+    public override DomainException Error { get; } = Error;
 }
 
 public static class Result

@@ -4,8 +4,6 @@ using MCP.Infrastructure.Repositories;
 using MCP.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
 namespace MCP.Infrastructure.Configuration;
@@ -27,6 +25,7 @@ public static class ServiceCollectionExtensions
         // Register CopilotServiceOptions from configuration
         services.Configure<CopilotServiceOptions>(configuration.GetSection("CopilotService"));
 
+        services.AddSingleton<CopilotServiceState>();
         // Register CopilotService with HttpClient
         services.AddHttpClient<ICopilotService, CopilotService>();
 

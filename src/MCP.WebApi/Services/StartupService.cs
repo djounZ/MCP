@@ -9,18 +9,13 @@ namespace MCP.WebApi.Services;
 /// <summary>
 /// Service that handles startup operations for the Web API
 /// </summary>
-public class StartupService : IDisposable
+public class StartupService(ICopilotService copilotService, ILogger<StartupService> logger)
+    : IDisposable
 {
-    private readonly ICopilotService _copilotService;
-    private readonly ILogger<StartupService> _logger;
+    private readonly ICopilotService _copilotService = copilotService ?? throw new ArgumentNullException(nameof(copilotService));
+    private readonly ILogger<StartupService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private HttpListener? _httpListener;
     private readonly TaskCompletionSource<bool> _authenticationCompleted = new();
-
-    public StartupService(ICopilotService copilotService, ILogger<StartupService> logger)
-    {
-        _copilotService = copilotService ?? throw new ArgumentNullException(nameof(copilotService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
 
     /// <summary>
     /// Initializes the application by registering device and opening verification URI
@@ -28,9 +23,10 @@ public class StartupService : IDisposable
     /// <returns>Task representing the initialization operation</returns>
     public async Task InitializeAsync()
     {
-        if (_copilotService.IsDeviceRegistered)
+        if (_copilotService.HasAccessToken)
         {
             _logger.LogInformation("Device is already registered. Skipping device registration.");
+            await GetAccessToken();
             return;
         }
 
@@ -72,6 +68,16 @@ public class StartupService : IDisposable
             _logger.LogError(ex, "An error occurred during device registration");
             throw;
         }
+    }
+
+    private async Task GetAccessToken()
+    {
+        var accessTokenAsync = await _copilotService.GetAccessTokenAsync();
+        if (!accessTokenAsync.IsSuccess)
+        {
+            throw new InvalidOperationException("Failed to get access token.",accessTokenAsync.Error);
+        }
+        return;
     }
 
     /// <summary>
@@ -413,7 +419,7 @@ public class StartupService : IDisposable
         var port = 8081; // Start with a default port
         var maxAttempts = 10;
 
-        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
             try
             {
@@ -526,6 +532,8 @@ public class StartupService : IDisposable
             if (result)
             {
                 _logger.LogInformation("User confirmed authentication completion");
+
+                await GetAccessToken();
             }
         }
         finally

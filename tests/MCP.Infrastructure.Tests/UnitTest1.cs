@@ -1,10 +1,9 @@
 ﻿using MCP.Application.Interfaces;
 using MCP.Infrastructure.Services;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
-namespace MCP.Infrastructure.Tests.Unit;
+namespace MCP.Infrastructure.Tests;
 
 /// <summary>
 ///     Unit tests for CopilotService (isolated, no external dependencies)
@@ -18,7 +17,7 @@ public class CopilotServiceUnitTests
         // Arrange & Act & Assert
         var options = Microsoft.Extensions.Options.Options.Create(new CopilotServiceOptions());
         var logger = NullLogger<CopilotService>.Instance;
-        Assert.Throws<ArgumentNullException>(() => new CopilotService(null!, options, logger));
+        Assert.Throws<ArgumentNullException>(() => new CopilotService(null!, options, logger, new CopilotServiceState(NullLogger<CopilotServiceState>.Instance)));
     }
 
     [Fact]
@@ -31,7 +30,7 @@ public class CopilotServiceUnitTests
 
         // Act
         var logger = NullLogger<CopilotService>.Instance;
-        using var service = new CopilotService(httpClient, options, logger);
+        using var service = new CopilotService(httpClient, options, logger, new CopilotServiceState(NullLogger<CopilotServiceState>.Instance));
 
         // Assert
         Assert.NotNull(service);
@@ -47,7 +46,7 @@ public class CopilotServiceUnitTests
         using var httpClient = new HttpClient();
         var options = Microsoft.Extensions.Options.Options.Create(new CopilotServiceOptions());
         var logger = NullLogger<CopilotService>.Instance;
-        var service = new CopilotService(httpClient, options, logger);
+        var service = new CopilotService(httpClient, options, logger, new CopilotServiceState(NullLogger<CopilotServiceState>.Instance));
 
         // Act & Assert
         var exception = Record.Exception(() => service.Dispose());
@@ -62,7 +61,7 @@ public class CopilotServiceUnitTests
         using var httpClient = new HttpClient();
         var options = Microsoft.Extensions.Options.Options.Create(new CopilotServiceOptions());
         var logger = NullLogger<CopilotService>.Instance;
-        var service = new CopilotService(httpClient, options, logger);
+        var service = new CopilotService(httpClient, options, logger, new CopilotServiceState(NullLogger<CopilotServiceState>.Instance));
 
         // Act & Assert
         var exception1 = Record.Exception(() => service.Dispose());

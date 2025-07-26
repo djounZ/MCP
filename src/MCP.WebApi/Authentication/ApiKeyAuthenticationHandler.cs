@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace MCP.WebApi.Extensions;
+namespace MCP.WebApi.Authentication;
 
 /// <summary>
 ///     Options for API Key authentication
@@ -16,17 +16,13 @@ public class ApiKeyAuthenticationSchemeOptions : AuthenticationSchemeOptions
 /// <summary>
 ///     Authentication handler for API Key authentication
 /// </summary>
-public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationSchemeOptions>
+public class ApiKeyAuthenticationHandler(
+    IOptionsMonitor<ApiKeyAuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder)
+    : AuthenticationHandler<ApiKeyAuthenticationSchemeOptions>(options, logger, encoder)
 {
     private const string ApiKeyHeaderName = "X-API-Key";
-
-    public ApiKeyAuthenticationHandler(
-        IOptionsMonitor<ApiKeyAuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder)
-        : base(options, logger, encoder)
-    {
-    }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {

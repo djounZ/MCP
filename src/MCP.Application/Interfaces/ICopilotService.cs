@@ -14,9 +14,10 @@ public interface ICopilotService
     /// <param name="prompt">The code prompt</param>
     /// <param name="language">Programming language (default: python)</param>
     /// <returns>Generated code completion or error</returns>
-    Task<Result<string>> GetCompletionAsync(string prompt, string language = "python");
+    public Task<Result<string>> GetCompletionAsync(string prompt, string language = "python");
 
-    Task<Result<CopilotDeviceCodeResponse>> RegisterDeviceAsync();
+    public Task<Result<CopilotDeviceCodeResponse>> RegisterDeviceAsync();
+    public Task<Result<Unit>> GetAccessTokenAsync();
 
-    bool IsDeviceRegistered { get; }
+    public bool HasAccessToken { get; }
 }

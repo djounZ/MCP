@@ -31,35 +31,18 @@ public class GenericDomainException : DomainException
 /// <summary>
 ///     Exception thrown when a domain entity is not found
 /// </summary>
-public class EntityNotFoundException : DomainException
-{
-    public EntityNotFoundException(string entityName, object id)
-        : base($"Entity '{entityName}' with id '{id}' was not found.")
-    {
-    }
-}
+public class EntityNotFoundException(string entityName, object id)
+    : DomainException($"Entity '{entityName}' with id '{id}' was not found.");
 
 /// <summary>
 ///     Exception thrown when a domain business rule is violated
 /// </summary>
-public class BusinessRuleViolationException : DomainException
-{
-    public BusinessRuleViolationException(string rule)
-        : base($"Business rule violation: {rule}")
-    {
-    }
-}
+public class BusinessRuleViolationException(string rule) : DomainException($"Business rule violation: {rule}");
 
 /// <summary>
 ///     Exception thrown when an authentication or authorization error occurs
 /// </summary>
-public class AuthenticationException : DomainException
-{
-    public AuthenticationException(string message)
-        : base($"Authentication failed: {message}")
-    {
-    }
-}
+public class AuthenticationException(string message) : DomainException($"Authentication failed: {message}");
 
 /// <summary>
 ///     Exception thrown when a network or external service error occurs
@@ -100,13 +83,8 @@ public class ConfigurationException : DomainException
 /// <summary>
 ///     Exception thrown when a validation error occurs
 /// </summary>
-public class ValidationException : DomainException
+public class ValidationException(string propertyName, string message)
+    : DomainException($"Validation failed for '{propertyName}': {message}")
 {
-    public string PropertyName { get; }
-
-    public ValidationException(string propertyName, string message)
-        : base($"Validation failed for '{propertyName}': {message}")
-    {
-        PropertyName = propertyName;
-    }
+    public string PropertyName { get; } = propertyName;
 }

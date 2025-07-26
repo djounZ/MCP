@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using Xunit.Abstractions;
 using CopilotServiceOptions = MCP.Infrastructure.Options.CopilotServiceOptions;
 
-namespace MCP.Infrastructure.Tests.Integration;
+namespace MCP.Infrastructure.Tests;
 
 /// <summary>
 ///     Integration tests for CopilotService
@@ -51,7 +51,7 @@ public class CopilotServiceIntegrationTests : IDisposable
             {
                 var options = sp.GetRequiredService<IOptions<CopilotServiceOptions>>();
                 var logger = NullLogger<CopilotService>.Instance;
-                return new CopilotService(httpClient, options, logger);
+                return new CopilotService(httpClient, options, logger, new CopilotServiceState(NullLogger<CopilotServiceState>.Instance));
             });
 
         _serviceProvider = services.BuildServiceProvider();

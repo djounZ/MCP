@@ -1,7 +1,7 @@
 # MCP - .NET 9 Clean Architecture with Functional Error Handling & Security
 
 A production-ready .NET 9 solution following Clean Architecture principles with modern functional programming patterns,
-comprehensive security, and minimal APIs for high performance.
+comprehensive security, and minimal APIs for high performance. Updated: July 26, 2025.
 
 ## 🏗️ Architecture
 
@@ -24,6 +24,7 @@ This project implements Clean Architecture with functional programming patterns 
 - **🧪 Comprehensive Testing** - Unit and integration tests with high coverage
 - **🔒 Type Safety** - Strong typing with nullable reference types
 - **🚀 .NET 9** - Latest .NET features and performance improvements
+- **🔍 API Documentation** - OpenAPI/Swagger with security definitions
 
 ## 📁 Project Structure
 
@@ -183,14 +184,15 @@ public static class CopilotEndpointsExtensions
 
 ### Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) or [VS Code](https://code.visualstudio.com/)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) (latest version)
+- [Visual Studio 2022+](https://visualstudio.microsoft.com/) or [VS Code](https://code.visualstudio.com/)
+- [.NET CLI](https://docs.microsoft.com/en-us/dotnet/core/tools/) for command-line operations
 
 ### Building the Solution
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/djounZ/MCP.git
 cd MCP
 
 # Restore dependencies
@@ -237,24 +239,27 @@ dotnet test tests/MCP.Domain.Tests
 ### Core Dependencies
 
 - **.NET 9.0** - Latest .NET framework with performance improvements
-- **ASP.NET Core** - Web framework for minimal APIs
+- **ASP.NET Core 9.0** - Web framework for minimal APIs
 - **Microsoft.AspNetCore.Authentication.JwtBearer** - JWT authentication
 - **System.IdentityModel.Tokens.Jwt** - JWT token handling
 - **Microsoft.Extensions.Logging** - Structured logging with ILogger<T>
 - **Microsoft.Extensions.Options** - Configuration options pattern
 - **System.Text.Json** - High-performance JSON serialization
+- **Microsoft.AspNetCore.OpenApi** - OpenAPI documentation
 
 ### Security Dependencies
 
 - **Microsoft.IdentityModel.Tokens** - Token validation and security
 - **Rate Limiting** - Built-in .NET 9 rate limiting middleware
 - **Authentication Middleware** - Custom API key authentication handlers
+- **Microsoft.AspNetCore.Authorization** - Role-based authorization
 
 ### Testing
 
 - **xUnit** - Modern testing framework
 - **Microsoft.AspNetCore.Mvc.Testing** - Integration testing support
 - **Microsoft.Extensions.Logging.Abstractions** - NullLogger for testing
+- **FluentAssertions** - Expressive assertion library
 
 ### Development Tools
 
@@ -484,6 +489,14 @@ public async Task GetCompletion_WithInvalidApiKey_ShouldReturnUnauthorized()
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📚 Documentation
+
+For detailed documentation, see the [docs](docs/) directory:
+
+- [Architecture Overview](docs/architecture.md)
+- [Functional Programming Patterns](docs/functional-patterns.md)
+- [Security Guide](docs/security.md)
 
 ## 🤝 Support
 

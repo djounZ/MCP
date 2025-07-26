@@ -1,6 +1,6 @@
 # Documentation
 
-This folder contains all project documentation for the MCP Clean Architecture project with functional programming patterns and comprehensive security.
+This folder contains all project documentation for the MCP Clean Architecture project with functional programming patterns and comprehensive security. Last updated: July 26, 2025.
 
 ## Files
 
@@ -11,6 +11,7 @@ This folder contains all project documentation for the MCP Clean Architecture pr
 - **functional-patterns.md** - Result monad usage and functional programming guidelines
 - **error-handling.md** - Error handling strategies and best practices
 - **security.md** - Comprehensive security guide (JWT, API Keys, Rate Limiting, Authorization)
+- **versioning.md** - Package versioning strategy with Directory.Build.props
 
 ## Key Topics Covered
 
@@ -41,3 +42,16 @@ This folder contains all project documentation for the MCP Clean Architecture pr
 - Request/response models with validation
 - OpenAPI/Swagger documentation
 - Authentication and authorization examples
+
+## Getting Started
+
+For the complete project overview, start with [architecture.md](architecture.md) to understand the overall structure and design principles.
+
+For information about error handling and the Result pattern, see [functional-patterns.md](functional-patterns.md).
+
+For security implementation details, see [security.md](security.md).
+
+## Related Resources
+
+- [Main README](../README.md) - Project overview and getting started
+- [Scripts README](../scripts/README.md) - Build and deployment scripts

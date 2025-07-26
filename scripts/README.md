@@ -1,6 +1,6 @@
 # Build Scripts
 
-This folder contains build, test, and deployment scripts for the MCP Clean Architecture project with security features.
+This folder contains build, test, and deployment scripts for the MCP Clean Architecture project with security features. Last updated: July 26, 2025.
 
 ## Available Scripts
 
@@ -11,6 +11,7 @@ This folder contains build, test, and deployment scripts for the MCP Clean Archi
 - **deploy.ps1** - Deployment script with environment and security validation
 - **lint.ps1** - Code quality and formatting checks
 - **security-scan.ps1** - Security vulnerability scanning (NuGet packages, secrets)
+- **version-update.ps1** - Update centralized package versions in Directory.Build.props
 
 ## Usage
 
@@ -36,6 +37,9 @@ This folder contains build, test, and deployment scripts for the MCP Clean Archi
 
 # Run security vulnerability scan
 .\scripts\security-scan.ps1
+
+# Update package versions
+.\scripts\version-update.ps1 -Package "System.IdentityModel.Tokens.Jwt" -Version "8.14.0"
 ```
 
 ### Linux/macOS (Bash)
@@ -88,9 +92,13 @@ This folder contains build, test, and deployment scripts for the MCP Clean Archi
 - Database migration with Result<T> error handling
 - Health check validation
 - Parallel test execution
-
-### Deployment Scripts
-- Environment-specific configuration
-- Database migration (if applicable)
-- Health check validation
 - Rollback capabilities
+
+## Continuous Integration
+
+These scripts are designed to be used with GitHub Actions, Azure DevOps, or other CI/CD platforms. Sample workflow configuration files are available in the `.github/workflows` directory.
+
+## Related Resources
+
+- [Main README](../README.md) - Project overview and getting started
+- [Documentation](../docs/README.md) - Full project documentation

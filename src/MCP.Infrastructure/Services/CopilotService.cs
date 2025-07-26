@@ -104,7 +104,7 @@ public sealed class CopilotService : ICopilotService, IDisposable
             grant_type = "urn:ietf:params:oauth:grant-type:device_code"
         };
 
-        var requestAsync = await SendPostRequestAsync<object,GithubAccessTokenResponse>(_options.AccessTokenUrl, tokenRequestData, headers);
+        var requestAsync = await SendPostRequestAsync<object,GithubAccessTokenResponse>(_options.GithubTokenUrl, tokenRequestData, headers);
         return await requestAsync.MatchAsync(
             onSuccess:  async response => await _state.SetAccessToken(response),
             onFailure: error => Result.Failure<Unit>($"Failed to get access token: {error}")
@@ -177,7 +177,7 @@ public sealed class CopilotService : ICopilotService, IDisposable
             };
 
             var tokenResponseResult =
-                await SendPostRequestAsync(_options.AccessTokenUrl, tokenRequestData, headers);
+                await SendPostRequestAsync(_options.GithubTokenUrl, tokenRequestData, headers);
             if (tokenResponseResult.IsFailure)
             {
                 continue; // Keep trying
@@ -316,7 +316,7 @@ public sealed class CopilotService : ICopilotService, IDisposable
 
         try
         {
-            var responseResult = await SendGetRequestAsync(_options.TokenUrl, headers);
+            var responseResult = await SendGetRequestAsync(_options.GithubCopilotTokenUrl, headers);
             if (responseResult.IsFailure)
             {
                 return Result.Failure<Unit>($"Failed to get token: {responseResult.Error}");

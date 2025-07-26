@@ -32,8 +32,8 @@ public class CopilotServiceIntegrationTests : IDisposable
         {
             options.ClientId = "Iv1.b507a08c87ecfe98";
             options.DeviceCodeUrl = "https://github.com/login/device/code";
-            options.AccessTokenUrl = "https://github.com/login/oauth/access_token";
-            options.TokenUrl = "https://api.github.com/copilot_internal/v2/token";
+            options.GithubTokenUrl = "https://github.com/login/oauth/access_token";
+            options.GithubCopilotTokenUrl = "https://api.github.com/copilot_internal/v2/token";
             options.CompletionUrl = "https://copilot-proxy.githubusercontent.com/v1/engines/copilot-codex/completions";
             options.EditorVersion = "Neovim/0.6.1";
             options.EditorPluginVersion = "copilot.vim/1.16.0";

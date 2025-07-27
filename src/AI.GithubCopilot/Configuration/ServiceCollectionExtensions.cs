@@ -18,13 +18,20 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddGithubCopilot(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<GithubOptions>(configuration.GetSection(nameof(GithubOptions)));
+        services.TryAddTransient<GithubCopilotTokenAuthorizationHandler>();
+        services.TryAddTransient<GithubCopilotChatAuthorizationHandler>();
         services.TryAddTransient<HttpListener>();
         services.TryAddTransient<TaskCompletionSource<bool>>();
         services.TryAddSingleton<HttpClientRunner>();
         services.TryAddSingleton<EncryptedEnvironment>();
         services.TryAddSingleton<GithubAccessTokenStore>();
+        services.TryAddSingleton<GithubCopilotAccessTokenStore>();
         services.TryAddTransient<GithubAuthenticator>();
         services.AddHttpClient<GithubAccessTokenProvider>();
+        services.AddHttpClient<GithubCopilotTokenProvider>()
+            .AddHttpMessageHandler<GithubCopilotTokenAuthorizationHandler>();
+        services.AddHttpClient<GithubCopilotChat>()
+            .AddHttpMessageHandler<GithubCopilotChatAuthorizationHandler>();
         return services;
     }
 }

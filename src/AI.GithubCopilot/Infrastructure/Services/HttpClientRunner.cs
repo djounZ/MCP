@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
@@ -7,6 +8,20 @@ namespace AI.GithubCopilot.Infrastructure.Services;
 
 public sealed class HttpClientRunner
 {
+
+    public async  Task<TOut> SendAsyncAndDeserialize<TOut>(
+        HttpClient client,
+        HttpMethod method,
+        [StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri,
+        Dictionary<string, string> headers,
+        HttpCompletionOption completionOption,
+        JsonSerializerOptions? options,
+        CancellationToken cancellationToken)
+    {
+        using var request = CreateHttpRequestMessage(method, requestUri, headers);
+        using var response = await client.SendAsync(request, completionOption, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await ReadContentAsync<TOut>(options, cancellationToken, response);    }
 
     public async  Task<TOut> SendAsyncAndDeserialize<TIn,TOut>(
         TIn requestContent,
@@ -24,6 +39,28 @@ public sealed class HttpClientRunner
         response.EnsureSuccessStatusCode();
         return await ReadContentAsync<TOut>(options, cancellationToken, response);
     }
+
+    public async  IAsyncEnumerable<StreamItem<TOut>> SendAsyncAndReadStream<TIn,TOut>(
+        TIn requestContent,
+        HttpClient client,
+        HttpMethod method,
+        [StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri,
+        Dictionary<string, string> headers,
+        HttpCompletionOption completionOption,
+        JsonSerializerOptions? options,
+        [EnumeratorCancellation] CancellationToken cancellationToken,
+        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync)
+    {
+
+        using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options);
+        using var response = await client.SendAsync(request, completionOption, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        await foreach (var line in ReadContentStreamAsync(cancellationToken, response, contentReaderAsync))
+        {
+            yield return line;
+        }
+    }
+
     private static HttpRequestMessage CreateHttpRequestMessage<TIn>(HttpMethod method, string? requestUri,
         TIn requestContent, Dictionary<string, string> headers, JsonSerializerOptions? options)
     {
@@ -39,6 +76,27 @@ public sealed class HttpClientRunner
 
             var json = JsonSerializer.Serialize(requestContent, options);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            return request;
+        }
+        catch
+        {
+            request?.Dispose();
+            throw;
+        }
+    }
+
+    private static HttpRequestMessage CreateHttpRequestMessage(HttpMethod method, string? requestUri,
+        Dictionary<string, string> headers)
+    {
+        HttpRequestMessage? request = null;
+        try
+        {
+            request = new HttpRequestMessage(method, requestUri);
+
+            foreach (var (name, value) in headers)
+            {
+                request.Headers.Add(name, value);
+            }
             return request;
         }
         catch
@@ -64,6 +122,20 @@ public sealed class HttpClientRunner
         {
             var result = await JsonSerializer.DeserializeAsync<TOut>(responseStream, options, cancellationToken);
             return result!;
+        }
+    }
+
+    private static async IAsyncEnumerable<StreamItem<TOut>> ReadContentStreamAsync<TOut>(
+        [EnumeratorCancellation] CancellationToken cancellationToken,
+        HttpResponseMessage response,
+        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync)
+    {
+        await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var reader = new StreamReader(responseStream);
+
+        while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
+        {
+            yield return await contentReaderAsync(reader,cancellationToken);
         }
     }
 

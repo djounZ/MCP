@@ -35,10 +35,15 @@
         <MicrosoftNETTestSdkVersion>17.12.0</MicrosoftNETTestSdkVersion>
         <MicrosoftCodeAnalysisAnalyzersVersion>3.3.4</MicrosoftCodeAnalysisAnalyzersVersion>
         <MicrosoftExtensionsAIAbstractions>9.7.1</MicrosoftExtensionsAIAbstractions>
+        <MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>9.0.7</MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>
+        <MicrosoftExtensionsConfigurationFileExtensionsVersion>9.0.7</MicrosoftExtensionsConfigurationFileExtensionsVersion>
+        <MicrosoftExtensionsConfigurationJsonVersion>9.0.7</MicrosoftExtensionsConfigurationJsonVersion>
         <!-- Testing packages -->
         <XunitVersion>2.9.2</XunitVersion>
         <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
         <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
+        <NSubstituteVersion>5.1.0</NSubstituteVersion>
+        <FluentAssertionsVersion>6.12.0</FluentAssertionsVersion>
         <!-- JWT & Auth packages -->
         <SystemIdentityModelTokensJwtVersion>8.13.0</SystemIdentityModelTokensJwtVersion>
         <MicrosoftIdentityModelTokensVersion>8.13.0</MicrosoftIdentityModelTokensVersion>

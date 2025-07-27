@@ -5,17 +5,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="$(CoverletCollectorVersion)"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)"/>
-        <PackageReference Include="xunit" Version="$(XunitVersion)"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)"/>
-        <PackageReference Include="NSubstitute" Version="5.1.0" />
-        <PackageReference Include="FluentAssertions" Version="6.12.0" />
+        <PackageReference Include="coverlet.collector" Version="$(CoverletCollectorVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsConfigurationEnvironmentVariablesVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="$(MicrosoftExtensionsConfigurationFileExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsConfigurationJsonVersion)" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+        <PackageReference Include="xunit" Version="$(XunitVersion)" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)" />
+        <PackageReference Include="NSubstitute" Version="$(NSubstituteVersion)" />
+        <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="Xunit"/>
-        <Using Include="FluentAssertions"/>
+        <Using Include="Xunit" />
+        <Using Include="FluentAssertions" />
     </ItemGroup>
 
     <ItemGroup>

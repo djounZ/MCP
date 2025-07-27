@@ -21,4 +21,6 @@ public sealed class GithubAccessTokenStore(EncryptedEnvironment encryptedEnviron
                 cancellationToken);
         return !string.IsNullOrEmpty(_githubAccessTokenResponse?.AccessToken);
     }
+
+    public string AccessToken => _githubAccessTokenResponse!.AccessToken;
 }

@@ -10,12 +10,3 @@ public record GithubAccessTokenResponse
 
     [JsonPropertyName("scope")] public string Scope { get; set; } = string.Empty;
 }
-
-public record GithubAccessTokenRequest
-{
-    [JsonPropertyName("client_id")] public string ClientId { get; init; } = string.Empty;
-
-    [JsonPropertyName("device_code")] public string DeviceCode { get; init; } = string.Empty;
-
-    [JsonPropertyName("grant_type")] public string GrantType { get; init; } = string.Empty;
-}

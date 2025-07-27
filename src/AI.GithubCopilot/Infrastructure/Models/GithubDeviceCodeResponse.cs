@@ -19,12 +19,3 @@ public class GithubDeviceCodeResponse
     [JsonPropertyName("interval")]
     public int Interval { get; set; }
 }
-
-public class GithubDeviceCodeRequest
-{
-    [JsonPropertyName("client_id")]
-    public string ClientId { get; init; } = string.Empty;
-
-    [JsonPropertyName("scope")]
-    public string Scope { get; init; } = string.Empty;
-}

@@ -37,13 +37,7 @@ public sealed class GithubAccessTokenProvider(
     {
         var request = new GithubDeviceCodeRequest
         {
-            ClientId = Options.ClientId, Scope = Options.Scope
-        };
-
-        var headers = new Dictionary<string, string>(Options.Headers)
-        {
-
-            [HeaderKeys.Accept] = "application/json"
+            ClientId = Options.ClientId, Scope = Options.DeviceScope
         };
 
         var response =
@@ -52,7 +46,7 @@ public sealed class GithubAccessTokenProvider(
                 httpClient,
                 HttpMethod.Post,
                 Options.DeviceCodeUrl,
-                headers,
+                Options.DeviceCodeHeaders,
                 HttpCompletionOption.ResponseHeadersRead,
                 null,
                 cancellationToken);
@@ -68,22 +62,16 @@ public sealed class GithubAccessTokenProvider(
         {
             ClientId = Options.ClientId,
             DeviceCode = githubDeviceCodeResponse.DeviceCode,
-            GrantType = Options.GrantType
+            TokenGrantType = Options.GrantType
         };
 
-
-        var headers = new Dictionary<string, string>(Options.Headers)
-        {
-
-            [HeaderKeys.Accept] = "application/json"
-        };
         var response =
             await httpClientRunner.SendAsyncAndDeserialize<GithubAccessTokenRequest, GithubAccessTokenResponse>(
                 request,
                 httpClient,
                 HttpMethod.Post,
                 Options.TokenUrl,
-                headers,
+                Options.TokenHeaders,
                 HttpCompletionOption.ResponseHeadersRead,
                 null,
                 cancellationToken);

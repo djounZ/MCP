@@ -6,9 +6,12 @@ namespace AI.GithubCopilot.Infrastructure.Models;
 /// Individual choice in the completion response
 /// </summary>
 public record CompletionChoice(
-    [property: JsonPropertyName("message")] ResponseMessage? Message,
-    [property: JsonPropertyName("delta")] MessageDelta? Delta,
-    [property: JsonPropertyName("finish_reason")] string? FinishReason,
-    [property: JsonPropertyName("done_reason")] string? DoneReason,
-    [property: JsonPropertyName("usage")] TokenUsage? Usage
+    [property: JsonPropertyName("index")] int Index,
+    [property: JsonPropertyName("delta")] MessageDelta? Delta = null,
+    [property: JsonPropertyName("finish_reason")] string? FinishReason = null,
+    [property: JsonPropertyName("content_filter_results")] ContentFilterResults? ContentFilterResults = null,
+    [property: JsonPropertyName("content_filter_offsets")] ContentFilterOffsets? ContentFilterOffsets = null,
+    [property: JsonPropertyName("message")] ResponseMessage? Message = null,
+    [property: JsonPropertyName("done_reason")] string? DoneReason = null,
+    [property: JsonPropertyName("usage")] TokenUsage? Usage = null
 );

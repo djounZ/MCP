@@ -39,11 +39,9 @@ public static class ChatResponseProcessor
         // Get usage information
         int? totalTokens = message?.Usage?.TotalTokens ?? response.Usage?.TotalTokens;
 
-        // Get finish reason
+        // Get finish reason from the first choice
         string? finishReason = message?.FinishReason ?? 
-                               message?.DoneReason ?? 
-                               response.FinishReason ?? 
-                               response.DoneReason;
+                               message?.DoneReason;
 
         return new ProcessedChatResponse(
             Content: content,

@@ -16,5 +16,15 @@ public record ChatCompletionRequest(
     [property: JsonPropertyName("presence_penalty")] double? PresencePenalty = null,
     [property: JsonPropertyName("stop")] IReadOnlyList<string>? Stop = null,
     [property: JsonPropertyName("user")] string? User = null,
-    [property: JsonPropertyName("n")] int? N = null
+    [property: JsonPropertyName("n")] int? N = null,
+    
+    // Additional properties from GitHub Copilot API
+    [property: JsonPropertyName("logit_bias")] Dictionary<string, double>? LogitBias = null,
+    [property: JsonPropertyName("logprobs")] bool? LogProbs = null,
+    [property: JsonPropertyName("top_logprobs")] int? TopLogProbs = null,
+    [property: JsonPropertyName("response_format")] ResponseFormat? ResponseFormat = null,
+    [property: JsonPropertyName("seed")] int? Seed = null,
+    [property: JsonPropertyName("tools")] IReadOnlyList<Tool>? Tools = null,
+    [property: JsonPropertyName("tool_choice")] ToolChoice? ToolChoice = null,
+    [property: JsonPropertyName("parallel_tool_calls")] bool? ParallelToolCalls = null
 );

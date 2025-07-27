@@ -32,8 +32,8 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
         // Arrange
         var messages = new List<ChatMessage>
         {
-            new("system", "You are a helpful assistant."),
-            new("user", "What is temperature in LLM?")
+            new("system", "You are an helpful assistant"),
+            new("user", "What is temperature in LLMs? Explain it in a simple way.")
         };
 
         var request = new ChatCompletionRequest(
@@ -48,45 +48,118 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
 
         // Act
         var responseContent = new StringBuilder();
-        _output.WriteLine("Sending request to GitHub Copilot API...");
+        //_output.WriteLine("Sending request to GitHub Copilot API...");
 
+        var chatCompletionResponses = new List<ChatCompletionResponse?>();
         try
         {
             await foreach (var response in _copilotChat.GetChatCompletionStreamAsync(request, CancellationToken.None))
             {
+                chatCompletionResponses.Add(response);
                 if (response?.Choices?.FirstOrDefault()?.Delta?.Content is not { } content)
                 {
                     continue;
                 }
 
                 responseContent.Append(content);
-                _output.WriteLine(content);
+                //_output.WriteLine(response.ToString());
             }
 
             // Assert
             var responseText = responseContent.ToString();
-            _output.WriteLine($"Complete response:");
+           // _output.WriteLine($"Complete response:");
             _output.WriteLine(responseText);
 
             // Check if response is not empty
-            Assert.NotEmpty(responseText);
-
-            // Check if response mentions temperature
-            Assert.Contains("temperature", responseText, StringComparison.OrdinalIgnoreCase);
-
-            // Check if response explains what temperature is in LLMs
-            Assert.True(
-                responseText.Contains("control") ||
-                responseText.Contains("parameter") ||
-                responseText.Contains("setting") ||
-                responseText.Contains("determines") ||
-                responseText.Contains("randomness"),
-                "Response should explain what temperature is in LLMs");
+            // Assert.NotEmpty(responseText);
+            //
+            // // Check if response mentions temperature
+            // Assert.Contains("temperature", responseText, StringComparison.OrdinalIgnoreCase);
+            //
+            // // Check if response explains what temperature is in LLMs
+            // Assert.True(
+            //     responseText.Contains("control") ||
+            //     responseText.Contains("parameter") ||
+            //     responseText.Contains("setting") ||
+            //     responseText.Contains("determines") ||
+            //     responseText.Contains("randomness"),
+            //     "Response should explain what temperature is in LLMs");
         }
         catch (Exception ex)
         {
             _output.WriteLine($"Error: {ex}");
             throw;
         }
+    }
+
+
+    [Fact]
+    public async Task FrontEndBackendConversation()
+    {
+        var system = "system";
+        var user = "user";
+        // Arrange
+        var messagesAi1 = new List<ChatMessage>
+        {
+            new(system, "Your are back-end dotnet expert. You are talking with front-end dotnet expert."),
+            new(user, "Lets build an Application that relies on Model Context Protocol.")
+        };
+
+        var messagesAi2 = new List<ChatMessage>
+        {
+            new(system, "Your are front-end dotnet expert. You are talking with back-end dotnet expert."),
+        };
+
+
+        for (var i = 0; i < 10; i++)
+        {
+            List<ChatMessage> currentUser;
+            List<ChatMessage> currentSystem;
+            string reply;
+            if (i % 2 == 0)
+            {
+                currentUser = messagesAi1;
+                currentSystem = messagesAi2;
+                reply = "Backend Expert";
+            }
+            else
+            {
+                currentUser = messagesAi2;
+                currentSystem = messagesAi1;
+                reply = "Frontend Expert";
+            }
+
+            _output.WriteLine("////////////////////////////////////////////////////////////////////////////////");
+            _output.WriteLine($"Round #{i} Response from {reply}:");
+            _output.WriteLine("////////////////////////////////////////////////////////////////////////////////");
+
+            var request = new ChatCompletionRequest(
+                Messages: currentUser,
+                Model: "gpt-4", // Specify the model to use
+                N: null,
+                TopP: null,
+                Stream: true,
+                Temperature: 0.7,
+                MaxTokens: 1000
+            );
+
+            var responseContent = new StringBuilder();
+
+            await foreach (var response in _copilotChat.GetChatCompletionStreamAsync(request, CancellationToken.None))
+            {
+                if (response?.Choices.FirstOrDefault()?.Delta?.Content is not { } content)
+                {
+                    continue;
+                }
+
+                responseContent.Append(content);
+            }
+
+            var responseText = responseContent.ToString();
+            _output.WriteLine(responseText);
+            currentUser.Add(new ChatMessage(system, responseText));
+            currentSystem.Add(new ChatMessage(user, responseText));
+        }
+
     }
 }

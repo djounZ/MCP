@@ -13,35 +13,20 @@ public static class ChatResponseProcessor
     {
         var references = new List<CopilotReference>();
 
-        // Extract references from copilot_references
-        if (response.CopilotReferences != null)
-        {
-            foreach (var reference in response.CopilotReferences)
-            {
-                var metadata = reference.Metadata;
-                if (metadata?.DisplayName != null && metadata.DisplayUrl != null)
-                {
-                    references.Add(new CopilotReference(metadata.DisplayName, metadata.DisplayUrl));
-                }
-            }
-        }
+        // Note: CopilotReferences were removed from the updated model
+        // If needed, they should be handled separately or added back
 
         // Get the first choice or fall back to the response itself
-        CompletionChoice? message = null;
-        if (response.Choices?.Count > 0)
-        {
-            message = response.Choices[0];
-        }
+        ChatChoice? choice = response.Choices?.FirstOrDefault();
 
         // Extract content from message or delta
-        string? content = message?.Message?.Content ?? message?.Delta?.Content;
+        string? content = choice?.Message?.Content?.AsText() ?? choice?.Delta?.Content;
 
         // Get usage information
-        int? totalTokens = message?.Usage?.TotalTokens ?? response.Usage?.TotalTokens;
+        int? totalTokens = response.Usage?.TotalTokens;
 
         // Get finish reason from the first choice
-        string? finishReason = message?.FinishReason ?? 
-                               message?.DoneReason;
+        string? finishReason = choice?.FinishReason;
 
         return new ProcessedChatResponse(
             Content: content,

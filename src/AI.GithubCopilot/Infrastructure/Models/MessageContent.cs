@@ -12,6 +12,16 @@ public abstract record MessageContent
     public static implicit operator MessageContent(string text) => new TextContent(text);
     public static MessageContent FromText(string text) => new TextContent(text);
     public static MessageContent Multipart(params ContentPart[] parts) => new MultipartContent(parts);
+    
+    /// <summary>
+    /// Converts content to text string if possible
+    /// </summary>
+    public string? AsText() => this switch
+    {
+        TextContent text => text.Text,
+        MultipartContent multipart => string.Join(" ", multipart.Parts.OfType<TextPart>().Select(p => p.Text)),
+        _ => null
+    };
 }
 
 /// <summary>

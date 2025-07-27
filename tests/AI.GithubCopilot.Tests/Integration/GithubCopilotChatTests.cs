@@ -97,6 +97,7 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
     public async Task FrontEndBackendConversation()
     {
         var system = "system";
+        var assistant = "assistant";
         var user = "user";
         // Arrange
         var messagesAi1 = new List<ChatMessage>
@@ -114,18 +115,18 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
         for (var i = 0; i < 10; i++)
         {
             List<ChatMessage> currentUser;
-            List<ChatMessage> currentSystem;
+            List<ChatMessage> currentAssistant;
             string reply;
             if (i % 2 == 0)
             {
                 currentUser = messagesAi1;
-                currentSystem = messagesAi2;
+                currentAssistant = messagesAi2;
                 reply = "Backend Expert";
             }
             else
             {
                 currentUser = messagesAi2;
-                currentSystem = messagesAi1;
+                currentAssistant = messagesAi1;
                 reply = "Frontend Expert";
             }
 
@@ -157,8 +158,8 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
 
             var responseText = responseContent.ToString();
             _output.WriteLine(responseText);
-            currentUser.Add(new ChatMessage(system, responseText));
-            currentSystem.Add(new ChatMessage(user, responseText));
+            currentUser.Add(new ChatMessage(assistant, responseText));
+            currentAssistant.Add(new ChatMessage(user, responseText));
         }
 
     }

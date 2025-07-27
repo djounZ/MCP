@@ -13,5 +13,5 @@ public record CompletionChoice(
     [property: JsonPropertyName("content_filter_offsets")] ContentFilterOffsets? ContentFilterOffsets = null,
     [property: JsonPropertyName("message")] ResponseMessage? Message = null,
     [property: JsonPropertyName("done_reason")] string? DoneReason = null,
-    [property: JsonPropertyName("usage")] TokenUsage? Usage = null
+    [property: JsonPropertyName("usage")] Usage? Usage = null
 );

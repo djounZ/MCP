@@ -5,7 +5,7 @@ namespace AI.GithubCopilot.Infrastructure.Models;
 /// <summary>
 /// Usage statistics for the completion
 /// </summary>
-public record TokenUsage(
+public record Usage(
     [property: JsonPropertyName("completion_tokens")] int CompletionTokens,
     [property: JsonPropertyName("prompt_tokens")] int PromptTokens,
     [property: JsonPropertyName("total_tokens")] int TotalTokens,

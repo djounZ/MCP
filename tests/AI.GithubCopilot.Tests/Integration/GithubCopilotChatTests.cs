@@ -49,7 +49,7 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
         {
             var chatCompletionAsync = await _copilotChat.GetChatCompletionAsync(request, CancellationToken.None);
            // _output.WriteLine($"Complete response:");
-            _output.WriteLine(chatCompletionAsync);
+            _output.WriteLine(chatCompletionAsync.Choices?[0].Message?.Content?.AsText());
         }
         catch (Exception ex)
         {

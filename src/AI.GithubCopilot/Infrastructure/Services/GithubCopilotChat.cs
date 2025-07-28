@@ -23,13 +23,13 @@ public sealed class GithubCopilotChat(
     };
 
 
-    public async Task<string?> GetChatCompletionAsync(
+    public async Task<ChatCompletionResponse> GetChatCompletionAsync(
         ChatCompletionRequest request,
         CancellationToken cancellationToken)
     {
         // Ensure streaming is disabled
         var streamingRequest = request with { Stream = false };
-        return await httpClientRunner.SendAndReadAsStringAsync(
+        return await httpClientRunner.SendAndDeserializeAsync<ChatCompletionRequest,ChatCompletionResponse>(
             streamingRequest,
             httpClient,
             HttpMethod.Post,

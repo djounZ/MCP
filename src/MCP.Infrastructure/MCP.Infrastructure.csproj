@@ -13,4 +13,9 @@
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(SystemIdentityModelTokensJwtVersion)"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Models\" />
+      <Folder Include="Options\" />
+    </ItemGroup>
+
 </Project>

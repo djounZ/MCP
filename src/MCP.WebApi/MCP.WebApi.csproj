@@ -10,4 +10,8 @@
         <ProjectReference Include="..\MCP.Infrastructure\MCP.Infrastructure.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Services\" />
+    </ItemGroup>
+
 </Project>

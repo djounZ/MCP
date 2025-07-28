@@ -21,8 +21,8 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
         _output = output;
 
         // Register the test output logger provider for this test
-        var loggerFactory = fixture.ServiceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>();
-        loggerFactory.AddProvider(new TestOutputLoggerProvider(_output));
+        // var loggerFactory = fixture.ServiceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>();
+        // loggerFactory.AddProvider(new TestOutputLoggerProvider(_output));
     }
     //[Fact(Skip = "This test requires valid GitHub Copilot credentials")]
     [Fact]

@@ -77,7 +77,7 @@ public class HttpClientRunnerTests
         using (var httpClient = new HttpClient(mockHandler))
         {
             // Run the test within the using scope to ensure proper disposal
-            result = await _runner.SendAsyncAndDeserialize<TestRequest, TestResponse>(
+            result = await _runner.SendAndDeserializeAsync<TestRequest, TestResponse>(
                 DefaultRequestData,
                 httpClient,
                 HttpMethod.Post,
@@ -130,7 +130,7 @@ public class HttpClientRunnerTests
         using (var httpClient = new HttpClient(mockHandler))
         {
             // Run the test within the using scope to ensure proper disposal
-            result = await _runner.SendAsyncAndDeserialize<TestRequest, TestResponse>(
+            result = await _runner.SendAndDeserializeAsync<TestRequest, TestResponse>(
                 DefaultRequestData,
                 httpClient,
                 HttpMethod.Get,
@@ -162,7 +162,7 @@ public class HttpClientRunnerTests
             // Create client inside the delegate to avoid disposal issues
             using var localHttpClient = new HttpClient(mockHandler);
 
-            await _runner.SendAsyncAndDeserialize<TestRequest, TestResponse>(
+            await _runner.SendAndDeserializeAsync<TestRequest, TestResponse>(
                 DefaultRequestData,
                 localHttpClient,
                 HttpMethod.Post,
@@ -197,7 +197,7 @@ public class HttpClientRunnerTests
             using var cts = new CancellationTokenSource();
             await cts.CancelAsync();
 
-            await _runner.SendAsyncAndDeserialize<TestRequest, TestResponse>(
+            await _runner.SendAndDeserializeAsync<TestRequest, TestResponse>(
                 DefaultRequestData,
                 localHttpClient,
                 HttpMethod.Get,
@@ -243,7 +243,7 @@ public class HttpClientRunnerTests
             using var localHttpClient = new HttpClient(mockHandler);
 
             // Store the result to assert later
-            capturedResult = await _runner.SendAsyncAndDeserialize<TestRequest?, TestResponse>(
+            capturedResult = await _runner.SendAndDeserializeAsync<TestRequest?, TestResponse>(
                 null, // Null request data
                 localHttpClient,
                 HttpMethod.Post,
@@ -285,7 +285,7 @@ public class HttpClientRunnerTests
             // Create client inside the delegate to avoid disposal issues
             using var localHttpClient = new HttpClient(mockHandler);
 
-            await _runner.SendAsyncAndDeserialize<TestRequest, TestResponse>(
+            await _runner.SendAndDeserializeAsync<TestRequest, TestResponse>(
                 DefaultRequestData,
                 localHttpClient,
                 HttpMethod.Post,
@@ -313,7 +313,7 @@ public class HttpClientRunnerTests
             // Create client inside the delegate to avoid disposal issues
             using var localHttpClient = new HttpClient(mockHandler);
 
-            await _runner.SendAsyncAndDeserialize<TestRequest, TestResponse>(
+            await _runner.SendAndDeserializeAsync<TestRequest, TestResponse>(
                 DefaultRequestData,
                 localHttpClient,
                 HttpMethod.Get,
@@ -342,7 +342,7 @@ public class HttpClientRunnerTests
             // Create client inside the delegate to avoid disposal issues
             using var localHttpClient = new HttpClient(mockHandler);
 
-            await _runner.SendAsyncAndDeserialize<TestRequest, TestResponse>(
+            await _runner.SendAndDeserializeAsync<TestRequest, TestResponse>(
                 DefaultRequestData,
                 localHttpClient,
                 HttpMethod.Get,

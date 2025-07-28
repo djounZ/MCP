@@ -24,6 +24,39 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
         var loggerFactory = fixture.ServiceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>();
         loggerFactory.AddProvider(new TestOutputLoggerProvider(_output));
     }
+    //[Fact(Skip = "This test requires valid GitHub Copilot credentials")]
+    [Fact]
+    public async Task GetChatCompletionAsync_WithQuestion_ReturnsResponse()
+    {
+        // Arrange
+        var messages = new List<ChatMessage>
+        {
+            new("system", "You are an helpful assistant"),
+            new("user", "What is temperature in LLMs? Explain it in a simple way.")
+        };
+
+        var request = new ChatCompletionRequest(
+            Messages: messages,
+            Model: "gpt-4", // Specify the model to use
+            N: null,
+            TopP: null,
+            Stream: true,
+            Temperature: 0.7,
+            MaxTokens: 1000
+        );
+
+        try
+        {
+            var chatCompletionAsync = await _copilotChat.GetChatCompletionAsync(request, CancellationToken.None);
+           // _output.WriteLine($"Complete response:");
+            _output.WriteLine(chatCompletionAsync);
+        }
+        catch (Exception ex)
+        {
+            _output.WriteLine($"Error: {ex}");
+            throw;
+        }
+    }
 
     /// <summary>
     /// Tests that <see cref="GithubCopilotChat.GetChatCompletionStreamAsync"/> can

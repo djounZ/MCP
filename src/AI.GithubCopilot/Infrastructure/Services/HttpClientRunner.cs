@@ -9,7 +9,40 @@ namespace AI.GithubCopilot.Infrastructure.Services;
 public sealed class HttpClientRunner
 {
 
-    public async  Task<TOut> SendAsyncAndDeserialize<TOut>(
+
+    public async Task<string?> SendAndReadAsStringAsync(
+        HttpClient client,
+        HttpMethod method,
+        [StringSyntax(StringSyntaxAttribute.Uri)]
+        string? requestUri,
+        Dictionary<string, string> headers,
+        HttpCompletionOption completionOption,
+        CancellationToken cancellationToken)
+    {
+        using var request = CreateHttpRequestMessage(method, requestUri, headers);
+        using var response = await client.SendAsync(request, completionOption, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return  await response.Content.ReadAsStringAsync(cancellationToken);
+    }
+
+    public async  Task<string?> SendAndReadAsStringAsync<TIn>(
+        TIn requestContent,
+        HttpClient client,
+        HttpMethod method,
+        [StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri,
+        Dictionary<string, string> headers,
+        HttpCompletionOption completionOption,
+        JsonSerializerOptions? options,
+        CancellationToken cancellationToken)
+    {
+
+        using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options);
+        using var response = await client.SendAsync(request, completionOption, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return  await response.Content.ReadAsStringAsync(cancellationToken);
+    }
+
+    public async  Task<TOut> SendAndDeserializeAsync<TOut>(
         HttpClient client,
         HttpMethod method,
         [StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri,
@@ -21,9 +54,11 @@ public sealed class HttpClientRunner
         using var request = CreateHttpRequestMessage(method, requestUri, headers);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await ReadContentAsync<TOut>(options, cancellationToken, response);    }
+        return await ReadContentAsync<TOut>(options, cancellationToken, response);
 
-    public async  Task<TOut> SendAsyncAndDeserialize<TIn,TOut>(
+    }
+
+    public async  Task<TOut> SendAndDeserializeAsync<TIn,TOut>(
         TIn requestContent,
         HttpClient client,
         HttpMethod method,
@@ -40,7 +75,7 @@ public sealed class HttpClientRunner
         return await ReadContentAsync<TOut>(options, cancellationToken, response);
     }
 
-    public async  IAsyncEnumerable<StreamItem<TOut>> SendAsyncAndReadStream<TIn,TOut>(
+    public async  IAsyncEnumerable<StreamItem<TOut>> SendAndReadStreamAsync<TIn,TOut>(
         TIn requestContent,
         HttpClient client,
         HttpMethod method,

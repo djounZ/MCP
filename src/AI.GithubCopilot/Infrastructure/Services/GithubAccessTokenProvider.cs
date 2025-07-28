@@ -41,7 +41,7 @@ public sealed class GithubAccessTokenProvider(
         };
 
         var response =
-            await httpClientRunner.SendAsyncAndDeserialize<GithubDeviceCodeRequest, GithubDeviceCodeResponse>(
+            await httpClientRunner.SendAndDeserializeAsync<GithubDeviceCodeRequest, GithubDeviceCodeResponse>(
                 request,
                 httpClient,
                 HttpMethod.Post,
@@ -66,7 +66,7 @@ public sealed class GithubAccessTokenProvider(
         };
 
         var response =
-            await httpClientRunner.SendAsyncAndDeserialize<GithubAccessTokenRequest, GithubAccessTokenResponse>(
+            await httpClientRunner.SendAndDeserializeAsync<GithubAccessTokenRequest, GithubAccessTokenResponse>(
                 request,
                 httpClient,
                 HttpMethod.Post,

@@ -38,7 +38,7 @@ public sealed class GithubCopilotTokenProvider(
         {
 
             var tokenResponse =
-                await httpClientRunner.SendAsyncAndDeserialize<GithubCopilotAccessTokenResponse>(
+                await httpClientRunner.SendAndDeserializeAsync<GithubCopilotAccessTokenResponse>(
                     httpClient,
                     HttpMethod.Get,
                     Options.CopilotTokenUrl,

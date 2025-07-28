@@ -37,6 +37,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    // GET {{MCP.WebApi_HostAddress}}/openapi/v1.json
     app.MapOpenApi();
     app.UseDeveloperExceptionPage();
 }
@@ -53,6 +54,7 @@ app.UseAuthorization();
 app.MapAuthEndpoints();
 app.MapSecuredHealthEndpoints();
 app.MapWeatherEndpoints();
+app.MapGithubCopilotChatEndpoints();
 
 // Initialize startup operations (device registration and browser opening)
 await app.Services.UseMcpInfrastructureAsync(CancellationToken.None);

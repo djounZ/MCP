@@ -3,6 +3,7 @@ using System.Text.Json;
 using AI.GithubCopilot.Domain;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,6 +16,7 @@ public class GithubCopilotChatClientTests : IClassFixture<TestFixture>
 {
     private readonly GithubCopilotChatClient _copilotChatClient;
     private readonly ITestOutputHelper _output;
+    private readonly ILoggerFactory _loggerFactory;
 
     public GithubCopilotChatClientTests(TestFixture fixture, ITestOutputHelper output)
     {
@@ -22,8 +24,8 @@ public class GithubCopilotChatClientTests : IClassFixture<TestFixture>
         _output = output;
 
         // Register the test output logger provider for this test
-        // var loggerFactory = fixture.ServiceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>();
-        // loggerFactory.AddProvider(new TestOutputLoggerProvider(_output));
+        _loggerFactory = fixture.ServiceProvider.GetRequiredService<ILoggerFactory>();
+        _loggerFactory.AddProvider(new TestOutputLoggerProvider(_output));
     }
 
     /// <summary>
@@ -277,5 +279,34 @@ public class GithubCopilotChatClientTests : IClassFixture<TestFixture>
             currentUser.Add(new ChatMessage(ChatRole.Assistant, responseText));
             currentAssistant.Add(new ChatMessage(ChatRole.User, responseText));
         }
+    }
+
+
+    [Fact]
+    public async Task ToolCalling()
+    {
+        var client = _copilotChatClient
+            .AsBuilder()
+            .UseFunctionInvocation(_loggerFactory)
+            .Build();
+
+        ChatOptions options = new() { Tools = [AIFunctionFactory.Create(GetCurrentWeather)] };
+
+        var response = client.GetStreamingResponseAsync("Should I wear a rain coat?", options);
+        var responseContent = new StringBuilder();
+        await foreach (var update in response)
+        {
+
+            var textContent = update.Contents?.OfType<TextContent>().FirstOrDefault()?.Text;
+            if (!string.IsNullOrEmpty(textContent))
+            {
+                responseContent.Append(textContent);
+            }
+        }
+
+        var responseText = responseContent.ToString();
+        _output.WriteLine(responseText);
+        return;
+        string GetCurrentWeather() => Random.Shared.NextDouble() > 0.5 ? "It's sunny" : "It's raining";
     }
 }

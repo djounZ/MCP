@@ -35,6 +35,7 @@
         <MicrosoftNETTestSdkVersion>17.12.0</MicrosoftNETTestSdkVersion>
         <MicrosoftCodeAnalysisAnalyzersVersion>3.3.4</MicrosoftCodeAnalysisAnalyzersVersion>
         <MicrosoftExtensionsAIAbstractions>9.7.1</MicrosoftExtensionsAIAbstractions>
+        <MicrosoftExtensionsAI>9.7.1</MicrosoftExtensionsAI>
         <MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>9.0.7</MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>
         <MicrosoftExtensionsConfigurationFileExtensionsVersion>9.0.7</MicrosoftExtensionsConfigurationFileExtensionsVersion>
         <MicrosoftExtensionsConfigurationJsonVersion>9.0.7</MicrosoftExtensionsConfigurationJsonVersion>

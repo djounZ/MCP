@@ -19,6 +19,10 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
     {
         _copilotChat = fixture.ServiceProvider.GetRequiredService<GithubCopilotChat>();
         _output = output;
+
+        // Register the test output logger provider for this test
+        var loggerFactory = fixture.ServiceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>();
+        loggerFactory.AddProvider(new TestOutputLoggerProvider(_output));
     }
 
     /// <summary>

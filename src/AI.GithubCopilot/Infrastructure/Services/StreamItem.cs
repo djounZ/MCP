@@ -2,21 +2,37 @@ namespace AI.GithubCopilot.Infrastructure.Services;
 
 public sealed record StreamItem<TOut>
 {
-    public StreamItem(TOut? content) : this(content, false, false)
-    {
 
-    }
-
-    private StreamItem(TOut? Value, bool Ignored, bool Ended)
+    private StreamItem(TOut? Value, string? Ignored, string? Ended, bool isIgnored, bool isEnded)
     {
         this.Value = Value;
         this.Ignored = Ignored;
         this.Ended = Ended;
+        IsIgnored = isIgnored;
+        IsEnded = isEnded;
     }
 
-    public static StreamItem<TOut> IgnoredItem => new(default, true, false);
-    public static StreamItem<TOut> EndedItem => new(default, false, true);
-    public TOut? Value { get; init; }
-    public bool Ignored { get; init; }
-    public bool Ended { get; init; }
+
+    public static StreamItem<TOut> BuildContent(TOut content)
+    {
+        return new StreamItem<TOut>(content, null, null, false, false);
+    }
+
+    public static StreamItem<TOut> BuildIgnored(string? content)
+    {
+        return new StreamItem<TOut>(default,content, null, true, false);
+    }
+
+    public static StreamItem<TOut> BuildEnded(string? content)
+    {
+        return new StreamItem<TOut>(default,null, content, false, true);
+    }
+
+
+    public TOut? Value { get; }
+    public string? Ignored { get; }
+    public string? Ended { get; }
+
+    public bool IsIgnored { get; }
+    public bool IsEnded { get; }
 }

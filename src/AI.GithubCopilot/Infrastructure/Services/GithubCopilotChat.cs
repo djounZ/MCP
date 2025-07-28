@@ -2,11 +2,13 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AI.GithubCopilot.Infrastructure.Models;
 using AI.GithubCopilot.Infrastructure.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AI.GithubCopilot.Infrastructure.Services;
 
 public sealed class GithubCopilotChat(
+    ILogger<GithubCopilotChat> logger,
     HttpClient httpClient,
     IOptions<GithubOptions> options,
     HttpClientRunner httpClientRunner)
@@ -41,12 +43,13 @@ public sealed class GithubCopilotChat(
                            cancellationToken,
                            ReadItemAsync))
         {
-            if (item.Ignored)
+            if (item.IsIgnored)
             {
+                logger.LogInformation("Ignored Item Received: {@RawMessage}",item.Ignored);
                 continue;
             }
 
-            if (item.Ended)
+            if (item.IsEnded)
             {
                 break;
             }
@@ -61,17 +64,17 @@ public sealed class GithubCopilotChat(
 
         if (string.IsNullOrWhiteSpace(line) || line.StartsWith("event:") || line.StartsWith(":"))
         {
-            return StreamItem<ChatCompletionResponse>.IgnoredItem;
+            return StreamItem<ChatCompletionResponse>.BuildIgnored(line);
         }
 
         var jsonLine = line.StartsWith("data: ") ? line[6..] : line;
 
         if (jsonLine == "[DONE]")
         {
-            return StreamItem<ChatCompletionResponse>.EndedItem;
+            return StreamItem<ChatCompletionResponse>.BuildEnded(line!);
         }
 
-        return new StreamItem<ChatCompletionResponse>(
-            JsonSerializer.Deserialize<ChatCompletionResponse>(jsonLine, JsonOptions));
+        return StreamItem<ChatCompletionResponse>.BuildContent(
+            JsonSerializer.Deserialize<ChatCompletionResponse>(jsonLine, JsonOptions)!);
     }
 }

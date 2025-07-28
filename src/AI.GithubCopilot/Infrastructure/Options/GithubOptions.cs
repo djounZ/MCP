@@ -17,4 +17,6 @@ public class GithubOptions
 
     public string CopilotChatCompletionsUrl { get; set; } = string.Empty;
     public Dictionary<string, string> CopilotChatCompletionsHeaders { get; set; } = [];
+
+    public string CopilotModelsUrl { get; set; } = string.Empty;
 }

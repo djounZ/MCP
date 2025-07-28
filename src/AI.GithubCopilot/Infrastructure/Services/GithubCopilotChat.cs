@@ -23,6 +23,21 @@ public sealed class GithubCopilotChat(
     };
 
 
+    public async Task<ModelsResponse> GetModelsAsync(CancellationToken cancellationToken)
+    {
+        var response = await httpClientRunner.SendAndDeserializeAsync<ModelsResponse>(
+            httpClient,
+            HttpMethod.Get,
+            Options.CopilotModelsUrl,
+            Options.CopilotChatCompletionsHeaders,
+            HttpCompletionOption.ResponseContentRead,
+            JsonOptions,
+            cancellationToken
+        );
+
+        return response;
+    }
+
     public async Task<ChatCompletionResponse> GetChatCompletionAsync(
         ChatCompletionRequest request,
         CancellationToken cancellationToken)

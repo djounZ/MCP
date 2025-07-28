@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using AI.GithubCopilot.Infrastructure.Models;
 using AI.GithubCopilot.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,22 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
         // Register the test output logger provider for this test
         // var loggerFactory = fixture.ServiceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>();
         // loggerFactory.AddProvider(new TestOutputLoggerProvider(_output));
+    }
+    //[Fact(Skip = "This test requires valid GitHub Copilot credentials")]
+    [Fact]
+    public async Task GetModels()
+    {
+        try
+        {
+            var chatCompletionAsync = await _copilotChat.GetModelsAsync(CancellationToken.None);
+            // _output.WriteLine($"Complete response:");
+            _output.WriteLine(JsonSerializer.Serialize(chatCompletionAsync));
+        }
+        catch (Exception ex)
+        {
+            _output.WriteLine($"Error: {ex}");
+            throw;
+        }
     }
     //[Fact(Skip = "This test requires valid GitHub Copilot credentials")]
     [Fact]

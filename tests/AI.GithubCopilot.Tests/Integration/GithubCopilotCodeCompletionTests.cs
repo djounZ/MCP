@@ -8,21 +8,21 @@ using Xunit.Abstractions;
 namespace AI.GithubCopilot.Tests.Integration;
 
 /// <summary>
-/// Integration tests for <see cref="GithubCopilotChat"/> class for code completion scenarios.
+/// Integration tests for <see cref="GithubCopilotChatCompletion"/> class for code completion scenarios.
 /// </summary>
 public class GithubCopilotCodeCompletionTests : IClassFixture<TestFixture>
 {
-    private readonly GithubCopilotChat _copilotChat;
+    private readonly GithubCopilotChatCompletion _copilotChatCompletion;
     private readonly ITestOutputHelper _output;
 
     public GithubCopilotCodeCompletionTests(TestFixture fixture, ITestOutputHelper output)
     {
-        _copilotChat = fixture.ServiceProvider.GetRequiredService<GithubCopilotChat>();
+        _copilotChatCompletion = fixture.ServiceProvider.GetRequiredService<GithubCopilotChatCompletion>();
         _output = output;
     }
 
     /// <summary>
-    /// Tests that <see cref="GithubCopilotChat.GetChatCompletionStreamAsync"/> can 
+    /// Tests that <see cref="GithubCopilotChatCompletion.GetChatCompletionStreamAsync"/> can 
     /// successfully stream code completion responses from the GitHub Copilot API.
     /// </summary>
     [Fact(Skip = "This test requires valid GitHub Copilot credentials")]
@@ -51,7 +51,7 @@ public class GithubCopilotCodeCompletionTests : IClassFixture<TestFixture>
         
         try
         {
-            await foreach (var response in _copilotChat.GetChatCompletionStreamAsync(request, CancellationToken.None))
+            await foreach (var response in _copilotChatCompletion.GetChatCompletionStreamAsync(request, CancellationToken.None))
             {
                 if (response?.Choices?.FirstOrDefault()?.Delta?.Content is { } content)
                 {

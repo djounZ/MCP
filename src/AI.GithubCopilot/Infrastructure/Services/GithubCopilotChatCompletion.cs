@@ -7,8 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace AI.GithubCopilot.Infrastructure.Services;
 
-public sealed class GithubCopilotChat(
-    ILogger<GithubCopilotChat> logger,
+public sealed class GithubCopilotChatCompletion(
+    ILogger<GithubCopilotChatCompletion> logger,
     HttpClient httpClient,
     IOptions<GithubOptions> options,
     HttpClientRunner httpClientRunner)

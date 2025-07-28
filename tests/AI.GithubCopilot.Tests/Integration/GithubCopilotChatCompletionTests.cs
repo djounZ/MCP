@@ -9,16 +9,16 @@ using Xunit.Abstractions;
 namespace AI.GithubCopilot.Tests.Integration;
 
 /// <summary>
-/// Integration tests for <see cref="GithubCopilotChat"/> class.
+/// Integration tests for <see cref="GithubCopilotChatCompletion"/> class.
 /// </summary>
-public class GithubCopilotChatTests : IClassFixture<TestFixture>
+public class GithubCopilotChatCompletionTests : IClassFixture<TestFixture>
 {
-    private readonly GithubCopilotChat _copilotChat;
+    private readonly GithubCopilotChatCompletion _copilotChatCompletion;
     private readonly ITestOutputHelper _output;
 
-    public GithubCopilotChatTests(TestFixture fixture, ITestOutputHelper output)
+    public GithubCopilotChatCompletionTests(TestFixture fixture, ITestOutputHelper output)
     {
-        _copilotChat = fixture.ServiceProvider.GetRequiredService<GithubCopilotChat>();
+        _copilotChatCompletion = fixture.ServiceProvider.GetRequiredService<GithubCopilotChatCompletion>();
         _output = output;
 
         // Register the test output logger provider for this test
@@ -31,7 +31,7 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
     {
         try
         {
-            var chatCompletionAsync = await _copilotChat.GetModelsAsync(CancellationToken.None);
+            var chatCompletionAsync = await _copilotChatCompletion.GetModelsAsync(CancellationToken.None);
             // _output.WriteLine($"Complete response:");
             _output.WriteLine(JsonSerializer.Serialize(chatCompletionAsync));
         }
@@ -64,7 +64,7 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
 
         try
         {
-            var chatCompletionAsync = await _copilotChat.GetChatCompletionAsync(request, CancellationToken.None);
+            var chatCompletionAsync = await _copilotChatCompletion.GetChatCompletionAsync(request, CancellationToken.None);
            // _output.WriteLine($"Complete response:");
             _output.WriteLine(chatCompletionAsync.Choices?[0].Message?.Content?.AsText());
         }
@@ -76,7 +76,7 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
     }
 
     /// <summary>
-    /// Tests that <see cref="GithubCopilotChat.GetChatCompletionStreamAsync"/> can
+    /// Tests that <see cref="GithubCopilotChatCompletion.GetChatCompletionStreamAsync"/> can
     /// successfully stream responses from the GitHub Copilot API.
     /// </summary>
     //[Fact(Skip = "This test requires valid GitHub Copilot credentials")]
@@ -107,7 +107,7 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
         var chatCompletionResponses = new List<ChatCompletionResponse?>();
         try
         {
-            await foreach (var response in _copilotChat.GetChatCompletionStreamAsync(request, CancellationToken.None))
+            await foreach (var response in _copilotChatCompletion.GetChatCompletionStreamAsync(request, CancellationToken.None))
             {
                 chatCompletionResponses.Add(response);
                 if (response?.Choices?.FirstOrDefault()?.Delta?.Content is not { } content)
@@ -200,7 +200,7 @@ public class GithubCopilotChatTests : IClassFixture<TestFixture>
 
             var responseContent = new StringBuilder();
 
-            await foreach (var response in _copilotChat.GetChatCompletionStreamAsync(request, CancellationToken.None))
+            await foreach (var response in _copilotChatCompletion.GetChatCompletionStreamAsync(request, CancellationToken.None))
             {
                 if (response?.Choices.FirstOrDefault()?.Delta?.Content is not { } content)
                 {

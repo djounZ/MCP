@@ -1,4 +1,5 @@
 using System.Net;
+using AI.GithubCopilot.Domain;
 using AI.GithubCopilot.Infrastructure.Options;
 using AI.GithubCopilot.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
@@ -30,8 +31,9 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<GithubAccessTokenProvider>();
         services.AddHttpClient<GithubCopilotTokenProvider>()
             .AddHttpMessageHandler<GithubCopilotTokenAuthorizationHandler>();
-        services.AddHttpClient<GithubCopilotChat>()
+        services.AddHttpClient<GithubCopilotChatCompletion>()
             .AddHttpMessageHandler<GithubCopilotChatAuthorizationHandler>();
+        services.AddTransient<GithubCopilotChatClient>();
         return services;
     }
 }

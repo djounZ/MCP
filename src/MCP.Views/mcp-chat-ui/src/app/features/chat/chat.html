@@ -1,0 +1,32 @@
+<div class="chat-container">
+  <mat-toolbar color="primary" class="chat-header">
+    <span>AI Chat Assistant</span>
+
+    <span class="spacer"></span>
+
+    <div class="toolbar-actions">
+      @if (isConnected()) {
+        <mat-icon class="connection-status connected" matTooltip="Connected">wifi</mat-icon>
+      } @else {
+        <mat-icon class="connection-status disconnected" matTooltip="Disconnected">wifi_off</mat-icon>
+      }
+
+      <button
+        mat-icon-button
+        (click)="clearChat()"
+        matTooltip="Clear chat"
+        [disabled]="messages().length === 0">
+        <mat-icon>clear_all</mat-icon>
+      </button>
+    </div>
+  </mat-toolbar>
+
+  <div class="chat-content">
+    <app-message-list [messages]="messages()"></app-message-list>
+
+    <app-message-input
+      (messageSubmit)="onMessageSubmit($event)"
+      [disabled]="!isConnected() || isLoading()">
+    </app-message-input>
+  </div>
+</div>

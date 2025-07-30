@@ -1,0 +1,35 @@
+<div class="message-list-container">
+  @if (messages().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
+      <h3>Start a conversation</h3>
+      <p>Type a message below to begin chatting with the AI assistant.</p>
+    </div>
+  } @else {
+    <div class="messages">
+      @for (message of messages(); track message.id) {
+        <div class="message-wrapper" [class.user-message]="message.isUser" [class.assistant-message]="!message.isUser">
+          <mat-card class="message-card" [class.error-message]="message.isError">
+            <mat-card-content>
+              <div class="message-header">
+                <span class="message-author">
+                  {{ message.isUser ? 'You' : 'AI Assistant' }}
+                </span>
+                <span class="message-time">
+                  {{ message.timestamp | date:'short' }}
+                </span>
+              </div>
+
+              <div class="message-content">
+                {{ message.content }}
+                @if (message.isStreaming) {
+                  <mat-spinner diameter="16" class="streaming-indicator"></mat-spinner>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+  }
+</div>

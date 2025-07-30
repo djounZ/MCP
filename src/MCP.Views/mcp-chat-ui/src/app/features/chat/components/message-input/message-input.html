@@ -1,0 +1,28 @@
+<div class="message-input-container">
+  <mat-form-field class="message-field" appearance="outline">
+    <mat-label>Type your message...</mat-label>
+    <textarea
+      matInput
+      rows="1"
+      [value]="messageContent()"
+      (input)="messageContent.set($any($event.target).value)"
+      (keydown)="onKeyPress($event)"
+      placeholder="Ask me anything..."
+      [disabled]="disabled()"
+      cdkTextareaAutosize
+      #autosize="cdkTextareaAutosize"
+      cdkAutosizeMinRows="1"
+      cdkAutosizeMaxRows="5">
+    </textarea>
+  </mat-form-field>
+
+  <button
+    mat-fab
+    color="primary"
+    class="send-button"
+    (click)="sendMessage()"
+    [disabled]="disabled() || !messageContent().trim()"
+    aria-label="Send message">
+    <mat-icon>send</mat-icon>
+  </button>
+</div>

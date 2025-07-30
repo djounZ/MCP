@@ -1,0 +1,24 @@
+<mat-sidenav-container class="app-container">
+  <mat-sidenav
+    #sidenav
+    mode="over"
+    class="app-sidenav"
+    [opened]="sidenavOpened()"
+    (openedChange)="sidenavOpened.set($event)">
+    <mat-toolbar color="primary">
+      <span>Menu</span>
+      <span class="spacer"></span>
+      <button mat-icon-button (click)="toggleSidenav()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <app-sidebar></app-sidebar>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="app-content">
+    <div class="content-area">
+      <app-chat></app-chat>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,47 @@
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+  .chat-header {
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .spacer {
+      flex: 1;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .connection-status {
+        &.connected {
+          color: #4caf50;
+        }
+
+        &.disconnected {
+          color: #f44336;
+        }
+      }
+    }
+  }
+
+  .chat-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    app-message-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    app-message-input {
+      flex-shrink: 0;
+    }
+  }
+}

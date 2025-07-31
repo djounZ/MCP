@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.AI;
 using AI.GithubCopilot.Domain;
 
@@ -8,6 +10,13 @@ namespace MCP.WebApi.Extensions;
 /// </summary>
 public static class GithubCopilotChatClientEndpointsExtensions
 {
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     /// <summary>
     /// Maps GitHub Copilot chat client endpoints to the application
     /// </summary>
@@ -85,7 +94,21 @@ public static class GithubCopilotChatClientEndpointsExtensions
                     MaxOutputTokens = request.MaxTokens ?? 1000
                 };
 
-                return chatClient.GetStreamingResponseAsync(messages, options, cancellationToken);
+                var responseStream = chatClient.GetStreamingResponseAsync(messages, options, cancellationToken);
+
+                return Results.Stream(
+                    async (stream) =>
+                    {
+                        await foreach (var update in responseStream)
+                        {
+                            var data = System.Text.Json.JsonSerializer.Serialize(update,JsonOptions);
+                            var bytes = System.Text.Encoding.UTF8.GetBytes(data + "\n");
+                            await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+                            await stream.FlushAsync(cancellationToken);
+                        }
+                    },
+                    contentType: "text/event-stream"
+                );
             })
             .WithName("SimpleChatStream")
             .WithSummary("Simple streaming chat endpoint")

@@ -55,6 +55,12 @@ export class Chat {
   }
 
   private handleStreamingResponse(response: LLMStreamResponse): void {
+    // Only process valid LLMStreamResponse objects
+    if (!response || typeof response !== 'object' || typeof response.content !== 'string') {
+      // Log invalid or debugging payloads
+      console.warn('Received non-LLMStreamResponse payload:', response);
+      return;
+    }
     this.messages.update(messages => {
       const messageIndex = messages.findIndex(m =>
         !m.isUser && m.isStreaming && m.id === messages[messages.length - 1]?.id

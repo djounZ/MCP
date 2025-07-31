@@ -5,11 +5,6 @@
     <span class="spacer"></span>
 
     <div class="toolbar-actions">
-      @if (isConnected()) {
-        <mat-icon class="connection-status connected" matTooltip="Connected">wifi</mat-icon>
-      } @else {
-        <mat-icon class="connection-status disconnected" matTooltip="Disconnected">wifi_off</mat-icon>
-      }
 
       <button
         mat-icon-button
@@ -26,7 +21,7 @@
 
     <app-message-input
       (messageSubmit)="onMessageSubmit($event)"
-      [disabled]="!isConnected() || isLoading()">
+      [disabled]="isLoading()">
     </app-message-input>
   </div>
 </div>

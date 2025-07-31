@@ -7,7 +7,6 @@ import { ChatResponseUpdate } from '../../shared/models/chat-api.model';
 })
 export class ChatHttpStream {
   private readonly messageSubject$ = new Subject<ChatResponseUpdate>();
-  readonly isConnected = signal(true); // Always true for HTTP
 
   private readonly apiUrl = 'http://localhost:5200/api/chat/stream';
 

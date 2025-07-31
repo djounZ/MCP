@@ -23,7 +23,6 @@ export class Chat {
 
   readonly messages = signal<ChatMessageView[]>([]);
   readonly isLoading = signal(false);
-  readonly isConnected = computed(() => this.chatStreamService.isConnected());
 
   constructor() {
     this.initializeChatStreamConnection();

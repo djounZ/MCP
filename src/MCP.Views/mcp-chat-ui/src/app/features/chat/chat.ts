@@ -20,7 +20,6 @@ export class ChatComponent {
 
   protected readonly messages = this.chatService.messages;
   protected readonly isLoading = this.chatService.isLoading;
-  protected readonly isConnected = this.chatService.isConnected;
 
   onMessageSubmit(content: string): void {
     this.chatService.sendMessage(content);

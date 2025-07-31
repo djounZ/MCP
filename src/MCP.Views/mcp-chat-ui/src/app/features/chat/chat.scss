@@ -16,15 +16,6 @@
       align-items: center;
       gap: 8px;
 
-      .connection-status {
-        &.connected {
-          color: #4caf50;
-        }
-
-        &.disconnected {
-          color: #f44336;
-        }
-      }
     }
   }
 

@@ -5,7 +5,7 @@ import { LLMStreamResponse } from '../../shared/models/message.interface';
 @Injectable({
   providedIn: 'root'
 })
-export class Websocket {
+export class ChatHttpStream {
   private readonly messageSubject$ = new Subject<LLMStreamResponse>();
   readonly isConnected = signal(true); // Always true for HTTP
 

@@ -1,26 +1,26 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { Websocket } from '../../../core/services/websocket';
+import { ChatHttpStream } from '../../../core/services/chat-http-stream';
 import { ChatMessage, LLMStreamResponse } from '../../../shared/models/message.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class Chat {
-  private readonly websocketService = inject(Websocket);
+  private readonly chatStreamService = inject(ChatHttpStream);
 
   readonly messages = signal<ChatMessage[]>([]);
   readonly isLoading = signal(false);
-  readonly isConnected = computed(() => this.websocketService.isConnected());
+  readonly isConnected = computed(() => this.chatStreamService.isConnected());
 
   constructor() {
-    this.initializeWebSocketConnection();
+    this.initializeChatStreamConnection();
   }
 
-  private initializeWebSocketConnection(): void {
-    this.websocketService.connect().subscribe();
+  private initializeChatStreamConnection(): void {
+    this.chatStreamService.connect().subscribe();
 
-    this.websocketService.getMessages().subscribe((response: LLMStreamResponse) => {
+    this.chatStreamService.getMessages().subscribe((response: LLMStreamResponse) => {
       this.handleStreamingResponse(response);
     });
   }
@@ -39,8 +39,8 @@ export class Chat {
     this.messages.update(messages => [...messages, userMessage]);
     this.isLoading.set(true);
 
-    // Send to WebSocket
-    this.websocketService.sendMessage(content);
+    // Send to HTTP stream
+    this.chatStreamService.sendMessage(content);
 
     // Create placeholder for LLM response
     const llmMessage: ChatMessage = {

@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.AI;
 using AI.GithubCopilot.Domain;
 
@@ -10,13 +8,6 @@ namespace MCP.WebApi.Extensions;
 /// </summary>
 public static class GithubCopilotChatClientEndpointsExtensions
 {
-
-    // private static readonly JsonSerializerOptions JsonOptions = new()
-    // {
-    //     PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    //     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    // };
-
     /// <summary>
     /// Maps GitHub Copilot chat client endpoints to the application
     /// </summary>

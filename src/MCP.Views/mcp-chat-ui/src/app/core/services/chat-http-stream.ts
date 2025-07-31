@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { ChatResponseUpdate } from '../../shared/models/message.interface';
+import { ChatResponseUpdate } from '../../shared/models/chat-api.model';
 
 @Injectable({
   providedIn: 'root'

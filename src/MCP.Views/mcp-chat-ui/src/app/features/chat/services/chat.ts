@@ -1,17 +1,19 @@
 // Type guards for AIContent discriminated union
-function isTextContent(c: unknown): c is import('../../../shared/models/message.interface').AIContentTextContent {
+function isTextContent(c: unknown): c is import('../../../shared/models/chat-api.model').AIContentTextContent {
   return !!c && typeof c === 'object' && (c as any).$type === 'text';
 }
-function isReasoningContent(c: unknown): c is import('../../../shared/models/message.interface').AIContentTextReasoningContent {
+function isReasoningContent(c: unknown): c is import('../../../shared/models/chat-api.model').AIContentTextReasoningContent {
   return !!c && typeof c === 'object' && (c as any).$type === 'reasoning';
 }
-function isErrorContent(c: unknown): c is import('../../../shared/models/message.interface').AIContentErrorContent {
+function isErrorContent(c: unknown): c is import('../../../shared/models/chat-api.model').AIContentErrorContent {
   return !!c && typeof c === 'object' && (c as any).$type === 'error';
 }
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
-import { ChatMessage, ChatResponseUpdate } from '../../../shared/models/message.interface';
+import { ChatMessageView } from '../../../shared/models/chat-view-message.model';
+import { ChatResponseUpdate } from '../../../shared/models/chat-api.model';
+import { updateChatMessageView } from '../../../shared/models/chat-view-message.mapper';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +21,7 @@ import { ChatMessage, ChatResponseUpdate } from '../../../shared/models/message.
 export class Chat {
   private readonly chatStreamService = inject(ChatHttpStream);
 
-  readonly messages = signal<ChatMessage[]>([]);
+  readonly messages = signal<ChatMessageView[]>([]);
   readonly isLoading = signal(false);
   readonly isConnected = computed(() => this.chatStreamService.isConnected());
 
@@ -39,7 +41,7 @@ export class Chat {
     if (!content.trim()) return;
 
     // Add user message
-    const userMessage: ChatMessage = {
+    const userMessage: ChatMessageView = {
       id: this.generateId(),
       content: content.trim(),
       isUser: true,
@@ -53,7 +55,7 @@ export class Chat {
     this.chatStreamService.sendMessage(content);
 
     // Create placeholder for LLM response
-    const llmMessage: ChatMessage = {
+    const llmMessage = {
       id: this.generateId(),
       content: '',
       isUser: false,
@@ -61,7 +63,8 @@ export class Chat {
       isStreaming: true
     };
 
-    this.messages.update(messages => [...messages, llmMessage]);
+    this.messages.update(messages => [...messages, llmMessage ]);
+
   }
 
   private handleStreamingResponse(response: ChatResponseUpdate): void {
@@ -71,49 +74,15 @@ export class Chat {
       console.warn('Received non-ChatResponseUpdate payload:', response);
       return;
     }
-    // Extract content and error using type guards
-    let content = '';
-    let error: string | undefined = undefined;
-    let isComplete = false;
-    for (const c of response.Contents) {
-      if (isTextContent(c)) {
-        content += c.Text || '';
-      } else if (isReasoningContent(c)) {
-        content += c.Text || '';
-      } else if (isErrorContent(c)) {
-        error = c.Message || 'Unknown error';
-      }
-    }
-    if (response.FinishReason) {
-      isComplete = true;
-    }
     this.messages.update(messages => {
-      const messageIndex = messages.findIndex(m =>
-        !m.isUser && m.isStreaming && m.id === messages[messages.length - 1]?.id
-      );
-
-      if (messageIndex !== -1) {
-        const updatedMessage = { ...messages[messageIndex] };
-        updatedMessage.content += content;
-
-        if (isComplete) {
-          updatedMessage.isStreaming = false;
-          this.isLoading.set(false);
-        }
-
-        if (error) {
-          updatedMessage.isError = true;
-          updatedMessage.content = error;
-          updatedMessage.isStreaming = false;
-          this.isLoading.set(false);
-        }
-
-        const newMessages = [...messages];
-        newMessages[messageIndex] = updatedMessage;
-        return newMessages;
+      const idx = messages.length - 1;
+      if (idx < 0) return messages;
+      updateChatMessageView(messages[idx], response, { isStreaming: !response.FinishReason });
+      if (response.FinishReason) {
+        this.isLoading.set(false);
+        messages[idx].isStreaming = false;
       }
-
-      return messages;
+      return [...messages];
     });
   }
 

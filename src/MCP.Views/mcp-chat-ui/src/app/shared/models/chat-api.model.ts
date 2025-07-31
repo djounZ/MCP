@@ -1,11 +1,24 @@
-export interface ChatMessage {
-  id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-  isStreaming?: boolean;
-  isError?: boolean;
+export interface AIContentTextReasoningContent extends AIContentBase {
+  $type: 'reasoning';
+  Text?: string | null;
 }
+
+export interface AIContentUriContent extends AIContentBase {
+  $type: 'uri';
+  Uri: string;
+  MediaType: string;
+}
+
+export interface AIContentUsageContent extends AIContentBase {
+  $type: 'usage';
+  Details: {
+    InputTokenCount?: number | null;
+    OutputTokenCount?: number | null;
+    TotalTokenCount?: number | null;
+    AdditionalCounts?: Record<string, number> | null;
+  };
+}
+// Renamed from message.interface.ts for backend API model clarity
 
 // OpenAPI: ChatResponseUpdate
 export interface ChatResponseUpdate {
@@ -65,25 +78,4 @@ export interface AIContentFunctionResultContent extends AIContentBase {
 export interface AIContentTextContent extends AIContentBase {
   $type: 'text';
   Text?: string | null;
-}
-
-export interface AIContentTextReasoningContent extends AIContentBase {
-  $type: 'reasoning';
-  Text?: string | null;
-}
-
-export interface AIContentUriContent extends AIContentBase {
-  $type: 'uri';
-  Uri: string;
-  MediaType: string;
-}
-
-export interface AIContentUsageContent extends AIContentBase {
-  $type: 'usage';
-  Details: {
-    InputTokenCount?: number | null;
-    OutputTokenCount?: number | null;
-    TotalTokenCount?: number | null;
-    AdditionalCounts?: Record<string, number> | null;
-  };
 }

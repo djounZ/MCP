@@ -11,9 +11,9 @@ function isErrorContent(c: unknown): c is import('../../../shared/models/chat-ap
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
-import { ChatResponseUpdateView } from '../../../shared/models/chat-view-message.model';
+import { AIContentTextContentView, ChatMessageView, ChatRequestView, ChatResponseUpdateView } from '../../../shared/models/chat-view-message.model';
 import { ChatResponseUpdate } from '../../../shared/models/chat-api.model';
-import { updateChatMessageView } from '../../../shared/models/chat-view-message.mapper';
+import { updateChatMessageView, mapChatRequestViewToChatRequest } from '../../../shared/models/chat-view-message.mapper';
 
 @Injectable({
   providedIn: 'root'
@@ -49,9 +49,21 @@ export class Chat {
 
     this.messages.update(messages => [...messages, userMessage]);
     this.isLoading.set(true);
-
-    // Send to HTTP stream
-    this.chatStreamService.sendMessage(content);
+    const aAIContentTextContentView: AIContentTextContentView = {
+      $type: 'text',
+      text: content.trim()
+    };
+    const userChatMessageView: ChatMessageView = {
+      contents: [aAIContentTextContentView],
+      Role: 'user',
+      Timestamp: new Date()
+    };
+    // Create ChatRequestView
+    const chatRequestView: ChatRequestView = {
+      messages: [userChatMessageView]
+    };
+    const chatRequest = mapChatRequestViewToChatRequest(chatRequestView);
+    this.chatStreamService.sendMessage(chatRequest);
 
     // Create placeholder for LLM response
     const llmMessage = {
@@ -62,7 +74,7 @@ export class Chat {
       isStreaming: true
     };
 
-    this.messages.update(messages => [...messages, llmMessage ]);
+    this.messages.update(messages => [...messages, llmMessage]);
 
   }
 

@@ -84,9 +84,6 @@ export interface ChatMessageView {
   role?: string | null;
   contents?: AIContentView[] | null;
   messageId?: string | null;
-  // UI-specific fields
-  isUser?: boolean;
-  timestamp?: Date;
   [key: string]: unknown;
 }
 

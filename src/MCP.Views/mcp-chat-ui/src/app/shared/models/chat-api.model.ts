@@ -82,34 +82,34 @@ export interface AIContentTextContent extends AIContentBase {
 
 // OpenAPI: ChatMessage
 export interface ChatMessage {
-  authorName?: string | null;
-  role?: string | null; // NullableOfChatRole
-  contents?: AIContent[] | null;
-  messageId?: string | null;
+  AuthorName?: string | null;
+  Role?: string | null; // NullableOfChatRole
+  Contents?: AIContent[] | null;
+  MessageId?: string | null;
   [key: string]: unknown;
 }
 
 // OpenAPI: ChatOptions
 export interface ChatOptions {
-  conversationId?: string | null;
-  instructions?: string | null;
-  temperature?: number | null;
-  maxOutputTokens?: number | null;
-  topP?: number | null;
-  topK?: number | null;
-  frequencyPenalty?: number | null;
-  presencePenalty?: number | null;
-  seed?: number | null;
-  responseFormat?: unknown | null; // ChatResponseFormat
-  modelId?: string | null;
-  stopSequences?: string[] | null;
-  allowMultipleToolCalls?: boolean | null;
-  toolMode?: unknown | null; // ChatToolMode
+  ConversationId?: string | null;
+  Instructions?: string | null;
+  Temperature?: number | null;
+  MaxOutputTokens?: number | null;
+  TopP?: number | null;
+  TopK?: number | null;
+  FrequencyPenalty?: number | null;
+  PresencePenalty?: number | null;
+  Seed?: number | null;
+  ResponseFormat?: unknown | null; // ChatResponseFormat
+  ModelId?: string | null;
+  StopSequences?: string[] | null;
+  AllowMultipleToolCalls?: boolean | null;
+  ToolMode?: unknown | null; // ChatToolMode
   [key: string]: unknown;
 }
 
 // OpenAPI: ChatRequest
 export interface ChatRequest {
-  messages: ChatMessage[];
-  options?: ChatOptions | null;
+  Messages: ChatMessage[];
+  Options?: ChatOptions | null;
 }

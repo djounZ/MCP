@@ -8,6 +8,7 @@ namespace MCP.WebApi.Extensions;
 /// </summary>
 public static class GithubCopilotChatClientEndpointsExtensions
 {
+    private const string StreamingContentType = "text/event-stream";
     /// <summary>
     /// Maps GitHub Copilot chat client endpoints to the application
     /// </summary>
@@ -33,7 +34,23 @@ public static class GithubCopilotChatClientEndpointsExtensions
         app.MapPost("/api/chat/completions/stream", (
             ChatRequest request,
             GithubCopilotChatClient chatClient,
-            CancellationToken cancellationToken) => chatClient.GetStreamingResponseAsync(request.Messages, request.Options, cancellationToken))
+            CancellationToken cancellationToken) =>
+            {
+                var streamingResponseAsync = chatClient.GetStreamingResponseAsync(request.Messages, request.Options, cancellationToken);
+                return Results.Stream(
+                    async (stream) =>
+                    {
+                        await foreach (var update in streamingResponseAsync)
+                        {
+                            var data = System.Text.Json.JsonSerializer.Serialize(update);
+                            var bytes = System.Text.Encoding.UTF8.GetBytes(data + Environment.NewLine);
+                            await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+                            await stream.FlushAsync(cancellationToken);
+                        }
+                    },
+                    contentType: StreamingContentType
+                );
+            })
             .WithName("CreateStreamingChatCompletion")
             .WithSummary("Create a streaming chat completion")
             .WithDescription("Creates a streaming chat completion using GitHub Copilot")
@@ -93,12 +110,12 @@ public static class GithubCopilotChatClientEndpointsExtensions
                         await foreach (var update in responseStream)
                         {
                             var data = System.Text.Json.JsonSerializer.Serialize(update);
-                            var bytes = System.Text.Encoding.UTF8.GetBytes(data + "\n");
+                            var bytes = System.Text.Encoding.UTF8.GetBytes(data +  Environment.NewLine);
                             await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
                             await stream.FlushAsync(cancellationToken);
                         }
                     },
-                    contentType: "text/event-stream"
+                    contentType: StreamingContentType
                 );
             })
             .WithName("SimpleChatStream")

@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { ChatResponseUpdate } from '../../shared/models/chat-api.model';
+import { ChatRequest, ChatResponseUpdate } from '../../shared/models/chat-api.model';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +8,7 @@ import { ChatResponseUpdate } from '../../shared/models/chat-api.model';
 export class ChatHttpStream {
   private readonly messageSubject$ = new Subject<ChatResponseUpdate>();
 
-  private readonly apiUrl = 'http://localhost:5200/api/chat/stream';
+  private readonly apiUrl = 'http://localhost:5200/api/chat/completions/stream';
 
   connect(): Observable<boolean> {
     // For HTTP, always consider as connected
@@ -18,12 +18,12 @@ export class ChatHttpStream {
     });
   }
 
-  async sendMessage(message: string): Promise<void> {
+  async sendMessage(message: ChatRequest): Promise<void> {
     try {
       const response = await fetch(this.apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Message: message })
+        body: JSON.stringify(message)
       });
       if (!response.body) {
         this.messageSubject$.next({ id: '', content: '', isComplete: true, error: 'No response body' });

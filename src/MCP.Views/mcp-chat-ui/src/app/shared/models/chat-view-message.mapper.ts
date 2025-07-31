@@ -33,10 +33,10 @@ export function updateChatMessageView(
 
 export function mapChatMessageViewToChatMessage(view: ChatMessageView): ChatMessage {
   return {
-    authorName: view.authorName ?? null,
-    role: view.role ?? null,
-    contents: view.contents ? view.contents.map(mapAIContentViewToAIContent) : null,
-    messageId: view.messageId ?? null,
+    AuthorName: view.authorName ?? null,
+    Role: view.role ?? null,
+    Contents: view.contents ? view.contents.map(mapAIContentViewToAIContent) : null,
+    MessageId: view.messageId ?? null,
     // Any additional properties
     ...Object.fromEntries(Object.entries(view).filter(([k]) => !['authorName','role','contents','messageId','isUser','timestamp'].includes(k)))
   };
@@ -108,27 +108,27 @@ function mapAIContentViewToAIContent(view: AIContentView): AIContent {
 
 export function mapChatRequestViewToChatRequest(view: ChatRequestView): ChatRequest {
   return {
-    messages: view.messages.map(mapChatMessageViewToChatMessage),
-    options: view.options ? mapChatOptionsViewToChatOptions(view.options) : undefined
+    Messages: view.messages.map(mapChatMessageViewToChatMessage),
+    Options: view.options ? mapChatOptionsViewToChatOptions(view.options) : undefined
   };
 }
 
 function mapChatOptionsViewToChatOptions(view: ChatOptionsView): ChatOptions {
   return {
-    conversationId: view.conversationId ?? null,
-    instructions: view.instructions ?? null,
-    temperature: view.temperature ?? null,
-    maxOutputTokens: view.maxOutputTokens ?? null,
-    topP: view.topP ?? null,
-    topK: view.topK ?? null,
-    frequencyPenalty: view.frequencyPenalty ?? null,
-    presencePenalty: view.presencePenalty ?? null,
-    seed: view.seed ?? null,
-    responseFormat: view.responseFormat ?? null,
-    modelId: view.modelId ?? null,
-    stopSequences: view.stopSequences ?? null,
-    allowMultipleToolCalls: view.allowMultipleToolCalls ?? null,
-    toolMode: view.toolMode ?? null,
-    additionalProperties: view['additionalProperties'] ?? null
+    ConversationId: view.conversationId ?? null,
+    Instructions: view.instructions ?? null,
+    Temperature: view.temperature ?? null,
+    MaxOutputTokens: view.maxOutputTokens ?? null,
+    TopP: view.topP ?? null,
+    TopK: view.topK ?? null,
+    FrequencyPenalty: view.frequencyPenalty ?? null,
+    PresencePenalty: view.presencePenalty ?? null,
+    Seed: view.seed ?? null,
+    ResponseFormat: view.responseFormat ?? null,
+    ModelId: view.modelId ?? null,
+    StopSequences: view.stopSequences ?? null,
+    AllowMultipleToolCalls: view.allowMultipleToolCalls ?? null,
+    ToolMode: view.toolMode ?? null,
+    AdditionalProperties: view['additionalProperties'] ?? null
   };
 }

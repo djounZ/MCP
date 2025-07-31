@@ -11,11 +11,11 @@ namespace MCP.WebApi.Extensions;
 public static class GithubCopilotChatClientEndpointsExtensions
 {
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
+    // private static readonly JsonSerializerOptions JsonOptions = new()
+    // {
+    //     PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+    //     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    // };
 
     /// <summary>
     /// Maps GitHub Copilot chat client endpoints to the application
@@ -101,7 +101,7 @@ public static class GithubCopilotChatClientEndpointsExtensions
                     {
                         await foreach (var update in responseStream)
                         {
-                            var data = System.Text.Json.JsonSerializer.Serialize(update,JsonOptions);
+                            var data = System.Text.Json.JsonSerializer.Serialize(update);
                             var bytes = System.Text.Encoding.UTF8.GetBytes(data + "\n");
                             await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
                             await stream.FlushAsync(cancellationToken);

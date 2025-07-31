@@ -1,7 +1,17 @@
+// Type guards for AIContent discriminated union
+function isTextContent(c: unknown): c is import('../../../shared/models/message.interface').AIContentTextContent {
+  return !!c && typeof c === 'object' && (c as any).$type === 'text';
+}
+function isReasoningContent(c: unknown): c is import('../../../shared/models/message.interface').AIContentTextReasoningContent {
+  return !!c && typeof c === 'object' && (c as any).$type === 'reasoning';
+}
+function isErrorContent(c: unknown): c is import('../../../shared/models/message.interface').AIContentErrorContent {
+  return !!c && typeof c === 'object' && (c as any).$type === 'error';
+}
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
-import { ChatMessage, LLMStreamResponse } from '../../../shared/models/message.interface';
+import { ChatMessage, ChatResponseUpdate } from '../../../shared/models/message.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +30,7 @@ export class Chat {
   private initializeChatStreamConnection(): void {
     this.chatStreamService.connect().subscribe();
 
-    this.chatStreamService.getMessages().subscribe((response: LLMStreamResponse) => {
+    this.chatStreamService.getMessages().subscribe((response: ChatResponseUpdate) => {
       this.handleStreamingResponse(response);
     });
   }
@@ -54,12 +64,28 @@ export class Chat {
     this.messages.update(messages => [...messages, llmMessage]);
   }
 
-  private handleStreamingResponse(response: LLMStreamResponse): void {
-    // Only process valid LLMStreamResponse objects
-    if (!response || typeof response !== 'object' || typeof response.content !== 'string') {
+  private handleStreamingResponse(response: ChatResponseUpdate): void {
+    // Only process valid ChatResponseUpdate objects
+    if (!response || typeof response !== 'object' || !Array.isArray(response.Contents)) {
       // Log invalid or debugging payloads
-      console.warn('Received non-LLMStreamResponse payload:', response);
+      console.warn('Received non-ChatResponseUpdate payload:', response);
       return;
+    }
+    // Extract content and error using type guards
+    let content = '';
+    let error: string | undefined = undefined;
+    let isComplete = false;
+    for (const c of response.Contents) {
+      if (isTextContent(c)) {
+        content += c.Text || '';
+      } else if (isReasoningContent(c)) {
+        content += c.Text || '';
+      } else if (isErrorContent(c)) {
+        error = c.Message || 'Unknown error';
+      }
+    }
+    if (response.FinishReason) {
+      isComplete = true;
     }
     this.messages.update(messages => {
       const messageIndex = messages.findIndex(m =>
@@ -68,16 +94,16 @@ export class Chat {
 
       if (messageIndex !== -1) {
         const updatedMessage = { ...messages[messageIndex] };
-        updatedMessage.content += response.content;
+        updatedMessage.content += content;
 
-        if (response.isComplete) {
+        if (isComplete) {
           updatedMessage.isStreaming = false;
           this.isLoading.set(false);
         }
 
-        if (response.error) {
+        if (error) {
           updatedMessage.isError = true;
-          updatedMessage.content = response.error;
+          updatedMessage.content = error;
           updatedMessage.isStreaming = false;
           this.isLoading.set(false);
         }

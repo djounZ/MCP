@@ -1,12 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { LLMStreamResponse } from '../../shared/models/message.interface';
+import { ChatResponseUpdate } from '../../shared/models/message.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatHttpStream {
-  private readonly messageSubject$ = new Subject<LLMStreamResponse>();
+  private readonly messageSubject$ = new Subject<ChatResponseUpdate>();
   readonly isConnected = signal(true); // Always true for HTTP
 
   private readonly apiUrl = 'http://localhost:5200/api/chat/stream';
@@ -24,7 +24,7 @@ export class ChatHttpStream {
       const response = await fetch(this.apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message })
+        body: JSON.stringify({ Message: message })
       });
       if (!response.body) {
         this.messageSubject$.next({ id: '', content: '', isComplete: true, error: 'No response body' });
@@ -43,33 +43,9 @@ export class ChatHttpStream {
           buffer = buffer.slice(boundary + 1);
           if (chunk) {
             try {
-              const update = JSON.parse(chunk);
+              const update = JSON.parse(chunk) as ChatResponseUpdate;
               console.log('AI chunk:', update); // Debug print
-              let content = '';
-              let error: string | undefined = undefined;
-              let found = false;
-              if (Array.isArray(update.contents) && update.contents.length > 0) {
-                const c = update.contents[0];
-                if (c.$type === 'text' || c.$type === 'reasoning' || c.$type === 'usage') {
-                  content = c.text || '';
-                  found = true;
-                } else if (c.$type === 'error') {
-                  error = c.message || 'Unknown error';
-                  found = true;
-                }
-              }
-              if (found) {
-                const mapped = {
-                  id: update.responseId || update.messageId || '',
-                  content,
-                  isComplete: !!update.finish_reason,
-                  error
-                };
-                this.messageSubject$.next(mapped);
-              } else {
-                // Only log unrecognized chunks, do not emit to chat
-                console.warn('Unrecognized AI chunk (not text/reasoning/error):', update);
-              }
+              this.messageSubject$.next(update);
             } catch (e) {
               // Ignore parse errors for incomplete/in-between chunks
             }
@@ -114,7 +90,7 @@ export class ChatHttpStream {
     }
   }
 
-  getMessages(): Observable<LLMStreamResponse> {
+  getMessages(): Observable<ChatResponseUpdate> {
     return this.messageSubject$.asObservable();
   }
 

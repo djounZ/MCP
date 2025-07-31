@@ -7,9 +7,83 @@ export interface ChatMessage {
   isError?: boolean;
 }
 
-export interface LLMStreamResponse {
-  id: string;
-  content: string;
-  isComplete: boolean;
-  error?: string;
+// OpenAPI: ChatResponseUpdate
+export interface ChatResponseUpdate {
+  AuthorName?: string | null;
+  Role?: string | null; // NullableOfChatRole, can be string or null
+  Contents?: AIContent[] | null;
+  ResponseId?: string | null;
+  MessageId?: string | null;
+  ConversationId?: string | null;
+  CreatedAt?: string | null; // ISO date-time string
+  FinishReason?: string | null; // NullableOfChatFinishReason, can be string or null
+  ModelId?: string | null;
+  [key: string]: unknown; // For additionalProperties
+}
+
+// OpenAPI: AIContent (union type)
+export type AIContent =
+  | AIContentDataContent
+  | AIContentErrorContent
+  | AIContentFunctionCallContent
+  | AIContentFunctionResultContent
+  | AIContentTextContent
+  | AIContentTextReasoningContent
+  | AIContentUriContent
+  | AIContentUsageContent
+  | AIContentBase;
+
+export interface AIContentBase {
+  additionalProperties?: Record<string, unknown> | null;
+}
+
+export interface AIContentDataContent extends AIContentBase {
+  $type: 'data';
+  Uri: string;
+}
+
+export interface AIContentErrorContent extends AIContentBase {
+  $type: 'error';
+  Message?: string | null;
+  ErrorCode?: string | null;
+  Details?: string | null;
+}
+
+export interface AIContentFunctionCallContent extends AIContentBase {
+  $type: 'functionCall';
+  CallId: string;
+  Name: string;
+  Arguments?: Record<string, unknown> | null;
+}
+
+export interface AIContentFunctionResultContent extends AIContentBase {
+  $type: 'functionResult';
+  CallId: string;
+  Result: unknown;
+}
+
+export interface AIContentTextContent extends AIContentBase {
+  $type: 'text';
+  Text?: string | null;
+}
+
+export interface AIContentTextReasoningContent extends AIContentBase {
+  $type: 'reasoning';
+  Text?: string | null;
+}
+
+export interface AIContentUriContent extends AIContentBase {
+  $type: 'uri';
+  Uri: string;
+  MediaType: string;
+}
+
+export interface AIContentUsageContent extends AIContentBase {
+  $type: 'usage';
+  Details: {
+    InputTokenCount?: number | null;
+    OutputTokenCount?: number | null;
+    TotalTokenCount?: number | null;
+    AdditionalCounts?: Record<string, number> | null;
+  };
 }

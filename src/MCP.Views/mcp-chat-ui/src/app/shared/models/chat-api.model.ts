@@ -79,3 +79,37 @@ export interface AIContentTextContent extends AIContentBase {
   $type: 'text';
   Text?: string | null;
 }
+
+// OpenAPI: ChatMessage
+export interface ChatMessage {
+  authorName?: string | null;
+  role?: string | null; // NullableOfChatRole
+  contents?: AIContent[] | null;
+  messageId?: string | null;
+  [key: string]: unknown;
+}
+
+// OpenAPI: ChatOptions
+export interface ChatOptions {
+  conversationId?: string | null;
+  instructions?: string | null;
+  temperature?: number | null;
+  maxOutputTokens?: number | null;
+  topP?: number | null;
+  topK?: number | null;
+  frequencyPenalty?: number | null;
+  presencePenalty?: number | null;
+  seed?: number | null;
+  responseFormat?: unknown | null; // ChatResponseFormat
+  modelId?: string | null;
+  stopSequences?: string[] | null;
+  allowMultipleToolCalls?: boolean | null;
+  toolMode?: unknown | null; // ChatToolMode
+  [key: string]: unknown;
+}
+
+// OpenAPI: ChatRequest
+export interface ChatRequest {
+  messages: ChatMessage[];
+  options?: ChatOptions | null;
+}

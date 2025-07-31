@@ -11,7 +11,7 @@ function isErrorContent(c: unknown): c is import('../../../shared/models/chat-ap
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
-import { ChatMessageView } from '../../../shared/models/chat-view-message.model';
+import { ChatResponseUpdateView } from '../../../shared/models/chat-view-message.model';
 import { ChatResponseUpdate } from '../../../shared/models/chat-api.model';
 import { updateChatMessageView } from '../../../shared/models/chat-view-message.mapper';
 
@@ -21,7 +21,7 @@ import { updateChatMessageView } from '../../../shared/models/chat-view-message.
 export class Chat {
   private readonly chatStreamService = inject(ChatHttpStream);
 
-  readonly messages = signal<ChatMessageView[]>([]);
+  readonly messages = signal<ChatResponseUpdateView[]>([]);
   readonly isLoading = signal(false);
 
   constructor() {
@@ -40,7 +40,7 @@ export class Chat {
     if (!content.trim()) return;
 
     // Add user message
-    const userMessage: ChatMessageView = {
+    const userMessage: ChatResponseUpdateView = {
       id: this.generateId(),
       content: content.trim(),
       isUser: true,

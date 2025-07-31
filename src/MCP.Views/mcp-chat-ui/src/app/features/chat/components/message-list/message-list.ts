@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { ChatMessageView } from '../../../../shared/models/chat-view-message.model';
+import { ChatResponseUpdateView } from '../../../../shared/models/chat-view-message.model';
 
 @Component({
   selector: 'app-message-list',
@@ -13,5 +13,5 @@ import { ChatMessageView } from '../../../../shared/models/chat-view-message.mod
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageList {
-  readonly messages = input.required<ChatMessageView[]>();
+  readonly messages = input.required<ChatResponseUpdateView[]>();
 }

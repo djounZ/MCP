@@ -1,7 +1,7 @@
 // Renamed from chat-message.model.ts for frontend view model clarity
 
 // View model for chat messages used in the UI
-export interface ChatMessageView {
+export interface ChatResponseUpdateView {
   id: string;
   content: string;
   isUser: boolean;

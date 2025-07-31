@@ -1,7 +1,7 @@
 // Renamed from chat-message.mapper.ts for frontend view model mapping clarity
 
 import { ChatResponseUpdate, AIContentTextContent, AIContentTextReasoningContent, AIContentErrorContent } from './chat-api.model';
-import { ChatMessageView } from './chat-view-message.model';
+import { ChatResponseUpdateView } from './chat-view-message.model';
 
 function isTextContent(c: unknown): c is AIContentTextContent {
   return !!c && typeof c === 'object' && (c as any).$type === 'text';
@@ -14,7 +14,7 @@ function isErrorContent(c: unknown): c is AIContentErrorContent {
 }
 
 export function updateChatMessageView(
-  prev: ChatMessageView,
+  prev: ChatResponseUpdateView,
   api: ChatResponseUpdate,
   opts?: { isStreaming?: boolean }
 ): void {

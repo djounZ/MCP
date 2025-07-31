@@ -11,17 +11,28 @@ function isErrorContent(c: unknown): c is import('../../../shared/models/chat-ap
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
-import { AIContentTextContentView, ChatMessageView, ChatRequestView, ChatResponseUpdateView } from '../../../shared/models/chat-view-message.model';
+import { AIContentTextContentView, ChatMessageView, ChatRequestView } from '../../../shared/models/chat-view-message.model';
 import { ChatResponseUpdate } from '../../../shared/models/chat-api.model';
-import { updateChatMessageView, mapChatRequestViewToChatRequest } from '../../../shared/models/chat-view-message.mapper';
+import { mapChatRequestViewToChatRequest } from '../../../shared/models/chat-view-message.mapper';
+
+export interface ChatResponseUpdateViewLight {
+  id: string;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
+  isStreaming?: boolean;
+  isError?: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class Chat {
   private readonly chatStreamService = inject(ChatHttpStream);
 
-  readonly messages = signal<ChatResponseUpdateView[]>([]);
+  readonly messages = signal<ChatResponseUpdateViewLight[]>([]);
   readonly isLoading = signal(false);
 
   constructor() {
@@ -29,7 +40,6 @@ export class Chat {
   }
 
   private initializeChatStreamConnection(): void {
-    this.chatStreamService.connect().subscribe();
 
     this.chatStreamService.getMessages().subscribe((response: ChatResponseUpdate) => {
       this.handleStreamingResponse(response);
@@ -40,7 +50,7 @@ export class Chat {
     if (!content.trim()) return;
 
     // Add user message
-    const userMessage: ChatResponseUpdateView = {
+    const userMessage: ChatResponseUpdateViewLight = {
       id: this.generateId(),
       content: content.trim(),
       isUser: true,
@@ -88,7 +98,7 @@ export class Chat {
     this.messages.update(messages => {
       const idx = messages.length - 1;
       if (idx < 0) return messages;
-      updateChatMessageView(messages[idx], response, { isStreaming: !response.FinishReason });
+      this.updateChatMessageViewLight(messages[idx], response, { isStreaming: !response.FinishReason });
       if (response.FinishReason) {
         this.isLoading.set(false);
         messages[idx].isStreaming = false;
@@ -96,6 +106,23 @@ export class Chat {
       return [...messages];
     });
   }
+
+  updateChatMessageViewLight(
+  prev: ChatResponseUpdateViewLight,
+  api: ChatResponseUpdate,
+  opts?: { isStreaming?: boolean }
+): void {
+  let appendText = '';
+  const content = api.Contents?.[0];
+  if (content && (isTextContent(content) || isReasoningContent(content))) {
+    appendText = content.Text || '';
+  } else if (content && isErrorContent(content)) {
+    appendText = content.Message || '';
+    prev.isError = true;
+  }
+  prev.content += appendText;
+  prev.isStreaming = opts?.isStreaming;
+}
 
   clearChat(): void {
     this.messages.set([]);

@@ -2,12 +2,16 @@
 
 // View model for chat messages used in the UI
 export interface ChatResponseUpdateView {
-  id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-  isStreaming?: boolean;
-  isError?: boolean;
+  authorName?: string | null;
+  role?: string | null;
+  contents?: AIContentView[] | null;
+  responseId?: string | null;
+  messageId?: string | null;
+  conversationId?: string | null;
+  createdAt?: string | null;
+  finishReason?: string | null;
+  modelId?: string | null;
+  [key: string]: unknown;
 }
 
 // View model for AIContent (UI)

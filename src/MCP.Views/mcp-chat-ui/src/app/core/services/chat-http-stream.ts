@@ -10,14 +10,6 @@ export class ChatHttpStream {
 
   private readonly apiUrl = 'http://localhost:5200/api/chat/completions/stream';
 
-  connect(): Observable<boolean> {
-    // For HTTP, always consider as connected
-    return new Observable<boolean>(observer => {
-      observer.next(true);
-      observer.complete();
-    });
-  }
-
   async sendMessage(message: ChatRequest): Promise<void> {
     try {
       const response = await fetch(this.apiUrl, {
@@ -91,9 +83,5 @@ export class ChatHttpStream {
 
   getMessages(): Observable<ChatResponseUpdate> {
     return this.messageSubject$.asObservable();
-  }
-
-  disconnect(): void {
-    // No-op for HTTP
   }
 }

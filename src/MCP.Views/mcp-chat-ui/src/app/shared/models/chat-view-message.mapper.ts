@@ -1,3 +1,82 @@
+export function mapChatResponseUpdateToView(api: ChatResponseUpdate): ChatResponseUpdateView {
+  return {
+    authorName: api.AuthorName ?? null,
+    role: api.Role ?? null,
+    contents: api.Contents ? api.Contents.map(mapAIContentToAIContentView) : null,
+    responseId: api.ResponseId ?? null,
+    messageId: api.MessageId ?? null,
+    conversationId: api.ConversationId ?? null,
+    createdAt: api.CreatedAt ?? null,
+    finishReason: api.FinishReason ?? null,
+    modelId: api.ModelId ?? null,
+    // Optionally add isStreaming/isError if you have logic for them
+  };
+}
+
+function mapAIContentToAIContentView(api: AIContent): AIContentView {
+  const type = (api as any).$type;
+  switch (type) {
+    case 'data':
+      return {
+        $type: 'data',
+        uri: (api as any).Uri,
+        additionalProperties: api.additionalProperties ?? null
+      };
+    case 'error':
+      return {
+        $type: 'error',
+        message: (api as any).Message ?? null,
+        errorCode: (api as any).ErrorCode ?? null,
+        details: (api as any).Details ?? null,
+        additionalProperties: api.additionalProperties ?? null
+      };
+    case 'functionCall':
+      return {
+        $type: 'functionCall',
+        callId: (api as any).CallId,
+        name: (api as any).Name,
+        arguments: (api as any).Arguments ?? null,
+        additionalProperties: api.additionalProperties ?? null
+      };
+    case 'functionResult':
+      return {
+        $type: 'functionResult',
+        callId: (api as any).CallId,
+        result: (api as any).Result,
+        additionalProperties: api.additionalProperties ?? null
+      };
+    case 'text':
+      return {
+        $type: 'text',
+        text: (api as any).Text ?? null,
+        additionalProperties: api.additionalProperties ?? null
+      };
+    case 'reasoning':
+      return {
+        $type: 'reasoning',
+        text: (api as any).Text ?? null,
+        additionalProperties: api.additionalProperties ?? null
+      };
+    case 'uri':
+      return {
+        $type: 'uri',
+        uri: (api as any).Uri,
+        mediaType: (api as any).MediaType,
+        additionalProperties: api.additionalProperties ?? null
+      };
+    case 'usage':
+      return {
+        $type: 'usage',
+        details: (api as any).Details,
+        additionalProperties: api.additionalProperties ?? null
+      };
+    default:
+      return {
+        $type: type,
+        additionalProperties: api.additionalProperties ?? null
+      };
+  }
+}
 // Renamed from chat-message.mapper.ts for frontend view model mapping clarity
 
 import { ChatResponseUpdate, AIContentTextContent, AIContentTextReasoningContent, AIContentErrorContent, ChatMessage, AIContent, AIContentDataContent, AIContentFunctionCallContent, AIContentFunctionResultContent, AIContentUriContent, AIContentUsageContent } from './chat-api.model';
@@ -14,22 +93,6 @@ function isErrorContent(c: unknown): c is AIContentErrorContent {
   return !!c && typeof c === 'object' && (c as any).$type === 'error';
 }
 
-export function updateChatMessageView(
-  prev: ChatResponseUpdateView,
-  api: ChatResponseUpdate,
-  opts?: { isStreaming?: boolean }
-): void {
-  let appendText = '';
-  const content = api.Contents?.[0];
-  if (content && (isTextContent(content) || isReasoningContent(content))) {
-    appendText = content.Text || '';
-  } else if (content && isErrorContent(content)) {
-    appendText = content.Message || '';
-    prev.isError = true;
-  }
-  prev.content += appendText;
-  prev.isStreaming = opts?.isStreaming;
-}
 
 export function mapChatMessageViewToChatMessage(view: ChatMessageView): ChatMessage {
   return {

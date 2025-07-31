@@ -89,3 +89,28 @@ export interface ChatMessageView {
   timestamp?: Date;
   [key: string]: unknown;
 }
+
+// View model for ChatOptions (UI)
+export interface ChatOptionsView {
+  conversationId?: string | null;
+  instructions?: string | null;
+  temperature?: number | null;
+  maxOutputTokens?: number | null;
+  topP?: number | null;
+  topK?: number | null;
+  frequencyPenalty?: number | null;
+  presencePenalty?: number | null;
+  seed?: number | null;
+  responseFormat?: unknown | null; // Use a more specific type if needed
+  modelId?: string | null;
+  stopSequences?: string[] | null;
+  allowMultipleToolCalls?: boolean | null;
+  toolMode?: unknown | null; // Use a more specific type if needed
+  [key: string]: unknown;
+}
+
+// View model for ChatRequest (UI)
+export interface ChatRequestView {
+  messages: ChatMessageView[];
+  options?: ChatOptionsView | null;
+}

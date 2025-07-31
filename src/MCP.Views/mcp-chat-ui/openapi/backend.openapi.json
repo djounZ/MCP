@@ -1,0 +1,773 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "MCP.WebApi | v1",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5200/"
+    }
+  ],
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "User login endpoint",
+        "description": "Authenticates user and returns JWT token",
+        "operationId": "Login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/validate": {
+      "get": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Validate current JWT token",
+        "description": "Returns information about the current authenticated user",
+        "operationId": "ValidateToken",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Refresh JWT token",
+        "description": "Issues a new JWT token for the authenticated user",
+        "operationId": "RefreshToken",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Basic health check endpoint",
+        "description": "Returns basic health status information (public endpoint)",
+        "operationId": "GetHealth",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/health/detailed": {
+      "get": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Detailed health check with dependency status",
+        "description": "Returns detailed health information (requires authentication)",
+        "operationId": "GetDetailedHealth",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/health/admin": {
+      "get": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Admin-only detailed system metrics",
+        "description": "Returns detailed system metrics (admin only)",
+        "operationId": "GetAdminHealth",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/weatherforecast": {
+      "get": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Get weather forecast",
+        "description": "Returns a 5-day weather forecast",
+        "operationId": "GetWeatherForecast",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/completions": {
+      "post": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Create a chat completion",
+        "description": "Creates a non-streaming chat completion using GitHub Copilot",
+        "operationId": "CreateChatCompletion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/chat/completions/stream": {
+      "post": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Create a streaming chat completion",
+        "description": "Creates a streaming chat completion using GitHub Copilot",
+        "operationId": "CreateStreamingChatCompletion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatResponseUpdate"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Simple chat endpoint",
+        "description": "Send a simple message and get a non-streaming response from GitHub Copilot",
+        "operationId": "SimpleChat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimpleChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/chat/stream": {
+      "post": {
+        "tags": [
+          "MCP.WebApi"
+        ],
+        "summary": "Simple streaming chat endpoint",
+        "description": "Send a simple message and get a streaming response from GitHub Copilot",
+        "operationId": "SimpleChatStream",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimpleChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AIContent": {
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/AIContentDataContent"
+          },
+          {
+            "$ref": "#/components/schemas/AIContentErrorContent"
+          },
+          {
+            "$ref": "#/components/schemas/AIContentFunctionCallContent"
+          },
+          {
+            "$ref": "#/components/schemas/AIContentFunctionResultContent"
+          },
+          {
+            "$ref": "#/components/schemas/AIContentTextContent"
+          },
+          {
+            "$ref": "#/components/schemas/AIContentTextReasoningContent"
+          },
+          {
+            "$ref": "#/components/schemas/AIContentUriContent"
+          },
+          {
+            "$ref": "#/components/schemas/AIContentUsageContent"
+          },
+          {
+            "$ref": "#/components/schemas/AIContentBase"
+          }
+        ]
+      },
+      "AIContentBase": {
+        "properties": {
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AIContentDataContent": {
+        "required": [
+          "$type",
+          "uri"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "data"
+            ],
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AIContentErrorContent": {
+        "required": [
+          "$type",
+          "message"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "error"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AIContentFunctionCallContent": {
+        "required": [
+          "$type",
+          "callId",
+          "name"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "functionCall"
+            ],
+            "type": "string"
+          },
+          "callId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "arguments": {
+            "type": "object",
+            "default": null,
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AIContentFunctionResultContent": {
+        "required": [
+          "$type",
+          "callId",
+          "result"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "functionResult"
+            ],
+            "type": "string"
+          },
+          "callId": {
+            "type": "string"
+          },
+          "result": { },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AIContentTextContent": {
+        "required": [
+          "$type",
+          "text"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "text"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AIContentTextReasoningContent": {
+        "required": [
+          "$type",
+          "text"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "reasoning"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AIContentUriContent": {
+        "required": [
+          "$type",
+          "uri",
+          "mediaType"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "uri"
+            ],
+            "type": "string"
+          },
+          "uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AIContentUsageContent": {
+        "required": [
+          "$type",
+          "details"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "usage"
+            ],
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "inputTokenCount": {
+                "type": "integer",
+                "format": "int64",
+                "nullable": true
+              },
+              "outputTokenCount": {
+                "type": "integer",
+                "format": "int64",
+                "nullable": true
+              },
+              "totalTokenCount": {
+                "type": "integer",
+                "format": "int64",
+                "nullable": true
+              },
+              "additionalCounts": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "nullable": true
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "ChatMessage": {
+        "type": "object",
+        "properties": {
+          "authorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/ChatRole"
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIContent"
+            },
+            "nullable": true
+          },
+          "messageId": {
+            "type": "string",
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "ChatOptions": {
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "instructions": {
+            "type": "string",
+            "nullable": true
+          },
+          "temperature": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "maxOutputTokens": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "topP": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "topK": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "frequencyPenalty": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "presencePenalty": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "responseFormat": {
+            "$ref": "#/components/schemas/ChatResponseFormat"
+          },
+          "modelId": {
+            "type": "string",
+            "nullable": true
+          },
+          "stopSequences": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "allowMultipleToolCalls": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "toolMode": {
+            "$ref": "#/components/schemas/ChatToolMode"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "default": null,
+        "nullable": true
+      },
+      "ChatRequest": {
+        "required": [
+          "messages"
+        ],
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            }
+          },
+          "options": {
+            "$ref": "#/components/schemas/ChatOptions"
+          }
+        }
+      },
+      "ChatResponseFormat": {
+        "type": "object",
+        "nullable": true
+      },
+      "ChatResponseUpdate": {
+        "type": "object",
+        "properties": {
+          "authorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/NullableOfChatRole"
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIContent"
+            },
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "nullable": true
+          },
+          "responseId": {
+            "type": "string",
+            "nullable": true
+          },
+          "messageId": {
+            "type": "string",
+            "nullable": true
+          },
+          "conversationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finishReason": {
+            "$ref": "#/components/schemas/NullableOfChatFinishReason"
+          },
+          "modelId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ChatRole": { },
+      "ChatToolMode": {
+        "type": "object",
+        "nullable": true
+      },
+      "LoginRequest": {
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "NullableOfChatFinishReason": {
+        "nullable": true
+      },
+      "NullableOfChatRole": {
+        "nullable": true
+      },
+      "SimpleChatRequest": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "default": null,
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "default": null,
+            "nullable": true
+          },
+          "temperature": {
+            "type": "number",
+            "format": "float",
+            "default": null,
+            "nullable": true
+          },
+          "maxTokens": {
+            "type": "integer",
+            "format": "int32",
+            "default": null,
+            "nullable": true
+          }
+        }
+      },
+      "WeatherForecast": {
+        "required": [
+          "date",
+          "temperatureC",
+          "summary"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "temperatureC": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "temperatureF": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "MCP.WebApi"
+    }
+  ]
+}

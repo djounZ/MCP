@@ -1,7 +1,8 @@
 // Renamed from chat-message.mapper.ts for frontend view model mapping clarity
 
 import { ChatResponseUpdate, AIContentTextContent, AIContentTextReasoningContent, AIContentErrorContent, ChatMessage, AIContent, AIContentDataContent, AIContentFunctionCallContent, AIContentFunctionResultContent, AIContentUriContent, AIContentUsageContent } from './chat-api.model';
-import { ChatResponseUpdateView, ChatMessageView, AIContentView } from './chat-view-message.model';
+import { ChatResponseUpdateView, ChatMessageView, AIContentView, ChatRequestView, ChatOptionsView } from './chat-view-message.model';
+import { ChatRequest, ChatOptions } from './chat-api.model';
 
 function isTextContent(c: unknown): c is AIContentTextContent {
   return !!c && typeof c === 'object' && (c as any).$type === 'text';
@@ -103,4 +104,31 @@ function mapAIContentViewToAIContent(view: AIContentView): AIContent {
         additionalProperties: view.additionalProperties ?? null
       } as AIContent;
   }
+}
+
+export function mapChatRequestViewToChatRequest(view: ChatRequestView): ChatRequest {
+  return {
+    messages: view.messages.map(mapChatMessageViewToChatMessage),
+    options: view.options ? mapChatOptionsViewToChatOptions(view.options) : undefined
+  };
+}
+
+function mapChatOptionsViewToChatOptions(view: ChatOptionsView): ChatOptions {
+  return {
+    conversationId: view.conversationId ?? null,
+    instructions: view.instructions ?? null,
+    temperature: view.temperature ?? null,
+    maxOutputTokens: view.maxOutputTokens ?? null,
+    topP: view.topP ?? null,
+    topK: view.topK ?? null,
+    frequencyPenalty: view.frequencyPenalty ?? null,
+    presencePenalty: view.presencePenalty ?? null,
+    seed: view.seed ?? null,
+    responseFormat: view.responseFormat ?? null,
+    modelId: view.modelId ?? null,
+    stopSequences: view.stopSequences ?? null,
+    allowMultipleToolCalls: view.allowMultipleToolCalls ?? null,
+    toolMode: view.toolMode ?? null,
+    additionalProperties: view['additionalProperties'] ?? null
+  };
 }

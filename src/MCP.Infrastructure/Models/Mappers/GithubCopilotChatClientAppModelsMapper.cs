@@ -247,5 +247,182 @@ public class GithubCopilotChatClientAppModelsMapper
         };
 
     }
+
+    #region Reverse Mappings (AppModel to Microsoft.Extensions.AI)
+
+    // Chat completion reverse mappings
+    public ChatResponse MapFromAppModel(ChatResponseAppModel appModel)
+    {
+        var chatResponse = new ChatResponse([.. appModel.Messages.Select(MapFromAppModel)])
+        {
+            ResponseId = appModel.ResponseId,
+            ConversationId = appModel.ConversationId,
+            ModelId = appModel.ModelId,
+            CreatedAt = appModel.CreatedAt,
+            FinishReason = MapFromAppModelFinishReason(appModel.FinishReason)
+        };
+        return chatResponse;
+    }
+
+    public ChatResponseUpdate MapFromAppModel(ChatResponseUpdateAppModel appModel)
+    {
+        return new ChatResponseUpdate
+        {
+            AuthorName = appModel.AuthorName,
+            Role = MapFromAppModelRole(appModel.Role ?? ChatRoleEnumAppModel.User),
+            Contents = [.. appModel.Contents.Select(MapFromAppModelContent)],
+            ResponseId = appModel.ResponseId,
+            MessageId = appModel.MessageId,
+            ConversationId = appModel.ConversationId,
+            CreatedAt = appModel.CreatedAt,
+            FinishReason = MapFromAppModelFinishReason(appModel.FinishReason),
+            ModelId = appModel.ModelId
+        };
+    }
+
+    public ChatMessage MapFromAppModel(ChatMessageAppModel appModel)
+    {
+        var contents = appModel.Contents.Select(MapFromAppModelContent).ToArray();
+        return new ChatMessage(MapFromAppModelRole(appModel.Role), contents);
+    }
+
+    public ChatOptions? MapFromAppModel(ChatOptionsAppModel? appModel)
+    {
+        if (appModel == null)
+        {
+            return null;
+        }
+
+        return new ChatOptions
+        {
+            ConversationId = appModel.ConversationId,
+            Instructions = appModel.Instructions,
+            Temperature = appModel.Temperature,
+            MaxOutputTokens = appModel.MaxOutputTokens,
+            TopP = appModel.TopP,
+            TopK = appModel.TopK,
+            FrequencyPenalty = appModel.FrequencyPenalty,
+            PresencePenalty = appModel.PresencePenalty,
+            Seed = appModel.Seed,
+            ResponseFormat = MapFromAppModel(appModel.ResponseFormat),
+            ModelId = appModel.ModelId,
+            StopSequences = appModel.StopSequences,
+            AllowMultipleToolCalls = appModel.AllowMultipleToolCalls,
+            ToolMode = MapFromAppModel(appModel.ToolMode)
+        };
+    }
+
+    private ChatToolMode? MapFromAppModel(ChatToolModeAppModel? appModel)
+    {
+        return appModel switch
+        {
+            AutoChatToolModeAppModel => new AutoChatToolMode(),
+            NoneChatToolModeAppModel => new NoneChatToolMode(),
+            RequiredChatToolModeAppModel required => new RequiredChatToolMode(required.RequiredFunctionName),
+            _ => null
+        };
+    }
+
+    private ChatResponseFormat? MapFromAppModel(ChatResponseFormatAppModel? appModel)
+    {
+        return appModel switch
+        {
+            ChatResponseFormatTextAppModel => new ChatResponseFormatText(),
+            ChatResponseFormatJsonAppModel json => new ChatResponseFormatJson(
+                json.Schema,
+                json.SchemaName,
+                json.SchemaDescription
+            ),
+            _ => null
+        };
+    }
+
+    // Role enum reverse mapping
+    public ChatRole MapFromAppModel(ChatRoleEnumAppModel appModel)
+    {
+        return MapFromAppModelRole(appModel);
+    }
+
+    // Content reverse mappings
+    public TextContent MapFromAppModel(TextContentAppModel appModel)
+    {
+        return new TextContent(appModel.Text);
+    }
+
+    public DataContent MapFromAppModel(DataContentAppModel appModel)
+    {
+        return new DataContent(appModel.Uri.ToString(), appModel.MediaType);
+    }
+
+    public UsageContent MapFromAppModel(UsageContentAppModel appModel)
+    {
+        return new UsageContent(MapFromAppModel(appModel.DetailsAppModel));
+    }
+
+    public UriContent MapFromAppModel(UriContentAppModel appModel)
+    {
+        return new UriContent(appModel.Uri, appModel.MediaType);
+    }
+
+    public ErrorContent MapFromAppModel(ErrorContentAppModel appModel)
+    {
+        return new ErrorContent(appModel.Message);
+    }
+
+    // Usage reverse mappings
+    public UsageDetails MapFromAppModel(UsageDetailsAppModel appModel)
+    {
+        var additionalCounts = appModel.AdditionalCounts != null
+            ? new AdditionalPropertiesDictionary<long>(appModel.AdditionalCounts)
+            : null;
+
+        return new UsageDetails
+        {
+            InputTokenCount = appModel.InputTokenCount,
+            OutputTokenCount = appModel.OutputTokenCount,
+            TotalTokenCount = appModel.TotalTokenCount,
+            AdditionalCounts = additionalCounts
+        };
+    }
+
+    // Helper methods for reverse mapping specific types
+    private ChatRole MapFromAppModelRole(ChatRoleEnumAppModel appModel)
+    {
+        return appModel switch
+        {
+            ChatRoleEnumAppModel.System => ChatRole.System,
+            ChatRoleEnumAppModel.User => ChatRole.User,
+            ChatRoleEnumAppModel.Assistant => ChatRole.Assistant,
+            ChatRoleEnumAppModel.Tool => ChatRole.Tool,
+            _ => ChatRole.User
+        };
+    }
+
+    private AIChatFinishReason? MapFromAppModelFinishReason(ChatFinishReasonAppModel? appModel)
+    {
+        return appModel switch
+        {
+            ChatFinishReasonAppModel.Stop => AIChatFinishReason.Stop,
+            ChatFinishReasonAppModel.Length => AIChatFinishReason.Length,
+            ChatFinishReasonAppModel.ToolCalls => AIChatFinishReason.ToolCalls,
+            ChatFinishReasonAppModel.ContentFilter => AIChatFinishReason.ContentFilter,
+            _ => null
+        };
+    }
+
+    private AIContent MapFromAppModelContent(AiContentAppModel appModel)
+    {
+        return appModel switch
+        {
+            TextContentAppModel text => MapFromAppModel(text),
+            DataContentAppModel data => MapFromAppModel(data),
+            UsageContentAppModel usage => MapFromAppModel(usage),
+            UriContentAppModel uri => MapFromAppModel(uri),
+            ErrorContentAppModel error => MapFromAppModel(error),
+            _ => throw new NotSupportedException($"Unsupported app model content type: {appModel.GetType().Name}")
+        };
+    }
+
+    #endregion
 }
 

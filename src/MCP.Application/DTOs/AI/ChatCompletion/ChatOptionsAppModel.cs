@@ -8,7 +8,7 @@ public sealed record ChatOptionsAppModel(
     [property: JsonPropertyName("temperature")] float? Temperature,
     [property: JsonPropertyName("maxOutputTokens")] int? MaxOutputTokens,
     [property: JsonPropertyName("top_p")] float? TopP,
-    [property: JsonPropertyName("top_k")] float? TopK,
+    [property: JsonPropertyName("top_k")] int? TopK,
     [property: JsonPropertyName("frequency_penalty")] float? FrequencyPenalty,
     [property: JsonPropertyName("presence_penalty")] float? PresencePenalty,
     [property: JsonPropertyName("seed")] long? Seed,

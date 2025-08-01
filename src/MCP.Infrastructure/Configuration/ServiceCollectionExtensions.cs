@@ -1,6 +1,7 @@
 using AI.GithubCopilot.Configuration;
 using MCP.Application.Interfaces;
 using MCP.Domain.Interfaces;
+using MCP.Infrastructure.Models.Mappers;
 using MCP.Infrastructure.Repositories;
 using MCP.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +29,9 @@ public static class ServiceCollectionExtensions
         // Add other infrastructure services here
         // Example: Database context, external API clients, etc.
 
+        services.AddSingleton<GithubCopilotChatClientAppModelsMapper>();
         services.AddGithubCopilot(configuration);
+        services.AddSingleton<GithubCopilotChatService>();
         return services;
     }
 }

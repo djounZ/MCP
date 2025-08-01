@@ -1,5 +1,8 @@
 using Microsoft.Extensions.AI;
 using AI.GithubCopilot.Domain;
+using MCP.Application.DTOs.AI.ChatCompletion;
+using MCP.Application.DTOs.AI.Contents;
+using MCP.Infrastructure.Services;
 
 namespace MCP.WebApi.Extensions;
 
@@ -19,7 +22,7 @@ public static class GithubCopilotChatClientEndpointsExtensions
         // Non-streaming chat completion endpoint
         app.MapPost("/api/chat/completions", async (
             ChatRequest request,
-            GithubCopilotChatClient chatClient,
+            GithubCopilotChatService chatClient,
             CancellationToken cancellationToken) =>
             {
                 var response = await chatClient.GetResponseAsync(request.Messages, request.Options, cancellationToken);
@@ -33,7 +36,7 @@ public static class GithubCopilotChatClientEndpointsExtensions
         // Streaming chat completion endpoint - returns IAsyncEnumerable<ChatResponseUpdate>
         app.MapPost("/api/chat/completions/stream", (
             ChatRequest request,
-            GithubCopilotChatClient chatClient,
+            GithubCopilotChatService chatClient,
             CancellationToken cancellationToken) =>
             {
                 var streamingResponseAsync = chatClient.GetStreamingResponseAsync(request.Messages, request.Options, cancellationToken);
@@ -59,21 +62,31 @@ public static class GithubCopilotChatClientEndpointsExtensions
         // Simple non-streaming chat endpoint
         app.MapPost("/api/chat", async (
             SimpleChatRequest request,
-            GithubCopilotChatClient chatClient,
+            GithubCopilotChatService chatClient,
             CancellationToken cancellationToken) =>
             {
-                var messages = new List<ChatMessage>
+                var messages = new List<ChatMessageAppModel>
                 {
-                    new(ChatRole.System, request.SystemPrompt ?? "You are a helpful assistant."),
-                    new(ChatRole.User, request.Message)
+                    new(ChatRoleEnumAppModel.System, [new TextContentAppModel([], request.SystemPrompt)] ),
+                    new(ChatRoleEnumAppModel.User, [new TextContentAppModel([], request.Message)] )
                 };
 
-                var options = new ChatOptions
-                {
-                    ModelId = request.Model ?? "gpt-4",
-                    Temperature = request.Temperature ?? 0.7f,
-                    MaxOutputTokens = request.MaxTokens ?? 1000
-                };
+                var options = new ChatOptionsAppModel(
+                    null,
+                    null,
+                    request.Temperature ?? 0.7f,
+                    request.MaxTokens ?? 1000,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    request.Model ?? "gpt-4",
+                    null,
+                    null,
+                    null
+                    );
 
                 var response = await chatClient.GetResponseAsync(messages, options, cancellationToken);
                 return Results.Ok(response);
@@ -86,37 +99,35 @@ public static class GithubCopilotChatClientEndpointsExtensions
         // Simple streaming chat endpoint - returns IAsyncEnumerable<ChatResponseUpdate>
         app.MapPost("/api/chat/stream", (
             SimpleChatRequest request,
-            GithubCopilotChatClient chatClient,
+            GithubCopilotChatService chatClient,
             CancellationToken cancellationToken) =>
             {
-                var messages = new List<ChatMessage>
+
+                var messages = new List<ChatMessageAppModel>
                 {
-                    new(ChatRole.System, request.SystemPrompt ?? "You are a helpful assistant."),
-                    new(ChatRole.User, request.Message)
+                    new(ChatRoleEnumAppModel.System, [new TextContentAppModel([], request.SystemPrompt)] ),
+                    new(ChatRoleEnumAppModel.User, [new TextContentAppModel([], request.Message)] )
                 };
 
-                var options = new ChatOptions
-                {
-                    ModelId = request.Model ?? "gpt-4",
-                    Temperature = request.Temperature ?? 0.7f,
-                    MaxOutputTokens = request.MaxTokens ?? 1000
-                };
+                var options = new ChatOptionsAppModel(
+                    null,
+                    null,
+                    request.Temperature ?? 0.7f,
+                    request.MaxTokens ?? 1000,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    request.Model ?? "gpt-4",
+                    null,
+                    null,
+                    null
+                );
 
                 var responseStream = chatClient.GetStreamingResponseAsync(messages, options, cancellationToken);
-
-                return Results.Stream(
-                    async (stream) =>
-                    {
-                        await foreach (var update in responseStream)
-                        {
-                            var data = System.Text.Json.JsonSerializer.Serialize(update);
-                            var bytes = System.Text.Encoding.UTF8.GetBytes(data +  Environment.NewLine);
-                            await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
-                            await stream.FlushAsync(cancellationToken);
-                        }
-                    },
-                    contentType: StreamingContentType
-                );
+                return responseStream.ToResult(cancellationToken);
             })
             .WithName("SimpleChatStream")
             .WithSummary("Simple streaming chat endpoint")
@@ -133,8 +144,8 @@ public static class GithubCopilotChatClientEndpointsExtensions
 /// <param name="Messages">List of chat messages</param>
 /// <param name="Options">Chat options</param>
 public record ChatRequest(
-    IEnumerable<ChatMessage> Messages,
-    ChatOptions? Options = null
+    IEnumerable<ChatMessageAppModel> Messages,
+    ChatOptionsAppModel? Options = null
 );
 
 /// <summary>
@@ -147,7 +158,7 @@ public record ChatRequest(
 /// <param name="MaxTokens">Maximum tokens to generate</param>
 public record SimpleChatRequest(
     string Message,
-    string? SystemPrompt = null,
+    string SystemPrompt,
     string? Model = null,
     float? Temperature = null,
     int? MaxTokens = null

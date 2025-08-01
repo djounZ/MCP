@@ -138,7 +138,7 @@
     "/api/chat/completions": {
       "post": {
         "tags": [
-          "MCP.WebApi"
+          "GithubCopilotChat"
         ],
         "summary": "Create a chat completion",
         "description": "Creates a non-streaming chat completion using GitHub Copilot",
@@ -155,7 +155,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponseAppModel"
+                }
+              }
+            }
           }
         }
       }
@@ -163,7 +170,7 @@
     "/api/chat/completions/stream": {
       "post": {
         "tags": [
-          "MCP.WebApi"
+          "GithubCopilotChat"
         ],
         "summary": "Create a streaming chat completion",
         "description": "Creates a streaming chat completion using GitHub Copilot",
@@ -186,7 +193,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ChatResponseUpdate"
+                    "$ref": "#/components/schemas/ChatResponseAppModel"
                   }
                 }
               }
@@ -198,7 +205,7 @@
     "/api/chat": {
       "post": {
         "tags": [
-          "MCP.WebApi"
+          "GithubCopilotChat"
         ],
         "summary": "Simple chat endpoint",
         "description": "Send a simple message and get a non-streaming response from GitHub Copilot",
@@ -215,7 +222,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponseAppModel"
+                }
+              }
+            }
           }
         }
       }
@@ -223,7 +237,7 @@
     "/api/chat/stream": {
       "post": {
         "tags": [
-          "MCP.WebApi"
+          "GithubCopilotChat"
         ],
         "summary": "Simple streaming chat endpoint",
         "description": "Send a simple message and get a streaming response from GitHub Copilot",
@@ -240,7 +254,17 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatResponseAppModel"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -248,50 +272,49 @@
   },
   "components": {
     "schemas": {
-      "AIContent": {
+      "AiContentAppModel": {
+        "required": [
+          "$type"
+        ],
         "type": "object",
         "anyOf": [
           {
-            "$ref": "#/components/schemas/AIContentDataContent"
+            "$ref": "#/components/schemas/AiContentAppModelDataContentAppModel"
           },
           {
-            "$ref": "#/components/schemas/AIContentErrorContent"
+            "$ref": "#/components/schemas/AiContentAppModelErrorContentAppModel"
           },
           {
-            "$ref": "#/components/schemas/AIContentFunctionCallContent"
+            "$ref": "#/components/schemas/AiContentAppModelTextContentAppModel"
           },
           {
-            "$ref": "#/components/schemas/AIContentFunctionResultContent"
+            "$ref": "#/components/schemas/AiContentAppModelTextReasoningContentAppModel"
           },
           {
-            "$ref": "#/components/schemas/AIContentTextContent"
+            "$ref": "#/components/schemas/AiContentAppModelUriContentAppModel"
           },
           {
-            "$ref": "#/components/schemas/AIContentTextReasoningContent"
-          },
-          {
-            "$ref": "#/components/schemas/AIContentUriContent"
-          },
-          {
-            "$ref": "#/components/schemas/AIContentUsageContent"
-          },
-          {
-            "$ref": "#/components/schemas/AIContentBase"
+            "$ref": "#/components/schemas/AiContentAppModelUsageContentAppModel"
           }
-        ]
-      },
-      "AIContentBase": {
-        "properties": {
-          "additionalProperties": {
-            "type": "object",
-            "nullable": true
+        ],
+        "discriminator": {
+          "propertyName": "$type",
+          "mapping": {
+            "data": "#/components/schemas/AiContentAppModelDataContentAppModel",
+            "error": "#/components/schemas/AiContentAppModelErrorContentAppModel",
+            "text": "#/components/schemas/AiContentAppModelTextContentAppModel",
+            "reasoning": "#/components/schemas/AiContentAppModelTextReasoningContentAppModel",
+            "uri": "#/components/schemas/AiContentAppModelUriContentAppModel",
+            "usage": "#/components/schemas/AiContentAppModelUsageContentAppModel"
           }
         }
       },
-      "AIContentDataContent": {
+      "AiContentAppModelDataContentAppModel": {
         "required": [
-          "$type",
-          "uri"
+          "uri",
+          "media_type",
+          "name",
+          "annotations"
         ],
         "properties": {
           "$type": {
@@ -301,18 +324,119 @@
             "type": "string"
           },
           "uri": {
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           },
-          "additionalProperties": {
-            "type": "object",
+          "media_type": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "annotations": {
+            "type": "array",
+            "items": {
+              "required": [
+                "$type"
+              ],
+              "type": "object",
+              "anyOf": [
+                {
+                  "required": [
+                    "title",
+                    "url",
+                    "file_id",
+                    "tool_name",
+                    "snippet",
+                    "annotated_regions"
+                  ],
+                  "properties": {
+                    "$type": {
+                      "enum": [
+                        "citation"
+                      ],
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "file_id": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "tool_name": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "snippet": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "annotated_regions": {
+                      "type": "array",
+                      "items": {
+                        "required": [
+                          "$type"
+                        ],
+                        "type": "object",
+                        "anyOf": [
+                          {
+                            "required": [
+                              "start",
+                              "end"
+                            ],
+                            "properties": {
+                              "$type": {
+                                "enum": [
+                                  "textSpan"
+                                ],
+                                "type": "string"
+                              },
+                              "start": {
+                                "type": "integer",
+                                "format": "int32"
+                              },
+                              "end": {
+                                "type": "integer",
+                                "format": "int32"
+                              }
+                            }
+                          }
+                        ],
+                        "discriminator": {
+                          "propertyName": "$type",
+                          "mapping": {
+                            "textSpan": "#/components/schemas/AnnotatedRegionAppModelTextSpanAnnotatedRegionAppModel"
+                          }
+                        }
+                      },
+                      "nullable": true
+                    }
+                  }
+                }
+              ],
+              "discriminator": {
+                "propertyName": "$type",
+                "mapping": {
+                  "citation": "#/components/schemas/AiAnnotationAppModelCitationAnnotationAppModel"
+                }
+              }
+            },
             "nullable": true
           }
         }
       },
-      "AIContentErrorContent": {
+      "AiContentAppModelErrorContentAppModel": {
         "required": [
-          "$type",
-          "message"
+          "message",
+          "annotations"
         ],
         "properties": {
           "$type": {
@@ -322,80 +446,26 @@
             "type": "string"
           },
           "message": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
-          "errorCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "details": {
-            "type": "string",
-            "nullable": true
-          },
-          "additionalProperties": {
-            "type": "object",
+          "annotations": {
+            "type": "array",
+            "items": {
+              "discriminator": {
+                "propertyName": "$type",
+                "mapping": {
+                  "citation": "#/components/schemas/AiAnnotationAppModelCitationAnnotationAppModel"
+                }
+              }
+            },
             "nullable": true
           }
         }
       },
-      "AIContentFunctionCallContent": {
+      "AiContentAppModelTextContentAppModel": {
         "required": [
-          "$type",
-          "callId",
-          "name"
-        ],
-        "properties": {
-          "$type": {
-            "enum": [
-              "functionCall"
-            ],
-            "type": "string"
-          },
-          "callId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "arguments": {
-            "type": "object",
-            "default": null,
-            "nullable": true
-          },
-          "additionalProperties": {
-            "type": "object",
-            "nullable": true
-          }
-        }
-      },
-      "AIContentFunctionResultContent": {
-        "required": [
-          "$type",
-          "callId",
-          "result"
-        ],
-        "properties": {
-          "$type": {
-            "enum": [
-              "functionResult"
-            ],
-            "type": "string"
-          },
-          "callId": {
-            "type": "string"
-          },
-          "result": { },
-          "additionalProperties": {
-            "type": "object",
-            "nullable": true
-          }
-        }
-      },
-      "AIContentTextContent": {
-        "required": [
-          "$type",
-          "text"
+          "text",
+          "annotations"
         ],
         "properties": {
           "$type": {
@@ -408,16 +478,24 @@
             "type": "string",
             "nullable": true
           },
-          "additionalProperties": {
-            "type": "object",
+          "annotations": {
+            "type": "array",
+            "items": {
+              "discriminator": {
+                "propertyName": "$type",
+                "mapping": {
+                  "citation": "#/components/schemas/AiAnnotationAppModelCitationAnnotationAppModel"
+                }
+              }
+            },
             "nullable": true
           }
         }
       },
-      "AIContentTextReasoningContent": {
+      "AiContentAppModelTextReasoningContentAppModel": {
         "required": [
-          "$type",
-          "text"
+          "text",
+          "annotations"
         ],
         "properties": {
           "$type": {
@@ -430,17 +508,25 @@
             "type": "string",
             "nullable": true
           },
-          "additionalProperties": {
-            "type": "object",
+          "annotations": {
+            "type": "array",
+            "items": {
+              "discriminator": {
+                "propertyName": "$type",
+                "mapping": {
+                  "citation": "#/components/schemas/AiAnnotationAppModelCitationAnnotationAppModel"
+                }
+              }
+            },
             "nullable": true
           }
         }
       },
-      "AIContentUriContent": {
+      "AiContentAppModelUriContentAppModel": {
         "required": [
-          "$type",
           "uri",
-          "mediaType"
+          "media_type",
+          "annotations"
         ],
         "properties": {
           "$type": {
@@ -453,19 +539,27 @@
             "type": "string",
             "format": "uri"
           },
-          "mediaType": {
+          "media_type": {
             "type": "string"
           },
-          "additionalProperties": {
-            "type": "object",
+          "annotations": {
+            "type": "array",
+            "items": {
+              "discriminator": {
+                "propertyName": "$type",
+                "mapping": {
+                  "citation": "#/components/schemas/AiAnnotationAppModelCitationAnnotationAppModel"
+                }
+              }
+            },
             "nullable": true
           }
         }
       },
-      "AIContentUsageContent": {
+      "AiContentAppModelUsageContentAppModel": {
         "required": [
-          "$type",
-          "details"
+          "details",
+          "annotations"
         ],
         "properties": {
           "$type": {
@@ -475,24 +569,30 @@
             "type": "string"
           },
           "details": {
+            "required": [
+              "input_token_count",
+              "output_token_count",
+              "total_token_count",
+              "additional_counts"
+            ],
             "type": "object",
             "properties": {
-              "inputTokenCount": {
+              "input_token_count": {
                 "type": "integer",
                 "format": "int64",
                 "nullable": true
               },
-              "outputTokenCount": {
+              "output_token_count": {
                 "type": "integer",
                 "format": "int64",
                 "nullable": true
               },
-              "totalTokenCount": {
+              "total_token_count": {
                 "type": "integer",
                 "format": "int64",
                 "nullable": true
               },
-              "additionalCounts": {
+              "additional_counts": {
                 "type": "object",
                 "additionalProperties": {
                   "type": "integer",
@@ -502,43 +602,58 @@
               }
             }
           },
-          "additionalProperties": {
-            "type": "object",
+          "annotations": {
+            "type": "array",
+            "items": {
+              "discriminator": {
+                "propertyName": "$type",
+                "mapping": {
+                  "citation": "#/components/schemas/AiAnnotationAppModelCitationAnnotationAppModel"
+                }
+              }
+            },
             "nullable": true
           }
         }
       },
-      "ChatMessage": {
+      "ChatMessageAppModel": {
+        "required": [
+          "role",
+          "contents"
+        ],
         "type": "object",
         "properties": {
-          "authorName": {
-            "type": "string",
-            "nullable": true
-          },
           "role": {
-            "$ref": "#/components/schemas/ChatRole"
+            "$ref": "#/components/schemas/ChatRoleEnumAppModel"
           },
           "contents": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AIContent"
-            },
-            "nullable": true
-          },
-          "messageId": {
-            "type": "string",
-            "nullable": true
-          },
-          "additionalProperties": {
-            "type": "object",
-            "nullable": true
+              "$ref": "#/components/schemas/AiContentAppModel"
+            }
           }
         }
       },
-      "ChatOptions": {
+      "ChatOptionsAppModel": {
+        "required": [
+          "conversation_id",
+          "instructions",
+          "temperature",
+          "maxOutputTokens",
+          "top_p",
+          "top_k",
+          "frequency_penalty",
+          "presence_penalty",
+          "seed",
+          "response_format",
+          "model_id",
+          "stop_sequences",
+          "allow_multiple_tool_calls",
+          "tool_mode"
+        ],
         "type": "object",
         "properties": {
-          "conversationId": {
+          "conversation_id": {
             "type": "string",
             "nullable": true
           },
@@ -556,22 +671,22 @@
             "format": "int32",
             "nullable": true
           },
-          "topP": {
+          "top_p": {
             "type": "number",
             "format": "float",
             "nullable": true
           },
-          "topK": {
+          "top_k": {
             "type": "integer",
             "format": "int32",
             "nullable": true
           },
-          "frequencyPenalty": {
+          "frequency_penalty": {
             "type": "number",
             "format": "float",
             "nullable": true
           },
-          "presencePenalty": {
+          "presence_penalty": {
             "type": "number",
             "format": "float",
             "nullable": true
@@ -581,30 +696,26 @@
             "format": "int64",
             "nullable": true
           },
-          "responseFormat": {
-            "$ref": "#/components/schemas/ChatResponseFormat"
+          "response_format": {
+            "$ref": "#/components/schemas/ChatResponseFormatAppModel"
           },
-          "modelId": {
+          "model_id": {
             "type": "string",
             "nullable": true
           },
-          "stopSequences": {
+          "stop_sequences": {
             "type": "array",
             "items": {
               "type": "string"
             },
             "nullable": true
           },
-          "allowMultipleToolCalls": {
+          "allow_multiple_tool_calls": {
             "type": "boolean",
             "nullable": true
           },
-          "toolMode": {
-            "$ref": "#/components/schemas/ChatToolMode"
-          },
-          "additionalProperties": {
-            "type": "object",
-            "nullable": true
+          "tool_mode": {
+            "$ref": "#/components/schemas/ChatToolModeAppModel"
           }
         },
         "default": null,
@@ -619,69 +730,176 @@
           "messages": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ChatMessage"
+              "$ref": "#/components/schemas/ChatMessageAppModel"
             }
           },
           "options": {
-            "$ref": "#/components/schemas/ChatOptions"
+            "$ref": "#/components/schemas/ChatOptionsAppModel"
           }
         }
       },
-      "ChatResponseFormat": {
-        "type": "object",
-        "nullable": true
-      },
-      "ChatResponseUpdate": {
+      "ChatResponseAppModel": {
+        "required": [
+          "messages",
+          "response_id",
+          "conversation_id",
+          "model_id",
+          "created_at",
+          "finish_reason"
+        ],
         "type": "object",
         "properties": {
-          "authorName": {
-            "type": "string",
-            "nullable": true
-          },
-          "role": {
-            "$ref": "#/components/schemas/NullableOfChatRole"
-          },
-          "contents": {
+          "messages": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AIContent"
-            },
-            "nullable": true
+              "$ref": "#/components/schemas/ChatMessageAppModel"
+            }
           },
-          "additionalProperties": {
-            "type": "object",
-            "nullable": true
-          },
-          "responseId": {
+          "response_id": {
             "type": "string",
             "nullable": true
           },
-          "messageId": {
+          "conversation_id": {
             "type": "string",
             "nullable": true
           },
-          "conversationId": {
+          "model_id": {
             "type": "string",
             "nullable": true
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "finishReason": {
-            "$ref": "#/components/schemas/NullableOfChatFinishReason"
+          "finish_reason": {
+            "$ref": "#/components/schemas/NullableOfChatFinishReasonAppModel"
+          }
+        }
+      },
+      "ChatResponseFormatAppModel": {
+        "required": [
+          "$type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ChatResponseFormatAppModelChatResponseFormatTextAppModel"
           },
-          "modelId": {
+          {
+            "$ref": "#/components/schemas/ChatResponseFormatAppModelChatResponseFormatJsonAppModel"
+          }
+        ],
+        "nullable": true,
+        "discriminator": {
+          "propertyName": "$type",
+          "mapping": {
+            "text": "#/components/schemas/ChatResponseFormatAppModelChatResponseFormatTextAppModel",
+            "json": "#/components/schemas/ChatResponseFormatAppModelChatResponseFormatJsonAppModel"
+          }
+        }
+      },
+      "ChatResponseFormatAppModelChatResponseFormatJsonAppModel": {
+        "required": [
+          "schema",
+          "schema_name",
+          "schema_description"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "json"
+            ],
+            "type": "string"
+          },
+          "schema": {
+            "nullable": true
+          },
+          "schema_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "schema_description": {
             "type": "string",
             "nullable": true
           }
         }
       },
-      "ChatRole": { },
-      "ChatToolMode": {
+      "ChatResponseFormatAppModelChatResponseFormatTextAppModel": {
+        "properties": {
+          "$type": {
+            "enum": [
+              "text"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "ChatRoleEnumAppModel": {
+        "type": "integer"
+      },
+      "ChatToolModeAppModel": {
+        "required": [
+          "$type"
+        ],
         "type": "object",
-        "nullable": true
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ChatToolModeAppModelNoneChatToolModeAppModel"
+          },
+          {
+            "$ref": "#/components/schemas/ChatToolModeAppModelAutoChatToolModeAppModel"
+          },
+          {
+            "$ref": "#/components/schemas/ChatToolModeAppModelRequiredChatToolModeAppModel"
+          }
+        ],
+        "nullable": true,
+        "discriminator": {
+          "propertyName": "$type",
+          "mapping": {
+            "none": "#/components/schemas/ChatToolModeAppModelNoneChatToolModeAppModel",
+            "auto": "#/components/schemas/ChatToolModeAppModelAutoChatToolModeAppModel",
+            "required": "#/components/schemas/ChatToolModeAppModelRequiredChatToolModeAppModel"
+          }
+        }
+      },
+      "ChatToolModeAppModelAutoChatToolModeAppModel": {
+        "properties": {
+          "$type": {
+            "enum": [
+              "auto"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "ChatToolModeAppModelNoneChatToolModeAppModel": {
+        "properties": {
+          "$type": {
+            "enum": [
+              "none"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "ChatToolModeAppModelRequiredChatToolModeAppModel": {
+        "required": [
+          "required_function_name"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "required"
+            ],
+            "type": "string"
+          },
+          "required_function_name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
       },
       "LoginRequest": {
         "required": [
@@ -698,15 +916,14 @@
           }
         }
       },
-      "NullableOfChatFinishReason": {
-        "nullable": true
-      },
-      "NullableOfChatRole": {
+      "NullableOfChatFinishReasonAppModel": {
+        "type": "integer",
         "nullable": true
       },
       "SimpleChatRequest": {
         "required": [
-          "message"
+          "message",
+          "systemPrompt"
         ],
         "type": "object",
         "properties": {
@@ -714,9 +931,7 @@
             "type": "string"
           },
           "systemPrompt": {
-            "type": "string",
-            "default": null,
-            "nullable": true
+            "type": "string"
           },
           "model": {
             "type": "string",
@@ -768,6 +983,9 @@
   "tags": [
     {
       "name": "MCP.WebApi"
+    },
+    {
+      "name": "GithubCopilotChat"
     }
   ]
 }

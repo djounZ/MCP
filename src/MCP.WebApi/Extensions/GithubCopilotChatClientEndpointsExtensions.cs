@@ -31,6 +31,8 @@ public static class GithubCopilotChatClientEndpointsExtensions
             .WithName("CreateChatCompletion")
             .WithSummary("Create a chat completion")
             .WithDescription("Creates a non-streaming chat completion using GitHub Copilot")
+            .WithTags("GithubCopilotChat")
+            .Produces<ChatResponseAppModel>()
             .WithOpenApi();
 
         // Streaming chat completion endpoint - returns IAsyncEnumerable<ChatResponseUpdate>
@@ -57,6 +59,8 @@ public static class GithubCopilotChatClientEndpointsExtensions
             .WithName("CreateStreamingChatCompletion")
             .WithSummary("Create a streaming chat completion")
             .WithDescription("Creates a streaming chat completion using GitHub Copilot")
+            .WithTags("GithubCopilotChat")
+            .Produces<ChatResponseAppModel[]>()
             .WithOpenApi();
 
         // Simple non-streaming chat endpoint
@@ -94,6 +98,8 @@ public static class GithubCopilotChatClientEndpointsExtensions
             .WithName("SimpleChat")
             .WithSummary("Simple chat endpoint")
             .WithDescription("Send a simple message and get a non-streaming response from GitHub Copilot")
+            .WithTags("GithubCopilotChat")
+            .Produces<ChatResponseAppModel>()
             .WithOpenApi();
 
         // Simple streaming chat endpoint - returns IAsyncEnumerable<ChatResponseUpdate>
@@ -132,6 +138,8 @@ public static class GithubCopilotChatClientEndpointsExtensions
             .WithName("SimpleChatStream")
             .WithSummary("Simple streaming chat endpoint")
             .WithDescription("Send a simple message and get a streaming response from GitHub Copilot")
+            .WithTags("GithubCopilotChat")
+            .Produces<ChatResponseAppModel[]>()
             .WithOpenApi();
 
         return app;

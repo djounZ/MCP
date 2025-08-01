@@ -8,7 +8,13 @@ export enum ChatRoleEnumAppModel {
   System = 2,
   Tool = 3
 }
-
+// --- ChatFinishReasonAppModel ---
+export enum ChatFinishReasonAppModel {
+  Stop = 0,
+  Length = 1,
+  ToolCalls = 2,
+  ContentFilter = 3
+}
 // --- AiContentAppModel (union type, simplified) ---
 export type AiContentAppModel =
   | AiContentAppModelDataContentAppModel
@@ -126,5 +132,27 @@ export interface ChatResponseAppModel {
   conversation_id?: string | null;
   model_id?: string | null;
   created_at?: string | null;
-  finish_reason?: number | null; // NullableOfChatFinishReasonAppModel (integer, nullable)
+  finish_reason?: ChatFinishReasonAppModel | null;
+}
+
+// --- ChatResponseAppModel ---
+export interface ChatResponseAppModel {
+  messages: ChatMessageAppModel[];
+  response_id?: string | null;
+  conversation_id?: string | null;
+  model_id?: string | null;
+  created_at?: string | null;
+  finish_reason?: ChatFinishReasonAppModel | null;
+}
+// --- ChatResponseUpdateAppModel ---
+export interface ChatResponseUpdateAppModel {
+  author_name?: string | null;
+  role?: ChatRoleEnumAppModel | null;
+  contents: AiContentAppModel[];
+  response_id?: string | null;
+  message_id?: string | null;
+  conversation_id?: string | null;
+  created_at?: string | null;
+  finish_reason?: ChatFinishReasonAppModel | null;
+  model_id?: string | null;
 }

@@ -60,7 +60,7 @@ public static class GithubCopilotChatClientEndpointsExtensions
             .WithSummary("Create a streaming chat completion")
             .WithDescription("Creates a streaming chat completion using GitHub Copilot")
             .WithTags("GithubCopilotChat")
-            .Produces<ChatResponseAppModel[]>()
+            .Produces<ChatResponseUpdateAppModel[]>()
             .WithOpenApi();
 
         // Simple non-streaming chat endpoint
@@ -139,7 +139,7 @@ public static class GithubCopilotChatClientEndpointsExtensions
             .WithSummary("Simple streaming chat endpoint")
             .WithDescription("Send a simple message and get a streaming response from GitHub Copilot")
             .WithTags("GithubCopilotChat")
-            .Produces<ChatResponseAppModel[]>()
+            .Produces<ChatResponseUpdateAppModel[]>()
             .WithOpenApi();
 
         return app;

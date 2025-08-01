@@ -1,6 +1,8 @@
+
 // Bi-directional mappers between API and View models for chat completion
 // Auto-generated for ChatRequest, ChatResponseAppModel, and all nested types
 
+import { from } from 'rxjs';
 import {
   ChatRoleEnumAppModel,
   AiContentAppModel,
@@ -20,7 +22,9 @@ import {
   ChatResponseFormatAppModelChatResponseFormatJsonAppModel,
   ChatOptionsAppModel,
   ChatRequest,
-  ChatResponseAppModel
+  ChatResponseAppModel,
+  ChatFinishReasonAppModel,
+  ChatResponseUpdateAppModel
 } from './chat-completion-api.models';
 
 import {
@@ -42,7 +46,9 @@ import {
   ChatResponseFormatAppModelChatResponseFormatJsonAppModelView,
   ChatOptionsAppModelView,
   ChatRequestView,
-  ChatResponseAppModelView
+  ChatResponseAppModelView,
+  ChatFinishReasonAppModelView,
+  ChatResponseUpdateAppModelView
 } from './chat-completion-view.models';
 
 // --- Role Enum Mapper ---
@@ -65,6 +71,25 @@ export function fromChatRoleEnumAppModelView(role: ChatRoleEnumAppModelView): Ch
   }
 }
 
+// --- Role Enum Mapper ---
+export function toChatFinishReasonAppModelView(role: ChatFinishReasonAppModel): ChatFinishReasonAppModelView {
+  switch (role) {
+    case ChatFinishReasonAppModel.Stop: return ChatFinishReasonAppModelView.Stop;
+    case ChatFinishReasonAppModel.Length: return ChatFinishReasonAppModelView.Length;
+    case ChatFinishReasonAppModel.ToolCalls: return ChatFinishReasonAppModelView.ToolCalls;
+    case ChatFinishReasonAppModel.ContentFilter: return ChatFinishReasonAppModelView.ContentFilter;
+    default: throw new Error('Unknown ChatFinishReasonAppModel value: ' + role);
+  }
+}
+export function fromChatFinishReasonAppModelView(role: ChatFinishReasonAppModelView): ChatFinishReasonAppModel {
+  switch (role) {
+    case ChatFinishReasonAppModelView.Stop: return ChatFinishReasonAppModel.Stop;
+    case ChatFinishReasonAppModelView.Length: return ChatFinishReasonAppModel.Length;
+    case ChatFinishReasonAppModelView.ToolCalls: return ChatFinishReasonAppModel.ToolCalls;
+    case ChatFinishReasonAppModelView.ContentFilter: return ChatFinishReasonAppModel.ContentFilter;
+    default: throw new Error('Unknown ChatFinishReasonAppModelView value: ' + role);
+  }
+}
 // --- AiContent Mappers ---
 export function toAiContentAppModelView(api: AiContentAppModel): AiContentAppModelView {
   switch (api.$type) {
@@ -306,7 +331,7 @@ export function toChatResponseAppModelView(api: ChatResponseAppModel): ChatRespo
     conversationId: api.conversation_id ?? null,
     modelId: api.model_id ?? null,
     createdAt: api.created_at ?? null,
-    finishReason: api.finish_reason ?? null
+    finishReason:  toChatFinishReasonAppModelView(api.finish_reason ?? ChatFinishReasonAppModel.Stop)
   };
 }
 export function fromChatResponseAppModelView(view: ChatResponseAppModelView): ChatResponseAppModel {
@@ -316,6 +341,33 @@ export function fromChatResponseAppModelView(view: ChatResponseAppModelView): Ch
     conversation_id: view.conversationId ?? null,
     model_id: view.modelId ?? null,
     created_at: view.createdAt ?? null,
-    finish_reason: view.finishReason ?? null
+    finish_reason: fromChatFinishReasonAppModelView(view.finishReason ?? ChatFinishReasonAppModelView.Stop) ?? null
+  };
+}
+export function toChatResponseUpdateAppModelView(api: ChatResponseUpdateAppModel): ChatResponseUpdateAppModelView {
+  return {
+    authorName: api.author_name ?? null,
+    role: api.role !== undefined && api.role !== null ? toChatRoleEnumAppModelView(api.role) : null,
+    contents: Array.isArray(api.contents) ? api.contents.map(toAiContentAppModelView) : [],
+    responseId: api.response_id ?? null,
+    messageId: api.message_id ?? null,
+    conversationId: api.conversation_id ?? null,
+    createdAt: api.created_at ?? null,
+    finishReason: api.finish_reason !== undefined && api.finish_reason !== null ? toChatFinishReasonAppModelView(api.finish_reason) : null,
+    modelId: api.model_id ?? null,
+  };
+}
+
+export function fromChatResponseUpdateAppModelView(view: ChatResponseUpdateAppModelView): ChatResponseUpdateAppModel {
+  return {
+    author_name: view.authorName ?? null,
+    role: view.role !== undefined && view.role !== null ? fromChatRoleEnumAppModelView(view.role) : null,
+    contents: Array.isArray(view.contents) ? view.contents.map(fromAiContentAppModelView) : [],
+    response_id: view.responseId ?? null,
+    message_id: view.messageId ?? null,
+    conversation_id: view.conversationId ?? null,
+    created_at: view.createdAt ?? null,
+    finish_reason: view.finishReason !== undefined && view.finishReason !== null ? fromChatFinishReasonAppModelView(view.finishReason) : null,
+    model_id: view.modelId ?? null,
   };
 }

@@ -1,12 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { ChatRequest, ChatResponseUpdate } from '../../shared/models/chat-api.model';
+import { ChatRequest, ChatResponseUpdateAppModel } from '../../shared/models/chat-completion-api.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatHttpStream {
-  private readonly messageSubject$ = new Subject<ChatResponseUpdate>();
+  private readonly messageSubject$ = new Subject<ChatResponseUpdateAppModel>();
 
   private readonly apiUrl = 'http://localhost:5200/api/chat/completions/stream';
 
@@ -18,7 +18,7 @@ export class ChatHttpStream {
         body: JSON.stringify(message)
       });
       if (!response.body) {
-        this.messageSubject$.next({ id: '', content: '', isComplete: true, error: 'No response body' });
+        this.messageSubject$.error({ error: 'No response body' });
         return;
       }
       const reader = response.body.getReader();
@@ -34,7 +34,7 @@ export class ChatHttpStream {
           buffer = buffer.slice(boundary + 1);
           if (chunk) {
             try {
-              const update = JSON.parse(chunk) as ChatResponseUpdate;
+              const update = JSON.parse(chunk) as ChatResponseUpdateAppModel;
               console.log('AI chunk:', update); // Debug print
               this.messageSubject$.next(update);
             } catch (e) {
@@ -47,41 +47,19 @@ export class ChatHttpStream {
       // Handle any trailing chunk
       if (buffer.trim()) {
         try {
-          const update = JSON.parse(buffer.trim());
+          const update = JSON.parse(buffer.trim()) as ChatResponseUpdateAppModel;
           console.log('AI chunk (trailing):', update);
-          let content = '';
-          let error: string | undefined = undefined;
-          let found = false;
-          if (Array.isArray(update.contents) && update.contents.length > 0) {
-            const c = update.contents[0];
-            if (c.$type === 'text' || c.$type === 'reasoning') {
-              content = c.text || '';
-              found = true;
-            } else if (c.$type === 'error') {
-              error = c.message || 'Unknown error';
-              found = true;
-            }
-          }
-          if (found) {
-            const mapped = {
-              id: update.responseId || update.messageId || '',
-              content,
-              isComplete: !!update.finishReason,
-              error
-            };
-            this.messageSubject$.next(mapped);
-          } else {
-            // Only log unrecognized trailing chunk
-            console.warn('Unrecognized trailing AI chunk (not text/reasoning/error):', update);
-          }
-        } catch (e) {}
+            this.messageSubject$.next(update);
+        } catch (e) {
+          this.messageSubject$.error({ error: 'Failed to parse trailing chunk' });
+        }
       }
     } catch (err) {
-      this.messageSubject$.next({ id: '', content: '', isComplete: true, error: 'Network error' });
+      this.messageSubject$.error({ error: 'Network error' });
     }
   }
 
-  getMessages(): Observable<ChatResponseUpdate> {
+  getMessages(): Observable<ChatResponseUpdateAppModel> {
     return this.messageSubject$.asObservable();
   }
 }

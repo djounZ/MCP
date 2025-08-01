@@ -193,7 +193,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ChatResponseAppModel"
+                    "$ref": "#/components/schemas/ChatResponseUpdateAppModel"
                   }
                 }
               }
@@ -260,7 +260,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ChatResponseAppModel"
+                    "$ref": "#/components/schemas/ChatResponseUpdateAppModel"
                   }
                 }
               }
@@ -835,6 +835,59 @@
           }
         }
       },
+      "ChatResponseUpdateAppModel": {
+        "required": [
+          "author_name",
+          "role",
+          "contents",
+          "response_id",
+          "message_id",
+          "conversation_id",
+          "created_at",
+          "finish_reason",
+          "model_id"
+        ],
+        "type": "object",
+        "properties": {
+          "author_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/NullableOfChatRoleEnumAppModel"
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiContentAppModel"
+            }
+          },
+          "response_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "message_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "conversation_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finish_reason": {
+            "$ref": "#/components/schemas/NullableOfChatFinishReasonAppModel"
+          },
+          "model_id": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "ChatRoleEnumAppModel": {
         "type": "integer"
       },
@@ -917,6 +970,10 @@
         }
       },
       "NullableOfChatFinishReasonAppModel": {
+        "type": "integer",
+        "nullable": true
+      },
+      "NullableOfChatRoleEnumAppModel": {
         "type": "integer",
         "nullable": true
       },

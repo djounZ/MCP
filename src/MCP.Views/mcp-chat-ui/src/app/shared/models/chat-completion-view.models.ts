@@ -1,3 +1,4 @@
+
 // View models corresponding to chat-completion-api.models.ts
 
 export enum ChatRoleEnumAppModelView {
@@ -7,6 +8,12 @@ export enum ChatRoleEnumAppModelView {
   Tool = 3
 }
 
+export enum ChatFinishReasonAppModelView {
+  Stop = 0,
+  Length = 1,
+  ToolCalls = 2,
+  ContentFilter = 3
+}
 export type AiContentAppModelView =
   | AiContentAppModelDataContentAppModelView
   | AiContentAppModelErrorContentAppModelView
@@ -117,5 +124,16 @@ export interface ChatResponseAppModelView {
   conversationId?: string | null;
   modelId?: string | null;
   createdAt?: string | null;
-  finishReason?: number | null;
+  finishReason?: ChatFinishReasonAppModelView | null;
+}
+export interface ChatResponseUpdateAppModelView {
+  authorName?: string | null;
+  role?: ChatRoleEnumAppModelView | null;
+  contents: AiContentAppModelView[];
+  responseId?: string | null;
+  messageId?: string | null;
+  conversationId?: string | null;
+  createdAt?: string | null;
+  finishReason?: ChatFinishReasonAppModelView | null;
+  modelId?: string | null;
 }

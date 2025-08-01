@@ -1,19 +1,19 @@
 // Type guards for AIContent discriminated union
-function isTextContent(c: unknown): c is import('../../../shared/models/chat-api.model').AIContentTextContent {
+function isTextContent(c: unknown): c is AiContentAppModelTextContentAppModel {
   return !!c && typeof c === 'object' && (c as any).$type === 'text';
 }
-function isReasoningContent(c: unknown): c is import('../../../shared/models/chat-api.model').AIContentTextReasoningContent {
+function isReasoningContent(c: unknown): c is AiContentAppModelTextReasoningContentAppModel {
   return !!c && typeof c === 'object' && (c as any).$type === 'reasoning';
 }
-function isErrorContent(c: unknown): c is import('../../../shared/models/chat-api.model').AIContentErrorContent {
+function isErrorContent(c: unknown): c is AiContentAppModelErrorContentAppModel {
   return !!c && typeof c === 'object' && (c as any).$type === 'error';
 }
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
-import { AIContentTextContentView, ChatMessageView, ChatRequestView } from '../../../shared/models/chat-view-message.model';
-import { ChatResponseUpdate } from '../../../shared/models/chat-api.model';
-import { mapChatRequestViewToChatRequest } from '../../../shared/models/chat-view-message.mapper';
+import { AiContentAppModelTextContentAppModelView, ChatMessageAppModelView, ChatRequestView, ChatRoleEnumAppModelView } from '../../../shared/models/chat-completion-view.models';
+import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel,  AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
+import { fromChatRequestView } from '../../../shared/models/chat-completion-mapper.models';
 
 export interface ChatResponseUpdateViewLight {
   id: string;
@@ -41,7 +41,7 @@ export class Chat {
 
   private initializeChatStreamConnection(): void {
 
-    this.chatStreamService.getMessages().subscribe((response: ChatResponseUpdate) => {
+    this.chatStreamService.getMessages().subscribe((response: ChatResponseUpdateAppModel) => {
       this.handleStreamingResponse(response);
     });
   }
@@ -59,20 +59,19 @@ export class Chat {
 
     this.messages.update(messages => [...messages, userMessage]);
     this.isLoading.set(true);
-    const aAIContentTextContentView: AIContentTextContentView = {
+    const aAIContentTextContentView: AiContentAppModelTextContentAppModelView = {
       $type: 'text',
       text: content.trim()
     };
-    const userChatMessageView: ChatMessageView = {
+    const userChatMessageView: ChatMessageAppModelView = {
       contents: [aAIContentTextContentView],
-      Role: 'user',
-      Timestamp: new Date()
+      role: ChatRoleEnumAppModelView.User
     };
     // Create ChatRequestView
     const chatRequestView: ChatRequestView = {
       messages: [userChatMessageView]
     };
-    const chatRequest = mapChatRequestViewToChatRequest(chatRequestView);
+    const chatRequest = fromChatRequestView(chatRequestView);
     this.chatStreamService.sendMessage(chatRequest);
 
     // Create placeholder for LLM response
@@ -88,9 +87,9 @@ export class Chat {
 
   }
 
-  private handleStreamingResponse(response: ChatResponseUpdate): void {
+  private handleStreamingResponse(response: ChatResponseUpdateAppModel): void {
     // Only process valid ChatResponseUpdate objects
-    if (!response || typeof response !== 'object' || !Array.isArray(response.Contents)) {
+    if (!response || typeof response !== 'object' || !Array.isArray(response.contents)) {
       // Log invalid or debugging payloads
       console.warn('Received non-ChatResponseUpdate payload:', response);
       return;
@@ -98,8 +97,8 @@ export class Chat {
     this.messages.update(messages => {
       const idx = messages.length - 1;
       if (idx < 0) return messages;
-      this.updateChatMessageViewLight(messages[idx], response, { isStreaming: !response.FinishReason });
-      if (response.FinishReason) {
+      this.updateChatMessageViewLight(messages[idx], response, { isStreaming: !response.finish_reason });
+      if (response.finish_reason) {
         this.isLoading.set(false);
         messages[idx].isStreaming = false;
       }
@@ -109,15 +108,15 @@ export class Chat {
 
   updateChatMessageViewLight(
   prev: ChatResponseUpdateViewLight,
-  api: ChatResponseUpdate,
+  api: ChatResponseUpdateAppModel,
   opts?: { isStreaming?: boolean }
 ): void {
   let appendText = '';
-  const content = api.Contents?.[0];
+  const content = api.contents?.[0];
   if (content && (isTextContent(content) || isReasoningContent(content))) {
-    appendText = content.Text || '';
+    appendText = content.text || '';
   } else if (content && isErrorContent(content)) {
-    appendText = content.Message || '';
+    appendText = content.message || '';
     prev.isError = true;
   }
   prev.content += appendText;

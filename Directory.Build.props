@@ -49,6 +49,9 @@
         <SystemIdentityModelTokensJwtVersion>8.13.0</SystemIdentityModelTokensJwtVersion>
         <MicrosoftIdentityModelTokensVersion>8.13.0</MicrosoftIdentityModelTokensVersion>
         <MicrosoftAspNetCoreAuthenticationJwtBearerVersion>9.0.0</MicrosoftAspNetCoreAuthenticationJwtBearerVersion>
+
+        <RiokMapperlyVersion>4.2.1</RiokMapperlyVersion>
+
     </PropertyGroup>
 
     <ItemGroup>

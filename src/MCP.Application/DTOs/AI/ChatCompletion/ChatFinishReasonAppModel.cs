@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace MCP.Application.DTOs.AI.ChatCompletion;
 
-public enum ChatFinishReason
+public enum ChatFinishReasonAppModel
 {
     [JsonPropertyName("stop")]
     Stop = 1,

@@ -11,6 +11,6 @@ public sealed record ChatResponseUpdateAppModel(
     [property: JsonPropertyName("message_id")] string? MessageId,
     [property: JsonPropertyName("conversation_id")] string? ConversationId,
     [property: JsonPropertyName("created_at")] DateTimeOffset? CreatedAt,
-    [property: JsonPropertyName("finish_reason")] ChatFinishReason? FinishReason,
+    [property: JsonPropertyName("finish_reason")] ChatFinishReasonAppModel? FinishReason,
     [property: JsonPropertyName("model_id")] string? ModelId
 );

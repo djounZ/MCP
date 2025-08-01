@@ -5,5 +5,5 @@ namespace MCP.Application.DTOs.AI.ChatCompletion;
 
 public sealed record ChatMessageAppModel(
     [property: JsonPropertyName("role")] ChatRoleEnumAppModel Role,
-    [property: JsonPropertyName("contents")]  IList<AiContentAppModel>? Contents = null
+    [property: JsonPropertyName("contents")]  IList<AiContentAppModel> Contents
 );

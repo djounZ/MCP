@@ -1,4 +1,3 @@
-
 // Bi-directional mappers between API and View models for chat completion
 // Auto-generated for ChatRequest, ChatResponseAppModel, and all nested types
 
@@ -331,7 +330,7 @@ export function toChatResponseAppModelView(api: ChatResponseAppModel): ChatRespo
     conversationId: api.conversation_id ?? null,
     modelId: api.model_id ?? null,
     createdAt: api.created_at ?? null,
-    finishReason:  toChatFinishReasonAppModelView(api.finish_reason ?? ChatFinishReasonAppModel.Stop)
+    finishReason: toChatFinishReasonAppModelView(api.finish_reason ?? ChatFinishReasonAppModel.Stop)
   };
 }
 export function fromChatResponseAppModelView(view: ChatResponseAppModelView): ChatResponseAppModel {
@@ -370,4 +369,42 @@ export function fromChatResponseUpdateAppModelView(view: ChatResponseUpdateAppMo
     finish_reason: view.finishReason !== undefined && view.finishReason !== null ? fromChatFinishReasonAppModelView(view.finishReason) : null,
     model_id: view.modelId ?? null,
   };
+}
+
+export function fromChatResponseUpdateAppModelToChatResponseAppModelView(api: ChatResponseUpdateAppModel): ChatResponseAppModelView {
+  return {
+    messages: api.contents ? [{
+      role: api.role !== undefined && api.role !== null
+        ? (api.role as unknown as ChatRoleEnumAppModelView)
+        : ChatRoleEnumAppModelView.Assistant,
+      contents: api.contents as AiContentAppModelView[]
+    }] : [],
+    responseId: api.response_id ?? null,
+    conversationId: api.conversation_id ?? null,
+    modelId: api.model_id ?? null,
+    createdAt: api.created_at ?? null,
+    finishReason: api.finish_reason !== undefined && api.finish_reason !== null ? (api.finish_reason as unknown as ChatFinishReasonAppModelView) : null
+  };
+}
+export function updateViewFromChatResponseUpdateAppModelTo(view: ChatResponseAppModelView, api: ChatResponseUpdateAppModel): void {
+  if (!view || !api) return;
+  // Append new message to messages array
+  if (api.contents) {
+    view.messages = [
+      ...view.messages,
+      {
+        role: api.role !== undefined && api.role !== null
+          ? (api.role as unknown as ChatRoleEnumAppModelView)
+          : ChatRoleEnumAppModelView.Assistant,
+        contents: api.contents as AiContentAppModelView[]
+      }
+    ];
+  }
+  view.responseId = api.response_id ?? view.responseId;
+  view.conversationId = api.conversation_id ?? view.conversationId;
+  view.modelId = api.model_id ?? view.modelId;
+  view.createdAt = api.created_at ?? view.createdAt;
+  view.finishReason = api.finish_reason !== undefined && api.finish_reason !== null
+    ? (api.finish_reason as unknown as ChatFinishReasonAppModelView)
+    : view.finishReason;
 }

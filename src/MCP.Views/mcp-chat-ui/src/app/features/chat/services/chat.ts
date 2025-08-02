@@ -96,7 +96,13 @@ export class Chat {
   }
 
   clearChat(): void {
-    this.messages.set([]);
+    this.chatResponseAppModelView.messages = [];
+    this.chatResponseAppModelView.responseId = null;
+    this.chatResponseAppModelView.conversationId = null;
+    this.chatResponseAppModelView.modelId = null;
+    this.chatResponseAppModelView.createdAt = new Date().toISOString();
+    this.chatResponseAppModelView.finishReason = null; // Reset finish reason
+    this.messages.update(() => [...this.chatResponseAppModelView.messages]);
   }
 
   private generateId(): string {

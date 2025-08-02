@@ -4,14 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatResponseUpdateAppModelView } from '../../../../shared/models/chat-completion-view.models';
-import {
-  isUserMessage,
-  isStreaming,
-  getDisplayContent,
-  isErrorMessage,
-  getMessageId,
-  getMessageTime
-} from '../../services/chat';
 
 @Component({
   selector: 'app-message-list',
@@ -24,10 +16,42 @@ export class MessageList {
   readonly messages = input.required<ChatResponseUpdateAppModelView[]>();
 
   // Utility methods exposed to template
-  isUserMessage = isUserMessage;
-  isStreaming = isStreaming;
-  getDisplayContent = getDisplayContent;
-  isErrorMessage = isErrorMessage;
-  getMessageId = getMessageId;
-  getMessageTime = getMessageTime;
+  isUserMessage(message: ChatResponseUpdateAppModelView): boolean {
+    return message.role === 0; // ChatRoleEnumAppModelView.User
+  }
+
+
+  isStreaming(message: ChatResponseUpdateAppModelView): boolean {
+    return !message.finishReason;
+  }
+
+  isErrorMessage(message: ChatResponseUpdateAppModelView): boolean {
+    return message.contents.some(c => c.$type === 'error');
+  }
+
+  getDisplayContent(message: ChatResponseUpdateAppModelView): string {
+    return message.contents
+      .filter(c => c.$type === 'text' || c.$type === 'reasoning')
+      .map(c => {
+        if (c.$type === 'text' || c.$type === 'reasoning') {
+          return c.text || '';
+        }
+        return '';
+      })
+      .join('');
+  }
+
+  getErrorMessage(message: ChatResponseUpdateAppModelView): string {
+    const errorContent = message.contents.find(c => c.$type === 'error');
+    return errorContent && errorContent.$type === 'error' ? errorContent.message : '';
+  }
+
+  getMessageId(message: ChatResponseUpdateAppModelView): string {
+    return message.messageId || 'unknown';
+  }
+
+  getMessageTime(message: ChatResponseUpdateAppModelView): Date {
+    return message.createdAt ? new Date(message.createdAt) : new Date();
+  }
+
 }

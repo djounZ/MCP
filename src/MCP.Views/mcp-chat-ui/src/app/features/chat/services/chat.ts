@@ -8,7 +8,7 @@ import {
   ChatRoleEnumAppModelView,
   ChatResponseUpdateAppModelView
 } from '../../../shared/models/chat-completion-view.models';
-import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel,  AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
+import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
 import { fromChatRequestView } from '../../../shared/models/chat-completion-mapper.models';
 import { ChatOptionsService } from './chat-options';
 
@@ -23,43 +23,6 @@ function isErrorContent(c: unknown): c is AiContentAppModelErrorContentAppModel 
   return !!c && typeof c === 'object' && (c as any).$type === 'error';
 }
 
-// Utility functions for ChatResponseUpdateAppModelView (UI logic)
-export function isUserMessage(message: ChatResponseUpdateAppModelView): boolean {
-  return message.role === ChatRoleEnumAppModelView.User;
-}
-
-export function isStreaming(message: ChatResponseUpdateAppModelView): boolean {
-  return !message.finishReason;
-}
-
-export function isErrorMessage(message: ChatResponseUpdateAppModelView): boolean {
-  return message.contents.some(c => c.$type === 'error');
-}
-
-export function getDisplayContent(message: ChatResponseUpdateAppModelView): string {
-  return message.contents
-    .filter(c => c.$type === 'text' || c.$type === 'reasoning')
-    .map(c => {
-      if (c.$type === 'text' || c.$type === 'reasoning') {
-        return c.text || '';
-      }
-      return '';
-    })
-    .join('');
-}
-
-export function getErrorMessage(message: ChatResponseUpdateAppModelView): string {
-  const errorContent = message.contents.find(c => c.$type === 'error');
-  return errorContent && errorContent.$type === 'error' ? errorContent.message : '';
-}
-
-export function getMessageId(message: ChatResponseUpdateAppModelView): string {
-  return message.messageId || 'unknown';
-}
-
-export function getMessageTime(message: ChatResponseUpdateAppModelView): Date {
-  return message.createdAt ? new Date(message.createdAt) : new Date();
-}
 
 @Injectable({
   providedIn: 'root'
@@ -181,6 +144,10 @@ export class Chat {
   }
 
   private generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // RFC4122 version 4 compliant
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 }

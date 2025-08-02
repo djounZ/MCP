@@ -31,10 +31,20 @@ export class Chat {
   private readonly chatStreamService = inject(ChatHttpStream);
   private readonly chatOptionsService = inject(ChatOptionsService);
 
-  readonly messages = signal<ChatResponseAppModelView[]>([]);
+  readonly messages = signal<ChatMessageAppModelView[]>([]);
   readonly isLoading = signal(false);
   readonly currentOptions = this.chatOptionsService.chatOptionsView;
 
+
+  // Create placeholder for LLM response
+  readonly chatResponseAppModelView: ChatResponseAppModelView = {
+    messages: [],
+    responseId: null,
+    conversationId: null,
+    modelId: null,
+    createdAt: new Date().toISOString(),
+    finishReason: null // null means still streaming
+  };
   constructor() {
     this.initializeChatStreamConnection();
   }
@@ -48,24 +58,7 @@ export class Chat {
   sendMessage(content: string): void {
     if (!content.trim()) return;
 
-    // Add user message
-    const userMessage: ChatResponseAppModelView = {
-      messages: [{
-        role: ChatRoleEnumAppModelView.User,
-        contents: [{
-          $type: 'text',
-          text: content.trim()
-        }]
-      }],
-      responseId: null,
-      conversationId: null,
-      modelId: null,
-      createdAt: new Date().toISOString(),
-      finishReason: null
-    };
 
-    this.messages.update(messages => [...messages, userMessage]);
-    this.isLoading.set(true);
 
     const aAIContentTextContentView: AiContentAppModelTextContentAppModelView = {
       $type: 'text',
@@ -76,6 +69,10 @@ export class Chat {
       role: ChatRoleEnumAppModelView.User
     };
 
+    this.chatResponseAppModelView.messages.push(userChatMessageView);
+    this.isLoading.set(true);
+    this.messages.update(() => [...this.chatResponseAppModelView.messages]);
+
     // Create ChatRequestView
     const chatRequestView: ChatRequestView = {
       messages: [userChatMessageView],
@@ -84,41 +81,16 @@ export class Chat {
     const chatRequest = fromChatRequestView(chatRequestView);
     this.chatStreamService.sendMessage(chatRequest);
 
-    // Create placeholder for LLM response
-    const llmMessage: ChatResponseAppModelView = {
-      messages: [{
-        role: ChatRoleEnumAppModelView.Assistant,
-        contents: []
-      }],
-      responseId: null,
-      conversationId: null,
-      modelId: null,
-      createdAt: new Date().toISOString(),
-      finishReason: null // null means still streaming
-    };
-
-    this.messages.update(messages => [...messages, llmMessage]);
   }
 
   private handleStreamingResponse(response: ChatResponseUpdateAppModel): void {
-    // Only process valid ChatResponseUpdate objects
-    if (!response || typeof response !== 'object' || !Array.isArray(response.contents)) {
-      console.warn('Received non-ChatResponseUpdate payload:', response);
-      return;
+    updateViewFromChatResponseUpdateAppModelTo(this.chatResponseAppModelView, response);
+
+    if (response.finish_reason) {
+      this.isLoading.set(false);
     }
-
-    this.messages.update(messages => {
-      const idx = messages.length - 1;
-      if (idx < 0) return messages;
-
-      // Use our mapper function to update the existing message
-      updateViewFromChatResponseUpdateAppModelTo(messages[idx], response);
-
-      if (response.finish_reason) {
-        this.isLoading.set(false);
-      }
-
-      return [...messages];
+    this.messages.update(() => {
+      return [...this.chatResponseAppModelView.messages];
     });
   }
 

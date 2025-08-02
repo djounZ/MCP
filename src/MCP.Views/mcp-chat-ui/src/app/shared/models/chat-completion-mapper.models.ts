@@ -390,15 +390,33 @@ export function updateViewFromChatResponseUpdateAppModelTo(view: ChatResponseApp
   if (!view || !api) return;
   // Append new message to messages array
   if (api.contents) {
-    view.messages = [
-      ...view.messages,
-      {
-        role: api.role !== undefined && api.role !== null
-          ? (api.role as unknown as ChatRoleEnumAppModelView)
-          : ChatRoleEnumAppModelView.Assistant,
-        contents: api.contents as AiContentAppModelView[]
-      }
-    ];
+
+    const api_role = api.role !== undefined && api.role !== null
+      ? (api.role as unknown as ChatRoleEnumAppModelView)
+      : ChatRoleEnumAppModelView.Assistant;
+    const idx = view.messages.length - 1;
+    if (idx < 0) {
+      view.messages = [
+        {
+          role: api_role,
+          contents: api.contents as AiContentAppModelView[]
+        }
+      ];
+    }
+
+    const last_message = view.messages[idx];
+    if (last_message && last_message.role === api_role) {
+      last_message.contents.push(...(api.contents as AiContentAppModelView[]));
+    }
+    else {
+      view.messages = [
+        ...view.messages,
+        {
+          role: api_role,
+          contents: api.contents as AiContentAppModelView[]
+        }
+      ];
+    }
   }
   view.responseId = api.response_id ?? view.responseId;
   view.conversationId = api.conversation_id ?? view.conversationId;

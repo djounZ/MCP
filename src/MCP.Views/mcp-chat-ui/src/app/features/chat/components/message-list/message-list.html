@@ -7,15 +7,15 @@
     </div>
   } @else {
     <div class="messages">
-      @for (message of messages(); track getMessageId(message)) {
+      @for (message of messages(); track $index) {
         <div class="message-wrapper"
-             [class.user-message]="isUserMessage(message)"
-             [class.assistant-message]="!isUserMessage(message)">
+             [class.user-message]="message.role === 'user'"
+             [class.assistant-message]="message.role === 'assistant'">
           <mat-card class="message-card" [class.error-message]="isErrorMessage(message)">
             <mat-card-content>
               <div class="message-header">
                 <span class="message-author">
-                  {{ message.role === 0 ? 'You' : 'AI Assistant' }}
+                  {{ message.role === 'user' ? 'You' : 'AI Assistant' }}
                 </span>
                 <span class="message-time">
                   {{ getMessageTime(message) | date:'short' }}
@@ -24,7 +24,7 @@
 
               <div class="message-content">
                 {{ getDisplayContent(message) }}
-                @if (message.role !== 0 && isStreaming(message)) {
+                @if (message.role !== 'user' && isLoading()) {
                   <mat-spinner diameter="16" class="streaming-indicator"></mat-spinner>
                 }
               </div>

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { ChatMessageAppModelView } from '../../../../shared/models/chat-completion-view.models';
+import { ChatMessageAppModelView, ChatRoleEnumAppModelView } from '../../../../shared/models/chat-completion-view.models';
 
 @Component({
   selector: 'app-message-list',
@@ -14,13 +14,7 @@ import { ChatMessageAppModelView } from '../../../../shared/models/chat-completi
 })
 export class MessageList {
   readonly messages = input.required<ChatMessageAppModelView[]>();
-  ChatRoleEnumAppModelView: any;
-
-  // Utility methods exposed to template
-  isUserMessage(message: ChatMessageAppModelView): boolean {
-    return message?.role === 0; // ChatRoleEnumAppModelView.User
-  }
-
+  readonly isLoading = input.required<boolean>();
 
   isStreaming(message: ChatMessageAppModelView): boolean {
     return false;
@@ -48,9 +42,6 @@ export class MessageList {
     return errorContent && errorContent.$type === 'error' ? errorContent.message : '';
   }
 
-  getMessageId(message: ChatMessageAppModelView): string {
-    return 'unknown';
-  }
 
   getMessageTime(message: ChatMessageAppModelView): Date {
     return new Date();

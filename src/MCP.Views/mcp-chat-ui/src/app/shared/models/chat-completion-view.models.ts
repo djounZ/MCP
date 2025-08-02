@@ -1,18 +1,18 @@
 
 // View models corresponding to chat-completion-api.models.ts
 
-export enum ChatRoleEnumAppModelView {
-  User = 0,
-  Assistant = 1,
-  System = 2,
-  Tool = 3
-}
 
+export enum ChatRoleEnumAppModelView {
+  User = "user",
+  Assistant = "assistant",
+  System = "system",
+  Tool = "tool"
+}
 export enum ChatFinishReasonAppModelView {
-  Stop = 0,
-  Length = 1,
-  ToolCalls = 2,
-  ContentFilter = 3
+  Stop = "stop",
+  Length = "length",
+  ToolCalls = "tool_calls",
+  ContentFilter = "content_filter"
 }
 export type AiContentAppModelView =
   | AiContentAppModelDataContentAppModelView

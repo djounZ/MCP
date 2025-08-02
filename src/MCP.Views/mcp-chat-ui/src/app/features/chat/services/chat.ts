@@ -37,7 +37,7 @@ export class Chat {
 
 
   // Create placeholder for LLM response
-  readonly chatResponseAppModelView: ChatResponseAppModelView = {
+  public readonly chatResponseAppModelView: ChatResponseAppModelView = {
     messages: [],
     responseId: null,
     conversationId: null,
@@ -75,7 +75,7 @@ export class Chat {
 
     // Create ChatRequestView
     const chatRequestView: ChatRequestView = {
-      messages: [userChatMessageView],
+      messages: [...this.chatResponseAppModelView.messages],
       //options: this.currentOptions()
     };
     const chatRequest = fromChatRequestView(chatRequestView);

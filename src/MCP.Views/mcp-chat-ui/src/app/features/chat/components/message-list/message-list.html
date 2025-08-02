@@ -7,22 +7,24 @@
     </div>
   } @else {
     <div class="messages">
-      @for (message of messages(); track message.id) {
-        <div class="message-wrapper" [class.user-message]="message.isUser" [class.assistant-message]="!message.isUser">
-          <mat-card class="message-card" [class.error-message]="message.isError">
+      @for (message of messages(); track getMessageId(message)) {
+        <div class="message-wrapper"
+             [class.user-message]="isUserMessage(message)"
+             [class.assistant-message]="!isUserMessage(message)">
+          <mat-card class="message-card" [class.error-message]="isErrorMessage(message)">
             <mat-card-content>
               <div class="message-header">
                 <span class="message-author">
-                  {{ message.isUser ? 'You' : 'AI Assistant' }}
+                  {{ isUserMessage(message) ? 'You' : 'AI Assistant' }}
                 </span>
                 <span class="message-time">
-                  {{ message.timestamp | date:'short' }}
+                  {{ getMessageTime(message) | date:'short' }}
                 </span>
               </div>
 
               <div class="message-content">
-                {{ message.content }}
-                @if (message.isStreaming) {
+                {{ getDisplayContent(message) }}
+                @if (isStreaming(message)) {
                   <mat-spinner diameter="16" class="streaming-indicator"></mat-spinner>
                 }
               </div>

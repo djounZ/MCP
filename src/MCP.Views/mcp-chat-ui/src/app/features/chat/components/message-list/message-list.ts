@@ -3,7 +3,15 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { ChatResponseUpdateViewLight } from '../../services/chat';
+import { ChatResponseUpdateAppModelView } from '../../../../shared/models/chat-completion-view.models';
+import {
+  isUserMessage,
+  isStreaming,
+  getDisplayContent,
+  isErrorMessage,
+  getMessageId,
+  getMessageTime
+} from '../../services/chat';
 
 @Component({
   selector: 'app-message-list',
@@ -13,5 +21,13 @@ import { ChatResponseUpdateViewLight } from '../../services/chat';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageList {
-  readonly messages = input.required<ChatResponseUpdateViewLight[]>();
+  readonly messages = input.required<ChatResponseUpdateAppModelView[]>();
+
+  // Utility methods exposed to template
+  isUserMessage = isUserMessage;
+  isStreaming = isStreaming;
+  getDisplayContent = getDisplayContent;
+  isErrorMessage = isErrorMessage;
+  getMessageId = getMessageId;
+  getMessageTime = getMessageTime;
 }

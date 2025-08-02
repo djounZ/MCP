@@ -54,6 +54,11 @@
           .message-header .message-time {
             color: rgba(255, 255, 255, 0.7);
           }
+
+          .usage-info .usage-details {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.8);
+          }
         }
       }
 
@@ -108,11 +113,37 @@
         white-space: pre-wrap;
         word-wrap: break-word;
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 8px;
 
         .streaming-indicator {
-          flex-shrink: 0;
+          align-self: flex-start;
+        }
+
+        .usage-info {
+          margin-top: 8px;
+
+          .usage-details {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            color: rgba(0, 0, 0, 0.6);
+            cursor: help;
+
+            .usage-icon {
+              font-size: 14px;
+              width: 14px;
+              height: 14px;
+            }
+
+            .usage-text {
+              font-weight: 500;
+            }
+          }
         }
       }
     }

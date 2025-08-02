@@ -87,12 +87,12 @@ export class Chat {
   private handleStreamingResponse(response: ChatResponseUpdateAppModel): void {
     updateViewFromChatResponseUpdateAppModelTo(this.chatResponseAppModelView, response);
 
-    if (response.finish_reason) {
-      this.isLoading.set(false);
-    }
     this.messages.update(() => {
       return [...this.chatResponseAppModelView.messages];
     });
+    if (response.finish_reason) {
+      this.isLoading.set(false);
+    }
   }
 
   clearChat(): void {

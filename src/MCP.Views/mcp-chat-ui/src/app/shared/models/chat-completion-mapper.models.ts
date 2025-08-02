@@ -392,24 +392,25 @@ export function updateViewFromChatResponseUpdateAppModelTo(view: ChatResponseApp
   if (!view || !api) return;
   // Append new message to messages array
   if (api.contents) {
-
-    const api_role = api.role !== undefined && api.role !== null
+    const apiContents = api.contents;
+    const viewContents = Array.isArray(apiContents) ? apiContents.map(toAiContentAppModelView) : [];
+    const viewRole = api.role !== undefined && api.role !== null
       ? (api.role as unknown as ChatRoleEnumAppModelView)
       : ChatRoleEnumAppModelView.Assistant;
     const idx = view.messages.length - 1;
     if (idx < 0) {
       view.messages = [
         {
-          role: api_role,
-          contents: api.contents as AiContentAppModelView[],
+          role: viewRole,
+          contents: viewContents,
           messageTime: api.created_at ? new Date(api.created_at) : new Date()
         }
       ];
     }
 
     const last_message = view.messages[idx];
-    if (last_message && last_message.role === api_role) {
-      last_message.contents.push(...(api.contents as AiContentAppModelView[]));
+    if (last_message && last_message.role === viewRole) {
+      last_message.contents.push(...viewContents);
       if (api.created_at) {
         last_message.messageTime = new Date(api.created_at);
       }
@@ -418,8 +419,8 @@ export function updateViewFromChatResponseUpdateAppModelTo(view: ChatResponseApp
       view.messages = [
         ...view.messages,
         {
-          role: api_role,
-          contents: api.contents as AiContentAppModelView[],
+          role: viewRole,
+          contents: viewContents,
           messageTime: api.created_at ? new Date(api.created_at) : new Date()
         }
       ];

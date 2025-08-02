@@ -27,6 +27,27 @@
                 @if (message.role !== 'user' && isLoading()) {
                   <mat-spinner diameter="16" class="streaming-indicator"></mat-spinner>
                 }
+
+                @if (hasUsageContent(message)) {
+                  <div class="usage-info">
+                    @let usage = getUsageContent(message);
+                    @if (usage) {
+                      <div class="usage-details"
+                        [matTooltip]="getUsageTooltip(usage)">
+                        <mat-icon class="usage-icon">analytics</mat-icon>
+                        <span class="usage-text">
+                          @if (usage.details.totalTokenCount) {
+                            {{ usage.details.totalTokenCount }} tokens
+                          } @else if (usage.details.inputTokenCount || usage.details.outputTokenCount) {
+                            {{ (usage.details.inputTokenCount || 0) + (usage.details.outputTokenCount || 0) }} tokens
+                          } @else {
+                            Usage tracked
+                          }
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             </mat-card-content>
           </mat-card>

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { ChatResponseUpdateAppModelView } from '../../../../shared/models/chat-completion-view.models';
+import { ChatResponseAppModelView } from '../../../../shared/models/chat-completion-view.models';
 
 @Component({
   selector: 'app-message-list',
@@ -13,24 +13,28 @@ import { ChatResponseUpdateAppModelView } from '../../../../shared/models/chat-c
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageList {
-  readonly messages = input.required<ChatResponseUpdateAppModelView[]>();
+  readonly messages = input.required<ChatResponseAppModelView[]>();
 
   // Utility methods exposed to template
-  isUserMessage(message: ChatResponseUpdateAppModelView): boolean {
-    return message.role === 0; // ChatRoleEnumAppModelView.User
+  isUserMessage(message: ChatResponseAppModelView): boolean {
+    return message.messages[0]?.role === 0; // ChatRoleEnumAppModelView.User
   }
 
 
-  isStreaming(message: ChatResponseUpdateAppModelView): boolean {
+  isStreaming(message: ChatResponseAppModelView): boolean {
     return !message.finishReason;
   }
 
-  isErrorMessage(message: ChatResponseUpdateAppModelView): boolean {
-    return message.contents.some(c => c.$type === 'error');
+  isErrorMessage(message: ChatResponseAppModelView): boolean {
+    return message.messages[0]?.contents.some(c => c.$type === 'error') || false;
   }
 
-  getDisplayContent(message: ChatResponseUpdateAppModelView): string {
-    return message.contents
+  getDisplayContent(message: ChatResponseAppModelView): string {
+    const msg = message.messages[0];
+    if (!msg) return '';
+
+    return message.messages
+      .flatMap(m => m.contents)
       .filter(c => c.$type === 'text' || c.$type === 'reasoning')
       .map(c => {
         if (c.$type === 'text' || c.$type === 'reasoning') {
@@ -41,17 +45,19 @@ export class MessageList {
       .join('');
   }
 
-  getErrorMessage(message: ChatResponseUpdateAppModelView): string {
-    const errorContent = message.contents.find(c => c.$type === 'error');
+  getErrorMessage(message: ChatResponseAppModelView): string {
+    const msg = message.messages[0];
+    if (!msg) return '';
+
+    const errorContent = msg.contents.find(c => c.$type === 'error');
     return errorContent && errorContent.$type === 'error' ? errorContent.message : '';
   }
 
-  getMessageId(message: ChatResponseUpdateAppModelView): string {
-    return message.messageId || 'unknown';
+  getMessageId(message: ChatResponseAppModelView): string {
+    return message.responseId || 'unknown';
   }
 
-  getMessageTime(message: ChatResponseUpdateAppModelView): Date {
+  getMessageTime(message: ChatResponseAppModelView): Date {
     return message.createdAt ? new Date(message.createdAt) : new Date();
   }
-
 }

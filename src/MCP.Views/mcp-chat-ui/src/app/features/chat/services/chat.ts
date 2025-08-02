@@ -6,10 +6,10 @@ import {
   ChatMessageAppModelView,
   ChatRequestView,
   ChatRoleEnumAppModelView,
-  ChatResponseUpdateAppModelView
+  ChatResponseAppModelView
 } from '../../../shared/models/chat-completion-view.models';
 import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
-import { fromChatRequestView } from '../../../shared/models/chat-completion-mapper.models';
+import { fromChatRequestView, fromChatResponseUpdateAppModelToChatResponseAppModelView, updateViewFromChatResponseUpdateAppModelTo } from '../../../shared/models/chat-completion-mapper.models';
 import { ChatOptionsService } from './chat-options';
 
 // Type guards for AIContent discriminated union (API model)
@@ -31,7 +31,7 @@ export class Chat {
   private readonly chatStreamService = inject(ChatHttpStream);
   private readonly chatOptionsService = inject(ChatOptionsService);
 
-  readonly messages = signal<ChatResponseUpdateAppModelView[]>([]);
+  readonly messages = signal<ChatResponseAppModelView[]>([]);
   readonly isLoading = signal(false);
   readonly currentOptions = this.chatOptionsService.chatOptionsView;
 
@@ -49,13 +49,17 @@ export class Chat {
     if (!content.trim()) return;
 
     // Add user message
-    const userMessage: ChatResponseUpdateAppModelView = {
-      messageId: this.generateId(),
-      role: ChatRoleEnumAppModelView.User,
-      contents: [{
-        $type: 'text',
-        text: content.trim()
+    const userMessage: ChatResponseAppModelView = {
+      messages: [{
+        role: ChatRoleEnumAppModelView.User,
+        contents: [{
+          $type: 'text',
+          text: content.trim()
+        }]
       }],
+      responseId: null,
+      conversationId: null,
+      modelId: null,
       createdAt: new Date().toISOString(),
       finishReason: null
     };
@@ -81,13 +85,14 @@ export class Chat {
     this.chatStreamService.sendMessage(chatRequest);
 
     // Create placeholder for LLM response
-    const llmMessage: ChatResponseUpdateAppModelView = {
-      messageId: this.generateId(),
-      role: ChatRoleEnumAppModelView.Assistant,
-      contents: [{
-        $type: 'text',
-        text: ''
+    const llmMessage: ChatResponseAppModelView = {
+      messages: [{
+        role: ChatRoleEnumAppModelView.Assistant,
+        contents: []
       }],
+      responseId: null,
+      conversationId: null,
+      modelId: null,
       createdAt: new Date().toISOString(),
       finishReason: null // null means still streaming
     };
@@ -106,37 +111,15 @@ export class Chat {
       const idx = messages.length - 1;
       if (idx < 0) return messages;
 
-      this.updateChatMessage(messages[idx], response);
+      // Use our mapper function to update the existing message
+      updateViewFromChatResponseUpdateAppModelTo(messages[idx], response);
 
       if (response.finish_reason) {
         this.isLoading.set(false);
-        // Map API finish reason to view model
-        messages[idx].finishReason = response.finish_reason as any;
       }
 
       return [...messages];
     });
-  }
-
-  private updateChatMessage(
-    prev: ChatResponseUpdateAppModelView,
-    api: ChatResponseUpdateAppModel
-  ): void {
-    const content = api.contents?.[0];
-    if (content && (isTextContent(content) || isReasoningContent(content))) {
-      const appendText = content.text || '';
-      // Find the text content in the previous message and update it
-      const textContent = prev.contents.find(c => c.$type === 'text');
-      if (textContent && textContent.$type === 'text') {
-        textContent.text = (textContent.text || '') + appendText;
-      }
-    } else if (content && isErrorContent(content)) {
-      // Replace with error content
-      prev.contents = [{
-        $type: 'error',
-        message: content.message || 'An error occurred'
-      }];
-    }
   }
 
   clearChat(): void {

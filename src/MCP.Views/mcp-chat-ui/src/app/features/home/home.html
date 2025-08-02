@@ -1,0 +1,96 @@
+<div class="home-container">
+  <div class="welcome-section">
+    <mat-card class="welcome-card">
+      <mat-card-header>
+        <div mat-card-avatar>
+          <mat-icon class="welcome-icon">home</mat-icon>
+        </div>
+        <mat-card-title>Welcome to MCP Chat UI</mat-card-title>
+        <mat-card-subtitle>Your AI Assistant Dashboard</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p class="welcome-description">
+          Get started with our intelligent chat assistant powered by advanced AI technology.
+          Explore the features below to make the most of your experience.
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="features-section">
+    <h2>Available Features</h2>
+
+    <div class="features-grid">
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <div mat-card-avatar>
+            <mat-icon class="feature-icon">chat</mat-icon>
+          </div>
+          <mat-card-title>AI Chat Assistant</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Engage in intelligent conversations with our advanced AI assistant. Get help with questions, tasks, and creative projects.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" routerLink="/chat">
+            <mat-icon>chat</mat-icon>
+            Start Chatting
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <div mat-card-avatar>
+            <mat-icon class="feature-icon">tune</mat-icon>
+          </div>
+          <mat-card-title>Advanced Chat Options</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Customize your chat experience with advanced settings including temperature, response format, and tool modes.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="accent" routerLink="/chat">
+            <mat-icon>settings</mat-icon>
+            Configure Settings
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="feature-card">
+        <mat-card-header>
+          <div mat-card-avatar>
+            <mat-icon class="feature-icon">psychology</mat-icon>
+          </div>
+          <mat-card-title>Intelligent Responses</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Experience contextual and intelligent responses tailored to your needs with support for various response formats.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button routerLink="/chat">
+            <mat-icon>auto_awesome</mat-icon>
+            Try Now
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+
+  <div class="quick-start-section">
+    <mat-card class="quick-start-card">
+      <mat-card-header>
+        <mat-card-title>Quick Start</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Ready to begin? Click the chat icon in the sidebar or use the button below to start your first conversation.</p>
+      </mat-card-content>
+      <mat-card-actions class="center-actions">
+        <button mat-fab color="primary" routerLink="/chat" class="start-chat-fab">
+          <mat-icon>chat</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

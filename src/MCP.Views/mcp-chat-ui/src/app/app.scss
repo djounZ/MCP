@@ -1,39 +1,24 @@
 .app-container {
+  display: flex;
   height: 100vh;
   width: 100vw;
+  overflow: hidden;
+}
 
-  .app-sidenav {
-    width: 280px;
+.app-sidebar {
+  flex-shrink: 0;
+  z-index: 10;
+}
 
-    mat-toolbar {
-      .spacer {
-        flex: 1;
-      }
-    }
-  }
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // Allow content to shrink
 
-  .app-content {
+  app-chat {
+    flex: 1;
     display: flex;
     flex-direction: column;
-
-    .main-toolbar {
-      flex-shrink: 0;
-
-      .spacer {
-        flex: 1;
-      }
-    }
-
-    .content-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-
-      app-chat {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-    }
   }
 }

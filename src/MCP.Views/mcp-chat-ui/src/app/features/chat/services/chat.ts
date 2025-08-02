@@ -73,7 +73,7 @@ export class Chat {
     // Create ChatRequestView
     const chatRequestView: ChatRequestView = {
       messages: [userChatMessageView],
-      options: this.currentOptions()
+      //options: this.currentOptions()
     };
     const chatRequest = fromChatRequestView(chatRequestView);
     this.chatStreamService.sendMessage(chatRequest);

@@ -1,23 +1,53 @@
-<mat-nav-list class="sidebar-nav">
-  <h3 mat-subheader>Chat History</h3>
+<div class="icon-sidebar">
+  <div class="sidebar-section">
+    <button
+      mat-icon-button
+      class="sidebar-icon-button"
+      matTooltip="Home"
+      matTooltipPosition="right"
+      routerLink="/home"
+      routerLinkActive="active">
+      <mat-icon>home</mat-icon>
+    </button>
 
-  <mat-list-item>
-    <mat-icon matListItemIcon>chat_bubble</mat-icon>
-    <span matListItemTitle>Recent Conversation</span>
-    <span matListItemLine>Ask me anything...</span>
-  </mat-list-item>
+    <button
+      mat-icon-button
+      class="sidebar-icon-button"
+      matTooltip="AI Chat"
+      matTooltipPosition="right"
+      routerLink="/chat"
+      routerLinkActive="active">
+      <mat-icon>chat</mat-icon>
+    </button>
+  </div>
 
-  <mat-divider></mat-divider>
+  <div class="sidebar-divider"></div>
 
-  <h3 mat-subheader>Settings</h3>
+  <div class="sidebar-spacer"></div>
 
-  <mat-list-item>
-    <mat-icon matListItemIcon>settings</mat-icon>
-    <span matListItemTitle>Preferences</span>
-  </mat-list-item>
+  <div class="sidebar-section">
+    <button
+      mat-icon-button
+      class="sidebar-icon-button"
+      matTooltip="Settings"
+      matTooltipPosition="right">
+      <mat-icon>settings</mat-icon>
+    </button>
 
-  <mat-list-item>
-    <mat-icon matListItemIcon>help</mat-icon>
-    <span matListItemTitle>Help & Support</span>
-  </mat-list-item>
-</mat-nav-list>
+    <button
+      mat-icon-button
+      class="sidebar-icon-button"
+      matTooltip="Help & Support"
+      matTooltipPosition="right">
+      <mat-icon>help_outline</mat-icon>
+    </button>
+
+    <button
+      mat-icon-button
+      class="sidebar-icon-button"
+      matTooltip="About"
+      matTooltipPosition="right">
+      <mat-icon>info_outline</mat-icon>
+    </button>
+  </div>
+</div>

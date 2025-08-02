@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MCP.Application.DTOs.AI.ChatCompletion;
 using MCP.Application.DTOs.AI.Contents;
 using Microsoft.Extensions.AI;
@@ -107,7 +108,7 @@ public sealed class GithubCopilotChatClientAppModelsMapper
 
         if (chatOptionsResponseFormat is ChatResponseFormatJson chatResponseFormatJson)
         {
-            return new ChatResponseFormatJsonAppModel(chatResponseFormatJson.Schema, chatResponseFormatJson.SchemaName, chatResponseFormatJson.SchemaDescription);
+            return new ChatResponseFormatJsonAppModel(chatResponseFormatJson.Schema.ToString(), chatResponseFormatJson.SchemaName, chatResponseFormatJson.SchemaDescription);
         }
         return null;
     }
@@ -329,7 +330,7 @@ public sealed class GithubCopilotChatClientAppModelsMapper
         {
             ChatResponseFormatTextAppModel => new ChatResponseFormatText(),
             ChatResponseFormatJsonAppModel json => new ChatResponseFormatJson(
-                json.Schema,
+                JsonDocument.Parse(json.Schema ?? "{}").RootElement,
                 json.SchemaName,
                 json.SchemaDescription
             ),

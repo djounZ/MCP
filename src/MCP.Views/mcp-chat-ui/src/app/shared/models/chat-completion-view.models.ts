@@ -91,7 +91,7 @@ export interface ChatResponseFormatAppModelChatResponseFormatTextAppModelView {
 }
 export interface ChatResponseFormatAppModelChatResponseFormatJsonAppModelView {
   $type: 'json';
-  schema?: unknown;
+  schema?: string | null;
   schemaName?: string | null;
   schemaDescription?: string | null;
 }

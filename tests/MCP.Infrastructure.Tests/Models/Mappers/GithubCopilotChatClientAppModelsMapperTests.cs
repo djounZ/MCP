@@ -927,7 +927,7 @@ public class GithubCopilotChatClientAppModelsMapperTests
             ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
             TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
             ResponseFormat: new ChatResponseFormatJsonAppModel(
-                System.Text.Json.JsonDocument.Parse("{}").RootElement,
+                "{}",
                 "Test Schema",
                 "A test schema"
             ),

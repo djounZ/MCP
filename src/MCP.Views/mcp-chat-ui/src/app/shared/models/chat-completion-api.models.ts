@@ -3,17 +3,17 @@
 
 // --- ChatRoleEnumAppModel ---
 export enum ChatRoleEnumAppModel {
-  User = 0,
-  Assistant = 1,
-  System = 2,
-  Tool = 3
+  User = "user",
+  Assistant = "assistant",
+  System = "system",
+  Tool = "tool"
 }
 // --- ChatFinishReasonAppModel ---
 export enum ChatFinishReasonAppModel {
-  Stop = 0,
-  Length = 1,
-  ToolCalls = 2,
-  ContentFilter = 3
+  Stop = "stop",
+  Length = "length",
+  ToolCalls = "tool_calls",
+  ContentFilter = "content_filter"
 }
 // --- AiContentAppModel (union type, simplified) ---
 export type AiContentAppModel =
@@ -96,7 +96,7 @@ export interface ChatResponseFormatAppModelChatResponseFormatTextAppModel {
 }
 export interface ChatResponseFormatAppModelChatResponseFormatJsonAppModel {
   $type: 'json';
-  schema?: unknown;
+  schema?: string | null;
   schema_name?: string | null;
   schema_description?: string | null;
 }

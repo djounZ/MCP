@@ -2,14 +2,15 @@ using System.Text.Json.Serialization;
 
 namespace MCP.Application.DTOs.AI.ChatCompletion;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ChatRoleEnumAppModel
 {
-    [JsonPropertyName("system")]
+    [JsonStringEnumMemberName("system")]
     System = 1,
-    [JsonPropertyName("assistant")]
+    [JsonStringEnumMemberName("assistant")]
     Assistant = 2,
-    [JsonPropertyName("user")]
+    [JsonStringEnumMemberName("user")]
     User = 3,
-    [JsonPropertyName("tool")]
+    [JsonStringEnumMemberName("tool")]
     Tool = 4
 }

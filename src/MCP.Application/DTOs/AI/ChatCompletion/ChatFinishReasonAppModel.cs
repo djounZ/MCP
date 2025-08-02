@@ -2,14 +2,15 @@ using System.Text.Json.Serialization;
 
 namespace MCP.Application.DTOs.AI.ChatCompletion;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ChatFinishReasonAppModel
 {
-    [JsonPropertyName("stop")]
+    [JsonStringEnumMemberName("stop")]
     Stop = 1,
-    [JsonPropertyName("length")]
+    [JsonStringEnumMemberName("length")]
     Length = 2,
-    [JsonPropertyName("tool_calls")]
+    [JsonStringEnumMemberName("tool_calls")]
     ToolCalls = 3,
-    [JsonPropertyName("content_filter")]
+    [JsonStringEnumMemberName("content_filter")]
     ContentFilter = 4
 }

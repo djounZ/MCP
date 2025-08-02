@@ -423,7 +423,6 @@ public static class GithubCopilotChatCompletionMappers
     {
         return toolMode switch
         {
-            NoneChatToolMode => ToolChoice.None,
             AutoChatToolMode => ToolChoice.Auto,
             RequiredChatToolMode { RequiredFunctionName: not null } required =>
                 ToolChoice.ForFunction(required.RequiredFunctionName),
@@ -448,7 +447,6 @@ public static class GithubCopilotChatCompletionMappers
                     jsonFormat.Schema.Value
                 ) : null
             ),
-            null => null,
             _ => null
         };
     }

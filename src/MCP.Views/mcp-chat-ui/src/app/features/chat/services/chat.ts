@@ -50,18 +50,24 @@ export class Chat {
   }
 
   private initializeChatStreamConnection(): void {
-    this.chatStreamService.getMessages().subscribe((response: ChatResponseUpdateAppModel) => {
-      this.handleStreamingResponse(response);
-    }, error => {
-      console.error('Chat stream error:', error);
-      this.isLoading.set(false);
+    this.chatStreamService.getMessages().subscribe({
+      next: (response: ChatResponseUpdateAppModel) => {
+        this.handleStreamingResponse(response);
+      },
+      error: error => {
+        console.error('Chat stream error:', error);
+        this.isLoading.set(false);
 
-      updateChatMessageAppModelViewsFromAppModelContents(this.chatResponseAppModelView.messages, ChatRoleEnumAppModelView.Assistant, [{
-        $type: 'error',
-        message: error.message || 'An error occurred while processing the chat response.'
-      }], new Date().toISOString());
-      this.messages.update(() => [...this.chatResponseAppModelView.messages]);
-
+        updateChatMessageAppModelViewsFromAppModelContents(this.chatResponseAppModelView.messages, ChatRoleEnumAppModelView.Assistant, [{
+          $type: 'error',
+          message: error.message || 'An error occurred while processing the chat response.'
+        }], new Date().toISOString());
+        this.messages.update(() => [...this.chatResponseAppModelView.messages]);
+      },
+      complete: () => {
+        console.log('Chat stream completed');
+        this.isLoading.set(false);
+      }
     });
   }
 

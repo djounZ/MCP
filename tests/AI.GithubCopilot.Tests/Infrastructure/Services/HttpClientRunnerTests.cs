@@ -3,6 +3,8 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using AI.GithubCopilot.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 
 namespace AI.GithubCopilot.Tests.Infrastructure.Services;
 
@@ -35,7 +37,7 @@ public class HttpClientRunnerTests
     };
 
     // Shared HttpClientRunner instance
-    private readonly HttpClientRunner _runner = new();
+    private readonly HttpClientRunner _runner = new(Substitute.For<ILogger<HttpClientRunner>>());
 
     /// <summary>
     /// Tests that SendAsyncAndDeserialize correctly sends a request and deserializes the response.

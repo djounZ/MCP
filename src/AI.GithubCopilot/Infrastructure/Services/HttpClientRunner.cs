@@ -3,10 +3,11 @@ using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace AI.GithubCopilot.Infrastructure.Services;
 
-public sealed class HttpClientRunner
+public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
 {
 
 
@@ -21,7 +22,7 @@ public sealed class HttpClientRunner
     {
         using var request = CreateHttpRequestMessage(method, requestUri, headers);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeAsync(response);
         return  await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
@@ -38,7 +39,7 @@ public sealed class HttpClientRunner
 
         using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeAsync(response);
         return  await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
@@ -53,7 +54,7 @@ public sealed class HttpClientRunner
     {
         using var request = CreateHttpRequestMessage(method, requestUri, headers);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeAsync(response);
         return await ReadContentAsync<TOut>(options, cancellationToken, response);
 
     }
@@ -71,7 +72,7 @@ public sealed class HttpClientRunner
 
         using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeAsync(response);
         return await ReadContentAsync<TOut>(options, cancellationToken, response);
     }
 
@@ -89,7 +90,7 @@ public sealed class HttpClientRunner
 
         using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessStatusCodeAsync(response);
         await foreach (var line in ReadContentStreamAsync(cancellationToken, response, contentReaderAsync))
         {
             yield return line;
@@ -174,4 +175,13 @@ public sealed class HttpClientRunner
         }
     }
 
+    private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorMessage = $"Request failed with status code {response.StatusCode}.";
+            logger.LogError("{@ErrorMessage} Content Is {@Content} and {@Reason}",errorMessage, await response.Content.ReadAsStringAsync(), response.ReasonPhrase);
+            throw new HttpRequestException(errorMessage);
+        }
+    }
 }

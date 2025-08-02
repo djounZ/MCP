@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { ChatRequest, ChatResponseUpdateAppModel } from '../../shared/models/chat-completion-api.models';
+import { ChatFinishReasonAppModel, ChatRequest, ChatResponseUpdateAppModel, ChatRoleEnumAppModel } from '../../shared/models/chat-completion-api.models';
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +46,21 @@ export class ChatHttpStream {
         this.messageSubject$.next(update);
       }
     } catch (err) {
-      this.messageSubject$.error(err);
+      const errorMessage =
+        typeof err === 'object' && err !== null && 'message' in err && typeof (err as any).message === 'string'
+          ? (err as { message: string }).message
+          : 'An error occurred while processing the chat response.';
+
+      const errorUpdate: ChatResponseUpdateAppModel = {
+        contents: [{
+          $type: 'error',
+          message: errorMessage
+        }],
+        role: ChatRoleEnumAppModel.Assistant,
+        created_at: new Date().toISOString(),
+        finish_reason: ChatFinishReasonAppModel.Stop,
+      }
+      this.messageSubject$.next(errorUpdate);
     }
   }
 

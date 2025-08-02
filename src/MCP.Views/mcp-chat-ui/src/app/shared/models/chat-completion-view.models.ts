@@ -64,6 +64,7 @@ export interface AiContentAppModelUsageContentAppModelView {
 export interface ChatMessageAppModelView {
   role: ChatRoleEnumAppModelView;
   contents: AiContentAppModelView[];
+  messageTime: Date;
 }
 
 export type ChatToolModeAppModelView =

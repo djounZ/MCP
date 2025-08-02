@@ -66,7 +66,8 @@ export class Chat {
     };
     const userChatMessageView: ChatMessageAppModelView = {
       contents: [aAIContentTextContentView],
-      role: ChatRoleEnumAppModelView.User
+      role: ChatRoleEnumAppModelView.User,
+      messageTime: new Date()
     };
 
     this.chatResponseAppModelView.messages.push(userChatMessageView);

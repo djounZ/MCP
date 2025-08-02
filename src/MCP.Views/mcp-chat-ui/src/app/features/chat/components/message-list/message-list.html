@@ -17,8 +17,8 @@
                 <span class="message-author">
                   {{ message.role === 'user' ? 'You' : 'AI Assistant' }}
                 </span>
-                <span class="message-time">
-                  {{ getMessageTime(message) | date:'short' }}
+                <span class="message-time" matTooltip="{{ message.messageTime | date:'full' }}">
+                  {{ getFormattedTime(message.messageTime) }}
                 </span>
               </div>
 

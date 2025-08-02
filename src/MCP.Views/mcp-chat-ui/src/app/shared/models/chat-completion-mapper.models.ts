@@ -196,7 +196,8 @@ export function fromAiContentAppModelView(view: AiContentAppModelView): AiConten
 export function toChatMessageAppModelView(api: ChatMessageAppModel): ChatMessageAppModelView {
   return {
     role: toChatRoleEnumAppModelView(api.role),
-    contents: api.contents.map(toAiContentAppModelView)
+    contents: api.contents.map(toAiContentAppModelView),
+    messageTime: new Date()
   };
 }
 export function fromChatMessageAppModelView(view: ChatMessageAppModelView): ChatMessageAppModel {
@@ -377,7 +378,8 @@ export function fromChatResponseUpdateAppModelToChatResponseAppModelView(api: Ch
       role: api.role !== undefined && api.role !== null
         ? (api.role as unknown as ChatRoleEnumAppModelView)
         : ChatRoleEnumAppModelView.Assistant,
-      contents: api.contents as AiContentAppModelView[]
+      contents: api.contents as AiContentAppModelView[],
+      messageTime: api.created_at ? new Date(api.created_at) : new Date()
     }] : [],
     responseId: api.response_id ?? null,
     conversationId: api.conversation_id ?? null,
@@ -399,7 +401,8 @@ export function updateViewFromChatResponseUpdateAppModelTo(view: ChatResponseApp
       view.messages = [
         {
           role: api_role,
-          contents: api.contents as AiContentAppModelView[]
+          contents: api.contents as AiContentAppModelView[],
+          messageTime: api.created_at ? new Date(api.created_at) : new Date()
         }
       ];
     }
@@ -407,13 +410,17 @@ export function updateViewFromChatResponseUpdateAppModelTo(view: ChatResponseApp
     const last_message = view.messages[idx];
     if (last_message && last_message.role === api_role) {
       last_message.contents.push(...(api.contents as AiContentAppModelView[]));
+      if (api.created_at) {
+        last_message.messageTime = new Date(api.created_at);
+      }
     }
     else {
       view.messages = [
         ...view.messages,
         {
           role: api_role,
-          contents: api.contents as AiContentAppModelView[]
+          contents: api.contents as AiContentAppModelView[],
+          messageTime: api.created_at ? new Date(api.created_at) : new Date()
         }
       ];
     }

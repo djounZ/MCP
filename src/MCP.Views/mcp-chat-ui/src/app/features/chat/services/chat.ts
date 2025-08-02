@@ -14,6 +14,7 @@ import { ChatHttpStream } from '../../../core/services/chat-http-stream';
 import { AiContentAppModelTextContentAppModelView, ChatMessageAppModelView, ChatRequestView, ChatRoleEnumAppModelView } from '../../../shared/models/chat-completion-view.models';
 import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel,  AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
 import { fromChatRequestView } from '../../../shared/models/chat-completion-mapper.models';
+import { ChatOptionsService } from './chat-options';
 
 export interface ChatResponseUpdateViewLight {
   id: string;
@@ -31,9 +32,11 @@ export interface ChatResponseUpdateViewLight {
 
 export class Chat {
   private readonly chatStreamService = inject(ChatHttpStream);
+  private readonly chatOptionsService = inject(ChatOptionsService);
 
   readonly messages = signal<ChatResponseUpdateViewLight[]>([]);
   readonly isLoading = signal(false);
+  readonly currentOptions = this.chatOptionsService.chatOptionsView;
 
   constructor() {
     this.initializeChatStreamConnection();
@@ -69,7 +72,8 @@ export class Chat {
     };
     // Create ChatRequestView
     const chatRequestView: ChatRequestView = {
-      messages: [userChatMessageView]
+      messages: [userChatMessageView],
+      options: this.currentOptions()
     };
     const chatRequest = fromChatRequestView(chatRequestView);
     this.chatStreamService.sendMessage(chatRequest);

@@ -1,0 +1,280 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Chat Options</mat-card-title>
+    <mat-card-subtitle>Configure model parameters and behavior</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="optionsForm">
+      <!-- Model Selection -->
+      <section class="options-section">
+        <h3>Model Configuration</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Model</mat-label>
+          <mat-select formControlName="modelId">
+            @for (model of modelOptions; track model.value) {
+              <mat-option [value]="model.value">{{ model.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>System Instructions</mat-label>
+          <textarea
+            matInput
+            formControlName="instructions"
+            placeholder="Enter system instructions for the model..."
+            rows="3">
+          </textarea>
+          <mat-hint>Instructions that guide the model's behavior throughout the conversation</mat-hint>
+        </mat-form-field>
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <!-- Quick Presets -->
+      <section class="options-section">
+        <h3>Quick Presets</h3>
+        <div class="preset-buttons">
+          @for (preset of presets; track preset.value) {
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="loadPreset(preset.value)"
+              [matTooltip]="preset.description">
+              <mat-icon>{{ getPresetIcon(preset.value) }}</mat-icon>
+              {{ preset.label }}
+            </button>
+          }
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <!-- Sampling Parameters -->
+      <section class="options-section">
+        <h3>Sampling Parameters</h3>
+
+        <div class="slider-group">
+          <label class="slider-label">
+            Temperature: {{ formatSliderValue(optionsForm.get('temperature')?.value || 0) }}
+            <mat-icon matTooltip="Controls randomness: 0 = deterministic, 2 = very random">info</mat-icon>
+          </label>
+          <mat-slider
+            min="0"
+            max="2"
+            step="0.1"
+            discrete
+            showTickMarks>
+            <input matSliderThumb formControlName="temperature">
+          </mat-slider>
+        </div>
+
+        <div class="slider-group">
+          <label class="slider-label">
+            Top P: {{ formatSliderValue(optionsForm.get('topP')?.value || 0) }}
+            <mat-icon matTooltip="Nucleus sampling: consider only top P probability mass">info</mat-icon>
+          </label>
+          <mat-slider
+            min="0"
+            max="1"
+            step="0.05"
+            discrete
+            showTickMarks>
+            <input matSliderThumb formControlName="topP">
+          </mat-slider>
+        </div>
+
+        <div class="slider-group">
+          <label class="slider-label">
+            Top K: {{ optionsForm.get('topK')?.value }}
+            <mat-icon matTooltip="Consider only the top K most likely tokens">info</mat-icon>
+          </label>
+          <mat-slider
+            min="1"
+            max="100"
+            step="1"
+            discrete>
+            <input matSliderThumb formControlName="topK">
+          </mat-slider>
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <!-- Token Limits and Penalties -->
+      <section class="options-section">
+        <h3>Output Configuration</h3>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Max Output Tokens</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="maxOutputTokens"
+              min="1"
+              max="8192">
+            <mat-hint>Maximum tokens in the response (1-8192)</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Seed (Optional)</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="seed"
+              placeholder="Random seed for reproducibility">
+            <mat-hint>For deterministic outputs (when supported)</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="slider-group">
+          <label class="slider-label">
+            Frequency Penalty: {{ formatSliderValue(optionsForm.get('frequencyPenalty')?.value || 0) }}
+            <mat-icon matTooltip="Penalize tokens based on their frequency in the text so far">info</mat-icon>
+          </label>
+          <mat-slider
+            min="-2"
+            max="2"
+            step="0.1"
+            discrete
+            showTickMarks>
+            <input matSliderThumb formControlName="frequencyPenalty">
+          </mat-slider>
+        </div>
+
+        <div class="slider-group">
+          <label class="slider-label">
+            Presence Penalty: {{ formatSliderValue(optionsForm.get('presencePenalty')?.value || 0) }}
+            <mat-icon matTooltip="Penalize tokens that have appeared in the text so far">info</mat-icon>
+          </label>
+          <mat-slider
+            min="-2"
+            max="2"
+            step="0.1"
+            discrete
+            showTickMarks>
+            <input matSliderThumb formControlName="presencePenalty">
+          </mat-slider>
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <!-- Response Format -->
+      <section class="options-section">
+        <h3>Response Format</h3>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Format</mat-label>
+          <mat-select formControlName="responseFormat">
+            <mat-option value="text">Text</mat-option>
+            <mat-option value="json">JSON</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        @if (optionsForm.get('responseFormat')?.value === 'json') {
+          <div class="json-options">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>JSON Schema Name</mat-label>
+              <input matInput formControlName="jsonSchemaName" placeholder="Schema name">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>JSON Schema Description</mat-label>
+              <textarea
+                matInput
+                formControlName="jsonSchemaDescription"
+                placeholder="Describe the expected JSON structure..."
+                rows="2">
+              </textarea>
+            </mat-form-field>
+          </div>
+        }
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <!-- Stop Sequences -->
+      <section class="options-section">
+        <h3>Stop Sequences</h3>
+        <p class="section-description">Sequences that will stop text generation</p>
+
+        <div class="stop-sequences-input">
+          <mat-form-field appearance="outline" class="flex-grow">
+            <mat-label>Add Stop Sequence</mat-label>
+            <input
+              matInput
+              [formControl]="newStopSequence"
+              placeholder="Enter stop sequence..."
+              (keydown.enter)="addStopSequence()">
+          </mat-form-field>
+          <button
+            mat-icon-button
+            type="button"
+            (click)="addStopSequence()"
+            [disabled]="!newStopSequence.value.trim()"
+            matTooltip="Add Stop Sequence">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+
+        @if (options().stopSequences && options().stopSequences!.length > 0) {
+          <mat-chip-set>
+            @for (sequence of options().stopSequences!; track $index) {
+              <mat-chip
+                [removable]="true"
+                (removed)="removeStopSequence($index)">
+                {{ sequence }}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+            }
+          </mat-chip-set>
+        }
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <!-- Tool Configuration -->
+      <section class="options-section">
+        <h3>Tool Configuration</h3>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Tool Mode</mat-label>
+          <mat-select formControlName="toolMode">
+            <mat-option value="none">None</mat-option>
+            <mat-option value="auto">Auto</mat-option>
+            <mat-option value="required">Required</mat-option>
+          </mat-select>
+          <mat-hint>How the model should use available tools</mat-hint>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="allowMultipleToolCalls">
+          Allow Multiple Tool Calls
+        </mat-checkbox>
+
+        @if (optionsForm.get('toolMode')?.value === 'required') {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Required Function Name</mat-label>
+            <input
+              matInput
+              formControlName="requiredFunctionName"
+              placeholder="Function name to require">
+          </mat-form-field>
+        }
+      </section>
+    </form>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button
+      mat-icon-button
+      type="button"
+      (click)="resetToDefaults()"
+      matTooltip="Reset to Defaults">
+      <mat-icon>restore</mat-icon>
+    </button>
+  </mat-card-actions>
+</mat-card>

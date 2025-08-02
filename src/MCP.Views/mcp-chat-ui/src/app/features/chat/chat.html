@@ -1,27 +1,48 @@
-<div class="chat-container">
-  <mat-toolbar color="primary" class="chat-header">
-    <span>AI Chat Assistant</span>
-
-    <span class="spacer"></span>
-
-    <div class="toolbar-actions">
-
-      <button
-        mat-icon-button
-        (click)="clearChat()"
-        matTooltip="Clear chat"
-        [disabled]="messages().length === 0">
-        <mat-icon>clear_all</mat-icon>
-      </button>
+<mat-sidenav-container class="chat-container">
+  <mat-sidenav
+    #optionsSidenav
+    mode="over"
+    position="end"
+    class="options-sidenav"
+    [opened]="showOptions()">
+    <div class="options-content">
+      <app-chat-options (optionsChanged)="onOptionsChanged()"></app-chat-options>
     </div>
-  </mat-toolbar>
+  </mat-sidenav>
 
-  <div class="chat-content">
-    <app-message-list [messages]="messages()"></app-message-list>
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" class="chat-header">
+      <mat-icon class="header-icon">chat</mat-icon>
+      <span>AI Chat Assistant</span>
 
-    <app-message-input
-      (messageSubmit)="onMessageSubmit($event)"
-      [disabled]="isLoading()">
-    </app-message-input>
-  </div>
-</div>
+      <span class="spacer"></span>
+
+      <div class="toolbar-actions">
+        <button
+          mat-icon-button
+          (click)="toggleOptions()"
+          matTooltip="Chat Options"
+          [color]="showOptions() ? 'accent' : ''">
+          <mat-icon>settings</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          (click)="clearChat()"
+          matTooltip="Clear chat"
+          [disabled]="messages().length === 0">
+          <mat-icon>clear_all</mat-icon>
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <div class="chat-content">
+      <app-message-list [messages]="messages()"></app-message-list>
+
+      <app-message-input
+        (messageSubmit)="onMessageSubmit($event)"
+        [disabled]="isLoading()">
+      </app-message-input>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

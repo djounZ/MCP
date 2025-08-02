@@ -1,40 +1,67 @@
 .chat-container {
-  display: flex;
-  flex-direction: column;
   height: 100vh;
 
-  .chat-header {
-    flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  .options-sidenav {
+    width: 400px;
+    max-width: 90vw;
 
-    .spacer {
-      flex: 1;
-    }
-
-    .toolbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
+    .options-content {
+      padding: 1rem;
+      height: 100%;
+      overflow-y: auto;
     }
   }
 
-  .chat-content {
-    flex: 1;
+  mat-sidenav-content {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    min-height: 0; // Allow flex children to shrink for scrolling
+    height: 100vh;
 
-    app-message-list {
+    .chat-header {
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      .header-icon {
+        margin-right: 0.5rem;
+      }
+
+      .spacer {
+        flex: 1;
+      }
+
+      .toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+
+    .chat-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      min-height: 0; // Critical for scrollable children
-    }
+      overflow: hidden;
+      min-height: 0; // Allow flex children to shrink for scrolling
 
-    app-message-input {
-      flex-shrink: 0;
+      app-message-list {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0; // Critical for scrollable children
+      }
+
+      app-message-input {
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .chat-container {
+    .options-sidenav {
+      width: 100vw;
     }
   }
 }

@@ -388,43 +388,17 @@ export function fromChatResponseUpdateAppModelToChatResponseAppModelView(api: Ch
     finishReason: api.finish_reason !== undefined && api.finish_reason !== null ? (api.finish_reason as unknown as ChatFinishReasonAppModelView) : null
   };
 }
-export function updateViewFromChatResponseUpdateAppModelTo(view: ChatResponseAppModelView, api: ChatResponseUpdateAppModel): void {
+
+export function updateChatResponseAppModelViewFromChatResponseUpdateAppModel(view: ChatResponseAppModelView, api: ChatResponseUpdateAppModel): void {
   if (!view || !api) return;
   // Append new message to messages array
   if (api.contents) {
-    const apiContents = api.contents;
-    const viewContents = Array.isArray(apiContents) ? apiContents.map(toAiContentAppModelView) : [];
+    const viewContents = Array.isArray(api.contents) ? api.contents.map(toAiContentAppModelView) : [];
     const viewRole = api.role !== undefined && api.role !== null
       ? (api.role as unknown as ChatRoleEnumAppModelView)
       : ChatRoleEnumAppModelView.Assistant;
-    const idx = view.messages.length - 1;
-    if (idx < 0) {
-      view.messages = [
-        {
-          role: viewRole,
-          contents: viewContents,
-          messageTime: api.created_at ? new Date(api.created_at) : new Date()
-        }
-      ];
-    }
-
-    const last_message = view.messages[idx];
-    if (last_message && last_message.role === viewRole) {
-      last_message.contents.push(...viewContents);
-      if (api.created_at) {
-        last_message.messageTime = new Date(api.created_at);
-      }
-    }
-    else {
-      view.messages = [
-        ...view.messages,
-        {
-          role: viewRole,
-          contents: viewContents,
-          messageTime: api.created_at ? new Date(api.created_at) : new Date()
-        }
-      ];
-    }
+    const apiCreatedAt = api.created_at ?? null;
+    updateChatMessageAppModelViewsFromAppModelContents(view.messages, viewRole, viewContents, apiCreatedAt);
   }
   view.responseId = api.response_id ?? view.responseId;
   view.conversationId = api.conversation_id ?? view.conversationId;
@@ -434,3 +408,30 @@ export function updateViewFromChatResponseUpdateAppModelTo(view: ChatResponseApp
     ? (api.finish_reason as unknown as ChatFinishReasonAppModelView)
     : view.finishReason;
 }
+
+export function updateChatMessageAppModelViewsFromAppModelContents(viewMessages: ChatMessageAppModelView[], viewRole: ChatRoleEnumAppModelView, viewContents: AiContentAppModelView[], apiCreatedAt: string | null) {
+  const idx = viewMessages.length - 1;
+  if (idx < 0) {
+    viewMessages.push({
+      role: viewRole,
+      contents: viewContents,
+      messageTime: apiCreatedAt ? new Date(apiCreatedAt) : new Date()
+    });
+  }
+
+  const last_message = viewMessages[idx];
+  if (last_message && last_message.role === viewRole) {
+    last_message.contents.push(...viewContents);
+    if (apiCreatedAt) {
+      last_message.messageTime = new Date(apiCreatedAt);
+    }
+  }
+  else {
+    viewMessages.push({
+      role: viewRole,
+      contents: viewContents,
+      messageTime: apiCreatedAt ? new Date(apiCreatedAt) : new Date()
+    });
+  }
+}
+

@@ -9,7 +9,7 @@ import {
   ChatResponseAppModelView
 } from '../../../shared/models/chat-completion-view.models';
 import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
-import { fromChatRequestView, fromChatResponseUpdateAppModelToChatResponseAppModelView, updateViewFromChatResponseUpdateAppModelTo } from '../../../shared/models/chat-completion-mapper.models';
+import { fromChatRequestView, updateChatMessageAppModelViewsFromAppModelContents, updateChatResponseAppModelViewFromChatResponseUpdateAppModel } from '../../../shared/models/chat-completion-mapper.models';
 import { ChatOptionsService } from './chat-options';
 
 // Type guards for AIContent discriminated union (API model)
@@ -52,6 +52,16 @@ export class Chat {
   private initializeChatStreamConnection(): void {
     this.chatStreamService.getMessages().subscribe((response: ChatResponseUpdateAppModel) => {
       this.handleStreamingResponse(response);
+    }, error => {
+      console.error('Chat stream error:', error);
+      this.isLoading.set(false);
+
+      updateChatMessageAppModelViewsFromAppModelContents(this.chatResponseAppModelView.messages, ChatRoleEnumAppModelView.Assistant, [{
+        $type: 'error',
+        message: error.message || 'An error occurred while processing the chat response.'
+      }], new Date().toISOString());
+      this.messages.update(() => [...this.chatResponseAppModelView.messages]);
+
     });
   }
 
@@ -77,7 +87,7 @@ export class Chat {
     // Create ChatRequestView
     const chatRequestView: ChatRequestView = {
       messages: [...this.chatResponseAppModelView.messages],
-      //options: this.currentOptions()
+      options: this.currentOptions()
     };
     const chatRequest = fromChatRequestView(chatRequestView);
     this.chatStreamService.sendMessage(chatRequest);
@@ -85,7 +95,7 @@ export class Chat {
   }
 
   private handleStreamingResponse(response: ChatResponseUpdateAppModel): void {
-    updateViewFromChatResponseUpdateAppModelTo(this.chatResponseAppModelView, response);
+    updateChatResponseAppModelViewFromChatResponseUpdateAppModel(this.chatResponseAppModelView, response);
 
     this.messages.update(() => {
       return [...this.chatResponseAppModelView.messages];

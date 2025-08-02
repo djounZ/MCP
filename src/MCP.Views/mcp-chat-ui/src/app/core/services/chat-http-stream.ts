@@ -17,11 +17,10 @@ export class ChatHttpStream {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(message)
       });
-      if (!response.body) {
-        this.messageSubject$.error({ error: 'No response body' });
-        return;
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
       }
-      const reader = response.body.getReader();
+      const reader = response.body!.getReader();
       let buffer = '';
       const decoder = new TextDecoder();
       while (true) {
@@ -33,29 +32,21 @@ export class ChatHttpStream {
           const chunk = buffer.slice(0, boundary).trim();
           buffer = buffer.slice(boundary + 1);
           if (chunk) {
-            try {
-              const update = JSON.parse(chunk) as ChatResponseUpdateAppModel;
-              console.log('AI chunk:', update); // Debug print
-              this.messageSubject$.next(update);
-            } catch (e) {
-              // Ignore parse errors for incomplete/in-between chunks
-            }
+            const update = JSON.parse(chunk) as ChatResponseUpdateAppModel;
+            console.log('AI chunk:', update); // Debug print
+            this.messageSubject$.next(update);
           }
           boundary = buffer.indexOf('\n');
         }
       }
       // Handle any trailing chunk
       if (buffer.trim()) {
-        try {
-          const update = JSON.parse(buffer.trim()) as ChatResponseUpdateAppModel;
-          console.log('AI chunk (trailing):', update);
-            this.messageSubject$.next(update);
-        } catch (e) {
-          this.messageSubject$.error({ error: 'Failed to parse trailing chunk' });
-        }
+        const update = JSON.parse(buffer.trim()) as ChatResponseUpdateAppModel;
+        console.log('AI chunk (trailing):', update);
+        this.messageSubject$.next(update);
       }
     } catch (err) {
-      this.messageSubject$.error({ error: 'Network error' });
+      this.messageSubject$.error(err);
     }
   }
 

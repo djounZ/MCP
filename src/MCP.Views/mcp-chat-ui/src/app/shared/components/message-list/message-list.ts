@@ -4,8 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ChatMessageAppModelView, AiContentAppModelUsageContentAppModelView } from '../../../../shared/models/chat-completion-view.models';
-import { formatMessageTime } from '../../../../shared/utils/date-time.utils';
+import { ChatMessageAppModelView, AiContentAppModelUsageContentAppModelView } from '../../models/chat-completion-view.models';
+import { formatMessageTime } from '../../utils/date-time.utils';
 
 @Component({
   selector: 'app-message-list',

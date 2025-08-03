@@ -5,12 +5,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MessageList } from './components/message-list/message-list';
-import { MessageInput } from './components/message-input/message-input';
+import { MessageList } from '../../shared/components/message-list/message-list';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from './components/confirm-dialog.component';
 import { ChatOptionsComponent } from './components/chat-options/chat-options';
 import { Chat as ChatService } from './services/chat';
+import { MessageInput } from '../../shared/components/message-input/message-input';
 
 @Component({
   selector: 'app-chat',

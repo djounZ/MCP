@@ -12,17 +12,6 @@ import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiCon
 import { fromChatRequestView, updateChatMessageAppModelViewsFromAppModelContents, updateChatResponseAppModelViewFromChatResponseUpdateAppModel } from '../../../shared/models/chat-completion-mapper.models';
 import { ChatOptionsService } from './chat-options';
 
-// Type guards for AIContent discriminated union (API model)
-function isTextContent(c: unknown): c is AiContentAppModelTextContentAppModel {
-  return !!c && typeof c === 'object' && (c as any).$type === 'text';
-}
-function isReasoningContent(c: unknown): c is AiContentAppModelTextReasoningContentAppModel {
-  return !!c && typeof c === 'object' && (c as any).$type === 'reasoning';
-}
-function isErrorContent(c: unknown): c is AiContentAppModelErrorContentAppModel {
-  return !!c && typeof c === 'object' && (c as any).$type === 'error';
-}
-
 
 @Injectable({
   providedIn: 'root'
@@ -56,14 +45,7 @@ export class Chat {
         this.handleStreamingResponse(response);
       },
       error: error => {
-        console.error('Chat stream error:', error);
-        this.isLoading.set(false);
-
-        updateChatMessageAppModelViewsFromAppModelContents(this.chatResponseAppModelView.messages, ChatRoleEnumAppModelView.Assistant, [{
-          $type: 'error',
-          message: error.message || 'An error occurred while processing the chat response.'
-        }], new Date().toISOString());
-        this.messages.update(() => [...this.chatResponseAppModelView.messages]);
+        this.handleError(error);
       },
       complete: () => {
         console.log('Chat stream completed');
@@ -72,10 +54,19 @@ export class Chat {
     });
   }
 
+  private handleError(error: any) {
+    console.error('Chat stream error:', error);
+    this.isLoading.set(false);
+
+    updateChatMessageAppModelViewsFromAppModelContents(this.chatResponseAppModelView.messages, ChatRoleEnumAppModelView.Assistant, [{
+      $type: 'error',
+      message: error.message || 'An error occurred while processing the chat response.'
+    }], new Date().toISOString());
+    this.messages.update(() => [...this.chatResponseAppModelView.messages]);
+  }
+
   sendMessage(content: string): void {
     if (!content.trim()) return;
-
-
 
     const aAIContentTextContentView: AiContentAppModelTextContentAppModelView = {
       $type: 'text',

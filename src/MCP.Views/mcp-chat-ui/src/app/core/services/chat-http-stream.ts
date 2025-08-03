@@ -33,7 +33,6 @@ export class ChatHttpStream {
           buffer = buffer.slice(boundary + 1);
           if (chunk) {
             const update = JSON.parse(chunk) as ChatResponseUpdateAppModel;
-            console.log('AI chunk:', update); // Debug print
             this.messageSubject$.next(update);
           }
           boundary = buffer.indexOf('\n');
@@ -42,7 +41,6 @@ export class ChatHttpStream {
       // Handle any trailing chunk
       if (buffer.trim()) {
         const update = JSON.parse(buffer.trim()) as ChatResponseUpdateAppModel;
-        console.log('AI chunk (trailing):', update);
         this.messageSubject$.next(update);
       }
     } catch (err) {
@@ -60,6 +58,7 @@ export class ChatHttpStream {
         created_at: new Date().toISOString(),
         finish_reason: ChatFinishReasonAppModel.Stop,
       }
+      console.error('ChatHttpStream error:', errorMessage, err);
       this.messageSubject$.next(errorUpdate);
     }
   }

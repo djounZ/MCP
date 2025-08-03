@@ -1,0 +1,11 @@
+.dev-in-progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+mat-card {
+  max-width: 400px;
+  margin: auto;
+  text-align: center;
+}

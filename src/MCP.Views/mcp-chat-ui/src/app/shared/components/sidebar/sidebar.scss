@@ -28,16 +28,11 @@
     color: #424242;
   }
 
-  &:focus, &.active {
-    background-color: #e3f2fd;
-    color: #1976d2;
-  }
-
-  // Active route styling
-  &.mdc-button--activated,
-  &[aria-current="page"] {
-    background-color: #e3f2fd !important;
-    color: #1976d2 !important;
+  &:focus, &.active, &.mdc-button--activated, &[aria-current="page"] {
+    background-color: #1976d2 !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 2px #90caf9;
+    border-radius: 50%;
   }
 
   mat-icon {

@@ -5,8 +5,9 @@
       class="sidebar-icon-button"
       matTooltip="Home"
       matTooltipPosition="right"
-      routerLink="/home"
-      routerLinkActive="active">
+      [routerLink]="ROUTE_PATHS.HOME"
+      routerLinkActive="active"
+      aria-label="Home">
       <mat-icon>home</mat-icon>
     </button>
 
@@ -15,8 +16,9 @@
       class="sidebar-icon-button"
       matTooltip="AI Chat"
       matTooltipPosition="right"
-      routerLink="/chat"
-      routerLinkActive="active">
+      [routerLink]="ROUTE_PATHS.CHAT"
+      routerLinkActive="active"
+      aria-label="AI Chat">
       <mat-icon>chat</mat-icon>
     </button>
   </div>
@@ -30,7 +32,10 @@
       mat-icon-button
       class="sidebar-icon-button"
       matTooltip="Settings"
-      matTooltipPosition="right">
+      matTooltipPosition="right"
+      [routerLink]="ROUTE_PATHS.SETTINGS"
+      routerLinkActive="active"
+      aria-label="Settings">
       <mat-icon>settings</mat-icon>
     </button>
 
@@ -38,7 +43,10 @@
       mat-icon-button
       class="sidebar-icon-button"
       matTooltip="Help & Support"
-      matTooltipPosition="right">
+      matTooltipPosition="right"
+      [routerLink]="ROUTE_PATHS.HELP"
+      routerLinkActive="active"
+      aria-label="Help & Support">
       <mat-icon>help_outline</mat-icon>
     </button>
 
@@ -46,7 +54,10 @@
       mat-icon-button
       class="sidebar-icon-button"
       matTooltip="About"
-      matTooltipPosition="right">
+      matTooltipPosition="right"
+      [routerLink]="ROUTE_PATHS.ABOUT"
+      routerLinkActive="active"
+      aria-label="About">
       <mat-icon>info_outline</mat-icon>
     </button>
   </div>

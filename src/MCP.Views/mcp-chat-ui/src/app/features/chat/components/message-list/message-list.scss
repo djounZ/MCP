@@ -1,3 +1,35 @@
+.message-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+.commands-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.copy-message-btn {
+  height: 22px;
+  min-height: 22px;
+  width: 22px;
+  min-width: 22px;
+  padding: 0;
+  margin-left: 2px;
+  color: #666;
+  opacity: 0.8;
+  transition: color 0.2s, opacity 0.2s;
+  .mat-icon {
+    font-size: 15px;
+    line-height: 22px;
+  }
+  &:hover {
+    color: #1976d2;
+    opacity: 1;
+    background: rgba(25, 118, 210, 0.08);
+  }
+}
 .waiting-server-indicator .waiting-icon {
   color: #43a047 !important;
 }

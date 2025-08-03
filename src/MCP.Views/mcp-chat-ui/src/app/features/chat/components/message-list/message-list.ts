@@ -16,6 +16,21 @@ import { formatMessageTime } from '../../../../shared/utils/date-time.utils';
 })
 export class MessageList {
   /**
+   * Copies the raw message content to clipboard
+   */
+  copyMessageContent(message: ChatMessageAppModelView): void {
+    if (message?.contents) {
+      // Concatenate all text and reasoning contents
+      const rawContent = message.contents
+        .filter(c => c.$type === 'text' || c.$type === 'reasoning')
+        .map(c => c.text || '')
+        .join('');
+      if (rawContent) {
+        navigator.clipboard.writeText(rawContent);
+      }
+    }
+  }
+  /**
    * Returns a plain text tooltip for token usage info
    */
   protected getUsageTooltip(usage: any): string {

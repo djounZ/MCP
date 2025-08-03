@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, ViewChild, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -37,6 +37,8 @@ export class ChatComponent {
   }
   @ViewChild(MessageInput) messageInputComponent?: MessageInput;
 
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   private readonly _focusEffect = effect(() => {
     if (!this.isLoading() && this.messageInputComponent) {
       setTimeout(() => {
@@ -60,6 +62,30 @@ export class ChatComponent {
 
   exportChat(): void {
     this.chatService.exportChat();
+  }
+
+  triggerImport(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  async importChat(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const { readJsonFile } = await import('../../shared/utils/file.utils');
+    try {
+      const imported = await readJsonFile(file);
+      // Validate imported structure if needed
+      if (imported && typeof imported === 'object' && 'messages' in imported) {
+
+        const chatResponseAppModelView = imported as import("../../shared/models/chat-completion-view.models").ChatResponseAppModelView;
+        this.chatService.assignChatResponseAppModelView(chatResponseAppModelView);
+      }
+    } catch (err) {
+      // Optionally show error dialog/toast
+      console.error('Failed to import chat:', err);
+    }
+    input.value = '';
   }
 
   toggleOptions(): void {

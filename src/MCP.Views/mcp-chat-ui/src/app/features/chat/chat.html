@@ -47,6 +47,21 @@
         >
           <mat-icon>download</mat-icon>
         </button>
+
+        <button
+          mat-icon-button
+          (click)="triggerImport()"
+          matTooltip="Import chat from JSON"
+        >
+          <mat-icon>upload</mat-icon>
+        </button>
+        <input
+          #fileInput
+          type="file"
+          accept="application/json"
+          style="display: none"
+          (change)="importChat($event)"
+        />
       </div>
     </mat-toolbar>
 

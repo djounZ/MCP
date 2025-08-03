@@ -87,7 +87,7 @@ export class Chat {
       .messages([...this.chatResponseAppModelView.messages])
       .options(this.currentOptions())
       .build();
-    const chatRequest = fromChatRequestView(chatRequestView);
+    const chatRequest = fromChatRequestView(chatRequestView, this.chatResponseAppModelView.conversationId);
     this.chatStreamService.sendMessage(chatRequest);
 
   }
@@ -107,6 +107,10 @@ export class Chat {
   clearChat(): void {
     const newResponse = new ChatResponseAppModelViewBuilder().build();
     // Copy properties to preserve reference for signals
+    this.assignChatResponseAppModelView(newResponse);
+  }
+
+  public assignChatResponseAppModelView(newResponse: ChatResponseAppModelView) {
     Object.assign(this.chatResponseAppModelView, newResponse);
     this.messages.update(() => [...this.chatResponseAppModelView.messages]);
   }

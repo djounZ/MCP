@@ -289,10 +289,10 @@ export function toChatOptionsAppModelView(api: ChatOptionsAppModel | null): Chat
     toolMode: toChatToolModeAppModelView(api.tool_mode ?? null)
   };
 }
-export function fromChatOptionsAppModelView(view: ChatOptionsAppModelView | null): ChatOptionsAppModel | null {
+export function fromChatOptionsAppModelView(view: ChatOptionsAppModelView | null, conversationId: string | null | undefined): ChatOptionsAppModel | null {
   if (!view) return null;
   return {
-    conversation_id: view.conversationId ?? null,
+    conversation_id: view.conversationId ?? conversationId ?? null,
     instructions: view.instructions ?? null,
     temperature: view.temperature ?? null,
     maxOutputTokens: view.maxOutputTokens ?? null,
@@ -316,10 +316,10 @@ export function toChatRequestView(api: ChatRequest): ChatRequestView {
     options: toChatOptionsAppModelView(api.options ?? null)
   };
 }
-export function fromChatRequestView(view: ChatRequestView): ChatRequest {
+export function fromChatRequestView(view: ChatRequestView, conversationId: string | null | undefined): ChatRequest {
   return {
     messages: view.messages.map(fromChatMessageAppModelView),
-    options: fromChatOptionsAppModelView(view.options ?? null)
+    options: fromChatOptionsAppModelView(view.options ?? null, conversationId)
   };
 }
 

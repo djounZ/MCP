@@ -14,6 +14,12 @@ import { TextFieldModule } from '@angular/cdk/text-field';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageInput {
+  public focusInput(): void {
+    const textarea = document.querySelector('textarea[matInput]') as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.focus();
+    }
+  }
   /**
    * Stores history of user-sent messages
    */

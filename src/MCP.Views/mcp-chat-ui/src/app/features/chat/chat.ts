@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, ViewChild, effect } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,6 +18,15 @@ import { Chat as ChatService } from './services/chat';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatComponent {
+  @ViewChild(MessageInput) messageInputComponent?: MessageInput;
+
+  private readonly _focusEffect = effect(() => {
+    if (!this.isLoading() && this.messageInputComponent) {
+      setTimeout(() => {
+        this.messageInputComponent?.focusInput();
+      });
+    }
+  });
   protected readonly chatService = inject(ChatService);
 
   protected readonly messages = this.chatService.messages;

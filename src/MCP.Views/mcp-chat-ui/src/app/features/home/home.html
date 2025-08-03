@@ -11,8 +11,9 @@
 
       <mat-card-content>
         <p class="welcome-description">
-          Get started with our intelligent chat assistant powered by advanced AI technology.
-          Explore the features below to make the most of your experience.
+          Get started with our intelligent chat assistant powered by advanced AI
+          technology. Explore the features below to make the most of your
+          experience.
         </p>
       </mat-card-content>
     </mat-card>
@@ -30,10 +31,17 @@
           <mat-card-title>AI Chat Assistant</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <p>Engage in intelligent conversations with our advanced AI assistant. Get help with questions, tasks, and creative projects.</p>
+          <p>
+            Engage in intelligent conversations with our advanced AI assistant.
+            Get help with questions, tasks, and creative projects.
+          </p>
         </mat-card-content>
         <mat-card-actions>
-          <button mat-raised-button color="primary" routerLink="/chat">
+          <button
+            mat-raised-button
+            color="primary"
+            [routerLink]="ROUTE_PATHS.BASIC_CHAT"
+          >
             <mat-icon>chat</mat-icon>
             Start Chatting
           </button>
@@ -48,10 +56,17 @@
           <mat-card-title>Advanced Chat Options</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <p>Customize your chat experience with advanced settings including temperature, response format, and tool modes.</p>
+          <p>
+            Customize your chat experience with advanced settings including
+            temperature, response format, and tool modes.
+          </p>
         </mat-card-content>
         <mat-card-actions>
-          <button mat-raised-button color="accent" routerLink="/chat">
+          <button
+            mat-raised-button
+            color="accent"
+            [routerLink]="ROUTE_PATHS.BASIC_CHAT"
+          >
             <mat-icon>settings</mat-icon>
             Configure Settings
           </button>
@@ -66,10 +81,13 @@
           <mat-card-title>Intelligent Responses</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <p>Experience contextual and intelligent responses tailored to your needs with support for various response formats.</p>
+          <p>
+            Experience contextual and intelligent responses tailored to your
+            needs with support for various response formats.
+          </p>
         </mat-card-content>
         <mat-card-actions>
-          <button mat-raised-button routerLink="/chat">
+          <button mat-raised-button [routerLink]="ROUTE_PATHS.BASIC_CHAT">
             <mat-icon>auto_awesome</mat-icon>
             Try Now
           </button>
@@ -84,10 +102,18 @@
         <mat-card-title>Quick Start</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p>Ready to begin? Click the chat icon in the sidebar or use the button below to start your first conversation.</p>
+        <p>
+          Ready to begin? Click the chat icon in the sidebar or use the button
+          below to start your first conversation.
+        </p>
       </mat-card-content>
       <mat-card-actions class="center-actions">
-        <button mat-fab color="primary" routerLink="/chat" class="start-chat-fab">
+        <button
+          mat-fab
+          color="primary"
+          [routerLink]="ROUTE_PATHS.BASIC_CHAT"
+          class="start-chat-fab"
+        >
           <mat-icon>chat</mat-icon>
         </button>
       </mat-card-actions>

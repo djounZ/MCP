@@ -4,7 +4,8 @@
     mode="over"
     class="app-sidenav"
     [opened]="sidenavOpened()"
-    (openedChange)="sidenavOpened.set($event)">
+    (openedChange)="sidenavOpened.set($event)"
+  >
     <mat-toolbar color="primary">
       <span>Menu</span>
       <span class="spacer"></span>
@@ -18,7 +19,7 @@
 
   <mat-sidenav-content class="app-content">
     <div class="content-area">
-      <app-chat></app-chat>
+      <app-basic-chat></app-basic-chat>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

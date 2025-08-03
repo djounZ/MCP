@@ -11,8 +11,8 @@ export const routes: Routes = [
     loadComponent: () => import('./features/home/home').then(m => m.HomeComponent)
   },
   {
-    path: 'chat',
-    loadComponent: () => import('./features/chat/chat').then(m => m.ChatComponent)
+    path: 'basic-chat',
+    loadComponent: () => import('./features/chats/basic/basic-chat').then(m => m.BasicChatComponent)
   }
   ,
   {

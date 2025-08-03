@@ -5,21 +5,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MessageList } from '../../shared/components/message-list/message-list';
+import { MessageList } from '../../../shared/components/message-list/message-list';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmationDialog, ConfirmationDialogData } from '../../shared/components/confirmation-dialog/confirmation-dialog';
-import { ChatOptionsComponent } from './components/chat-options/chat-options';
-import { Chat as ChatService } from './services/chat';
-import { MessageInput } from '../../shared/components/message-input/message-input';
+import { ConfirmationDialog, ConfirmationDialogData } from '../../../shared/components/confirmation-dialog/confirmation-dialog';
+import { ChatOptionsComponent } from '../components/chat-options/chat-options';
+import { Chat as ChatService } from '../services/chat';
+import { MessageInput } from '../../../shared/components/message-input/message-input';
 
 @Component({
-  selector: 'app-chat',
+  selector: 'app-basic-chat',
   imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatBadgeModule, MatTooltipModule, MatSidenavModule, MatDialogModule, MessageList, MessageInput, ChatOptionsComponent],
-  templateUrl: './chat.html',
-  styleUrl: './chat.scss',
+  templateUrl: './basic-chat.html',
+  styleUrl: './basic-chat.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatComponent {
+export class BasicChatComponent {
   constructor(private dialog: MatDialog) { }
 
   confirmClearChat(): void {
@@ -72,13 +72,13 @@ export class ChatComponent {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    const { readJsonFile } = await import('../../shared/utils/file.utils');
+    const { readJsonFile } = await import('../../../shared/utils/file.utils');
     try {
       const imported = await readJsonFile(file);
       // Validate imported structure if needed
       if (imported && typeof imported === 'object' && 'messages' in imported) {
 
-        const chatResponseAppModelView = imported as import("../../shared/models/chat-completion-view.models").ChatResponseAppModelView;
+        const chatResponseAppModelView = imported as import("../../../shared/models/chat-completion-view.models").ChatResponseAppModelView;
         this.chatService.assignChatResponseAppModelView(chatResponseAppModelView);
       }
     } catch (err) {
@@ -97,3 +97,4 @@ export class ChatComponent {
     console.log('Chat options updated');
   }
 }
+

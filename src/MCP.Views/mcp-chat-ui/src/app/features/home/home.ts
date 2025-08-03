@@ -3,6 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
+import { ROUTE_PATHS } from '../../app.routes.constants';
 
 @Component({
   selector: 'app-home',
@@ -12,5 +13,6 @@ import { RouterModule } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
+  protected readonly ROUTE_PATHS = ROUTE_PATHS;
 
 }

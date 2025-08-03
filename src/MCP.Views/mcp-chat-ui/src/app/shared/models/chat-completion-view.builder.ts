@@ -22,19 +22,19 @@ export class AiContentAppModelTextContentAppModelViewBuilder {
 }
 export class ChatRequestViewBuilder {
   private _messages: ChatMessageAppModelView[] = [];
-  private _options: any = null;
+  private _options: ChatOptionsAppModelView | null = null;
 
   messages(messages: ChatMessageAppModelView[]): this {
     this._messages = messages;
     return this;
   }
 
-  options(options: any): this {
+  options(options: ChatOptionsAppModelView): this {
     this._options = options;
     return this;
   }
 
-  build(): any {
+  build(): { messages: ChatMessageAppModelView[]; options: ChatOptionsAppModelView | null } {
     return {
       messages: this._messages,
       options: this._options
@@ -42,7 +42,7 @@ export class ChatRequestViewBuilder {
   }
 }
 
-import { ChatResponseAppModelView, ChatMessageAppModelView, ChatFinishReasonAppModelView, ChatRoleEnumAppModelView, AiContentAppModelView } from './chat-completion-view.models';
+import { ChatResponseAppModelView, ChatMessageAppModelView, ChatFinishReasonAppModelView, ChatRoleEnumAppModelView, AiContentAppModelView, ChatOptionsAppModelView } from './chat-completion-view.models';
 import { generateUuid } from '../utils/uuid.utils';
 export class ChatMessageAppModelViewBuilder {
   private _role: ChatRoleEnumAppModelView = ChatRoleEnumAppModelView.User;
@@ -78,7 +78,7 @@ export class ChatResponseAppModelViewBuilder {
   private _responseId: string | null = null;
   private _conversationId: string | null = generateUuid();
   private _modelId: string | null = null;
-  private _createdAt: string | null = new Date().toISOString();
+  private _createdAt: Date | null = new Date();
   private _finishReason: ChatFinishReasonAppModelView | null = null;
 
   messages(messages: ChatMessageAppModelView[]): this {
@@ -86,27 +86,27 @@ export class ChatResponseAppModelViewBuilder {
     return this;
   }
 
-  responseId(responseId: string | null): this {
+  responseId(responseId: string): this {
     this._responseId = responseId;
     return this;
   }
 
-  conversationId(conversationId: string | null): this {
+  conversationId(conversationId: string): this {
     this._conversationId = conversationId;
     return this;
   }
 
-  modelId(modelId: string | null): this {
+  modelId(modelId: string): this {
     this._modelId = modelId;
     return this;
   }
 
-  createdAt(createdAt: string | null): this {
+  createdAt(createdAt: Date): this {
     this._createdAt = createdAt;
     return this;
   }
 
-  finishReason(finishReason: ChatFinishReasonAppModelView | null): this {
+  finishReason(finishReason: ChatFinishReasonAppModelView): this {
     this._finishReason = finishReason;
     return this;
   }

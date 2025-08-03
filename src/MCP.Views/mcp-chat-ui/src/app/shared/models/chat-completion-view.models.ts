@@ -124,7 +124,7 @@ export interface ChatResponseAppModelView {
   responseId?: string | null;
   conversationId?: string | null;
   modelId?: string | null;
-  createdAt?: string | null;
+  createdAt?: Date | null;
   finishReason?: ChatFinishReasonAppModelView | null;
 }
 export interface ChatResponseUpdateAppModelView {
@@ -134,7 +134,7 @@ export interface ChatResponseUpdateAppModelView {
   responseId?: string | null;
   messageId?: string | null;
   conversationId?: string | null;
-  createdAt?: string | null;
+  createdAt?: Date | null;
   finishReason?: ChatFinishReasonAppModelView | null;
   modelId?: string | null;
 }

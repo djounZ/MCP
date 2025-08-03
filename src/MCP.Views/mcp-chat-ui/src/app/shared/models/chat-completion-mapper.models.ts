@@ -330,7 +330,7 @@ export function toChatResponseAppModelView(api: ChatResponseAppModel): ChatRespo
     responseId: api.response_id ?? null,
     conversationId: api.conversation_id ?? null,
     modelId: api.model_id ?? null,
-    createdAt: api.created_at ?? null,
+    createdAt: api.created_at ? new Date(api.created_at) : null,
     finishReason: toChatFinishReasonAppModelView(api.finish_reason ?? ChatFinishReasonAppModel.Stop)
   };
 }
@@ -340,7 +340,7 @@ export function fromChatResponseAppModelView(view: ChatResponseAppModelView): Ch
     response_id: view.responseId ?? null,
     conversation_id: view.conversationId ?? null,
     model_id: view.modelId ?? null,
-    created_at: view.createdAt ?? null,
+    created_at: view.createdAt ? view.createdAt.toISOString() : null,
     finish_reason: fromChatFinishReasonAppModelView(view.finishReason ?? ChatFinishReasonAppModelView.Stop) ?? null
   };
 }
@@ -352,7 +352,7 @@ export function toChatResponseUpdateAppModelView(api: ChatResponseUpdateAppModel
     responseId: api.response_id ?? null,
     messageId: api.message_id ?? null,
     conversationId: api.conversation_id ?? null,
-    createdAt: api.created_at ?? null,
+    createdAt: api.created_at ? new Date(api.created_at) : null,
     finishReason: api.finish_reason !== undefined && api.finish_reason !== null ? toChatFinishReasonAppModelView(api.finish_reason) : null,
     modelId: api.model_id ?? null,
   };
@@ -366,7 +366,7 @@ export function fromChatResponseUpdateAppModelView(view: ChatResponseUpdateAppMo
     response_id: view.responseId ?? null,
     message_id: view.messageId ?? null,
     conversation_id: view.conversationId ?? null,
-    created_at: view.createdAt ?? null,
+    created_at: view.createdAt ? view.createdAt.toISOString() : null,
     finish_reason: view.finishReason !== undefined && view.finishReason !== null ? fromChatFinishReasonAppModelView(view.finishReason) : null,
     model_id: view.modelId ?? null,
   };
@@ -384,7 +384,7 @@ export function fromChatResponseUpdateAppModelToChatResponseAppModelView(api: Ch
     responseId: api.response_id ?? null,
     conversationId: api.conversation_id ?? null,
     modelId: api.model_id ?? null,
-    createdAt: api.created_at ?? null,
+    createdAt: api.created_at ? new Date(api.created_at) : null,
     finishReason: api.finish_reason !== undefined && api.finish_reason !== null ? (api.finish_reason as unknown as ChatFinishReasonAppModelView) : null
   };
 }
@@ -403,7 +403,7 @@ export function updateChatResponseAppModelViewFromChatResponseUpdateAppModel(vie
   view.responseId = api.response_id ?? view.responseId;
   view.conversationId = api.conversation_id ?? view.conversationId;
   view.modelId = api.model_id ?? view.modelId;
-  view.createdAt = api.created_at ?? view.createdAt;
+  view.createdAt = api.created_at ? new Date(api.created_at) : view.createdAt;
   view.finishReason = api.finish_reason !== undefined && api.finish_reason !== null
     ? (api.finish_reason as unknown as ChatFinishReasonAppModelView)
     : view.finishReason;

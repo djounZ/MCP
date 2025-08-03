@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
+import { ChatResponseAppModelViewBuilder } from '../../../shared/models/chat-completion-view.builder';
 import { Observable, map } from 'rxjs';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
 import {
@@ -8,6 +9,7 @@ import {
   ChatRoleEnumAppModelView,
   ChatResponseAppModelView
 } from '../../../shared/models/chat-completion-view.models';
+import { ChatMessageAppModelViewBuilder, ChatRequestViewBuilder, AiContentAppModelTextContentAppModelViewBuilder } from '../../../shared/models/chat-completion-view.builder';
 import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
 import { fromChatRequestView, updateChatMessageAppModelViewsFromAppModelContents, updateChatResponseAppModelViewFromChatResponseUpdateAppModel } from '../../../shared/models/chat-completion-mapper.models';
 import { ChatOptionsService } from './chat-options';
@@ -26,15 +28,9 @@ export class Chat {
   readonly currentOptions = this.chatOptionsService.chatOptionsView;
 
 
-  // Create placeholder for LLM response
-  public readonly chatResponseAppModelView: ChatResponseAppModelView = {
-    messages: [],
-    responseId: null,
-    conversationId: null,
-    modelId: null,
-    createdAt: new Date().toISOString(),
-    finishReason: null // null means still streaming
-  };
+  // Create placeholder for LLM response using builder
+  public readonly chatResponseAppModelView: ChatResponseAppModelView =
+    new ChatResponseAppModelViewBuilder().build();
   constructor() {
     this.initializeChatStreamConnection();
   }
@@ -65,29 +61,31 @@ export class Chat {
     this.messages.update(() => [...this.chatResponseAppModelView.messages]);
   }
 
-  sendMessage(content: string): void {
-    if (!content.trim()) return;
 
-    const aAIContentTextContentView: AiContentAppModelTextContentAppModelView = {
-      $type: 'text',
-      text: content.trim()
-    };
-    const userChatMessageView: ChatMessageAppModelView = {
-      contents: [aAIContentTextContentView],
-      role: ChatRoleEnumAppModelView.User,
-      messageTime: new Date()
-    };
+  sendMessage(content: string): void {
+    const trimmedContent = content.trim();
+    if (!trimmedContent) return;
+
+    const aAIContentTextContentView = new AiContentAppModelTextContentAppModelViewBuilder()
+      .text(trimmedContent)
+      .build();
+
+    const userChatMessageView = new ChatMessageAppModelViewBuilder()
+      .role(ChatRoleEnumAppModelView.User)
+      .contents([aAIContentTextContentView])
+      .messageTime(new Date())
+      .build();
 
     this.chatResponseAppModelView.messages.push(userChatMessageView);
     this.isLoading.set(true);
     this.isAwaitingResponse.set(true);
     this.messages.update(() => [...this.chatResponseAppModelView.messages]);
 
-    // Create ChatRequestView
-    const chatRequestView: ChatRequestView = {
-      messages: [...this.chatResponseAppModelView.messages],
-      options: this.currentOptions()
-    };
+    // Create ChatRequestView using builder
+    const chatRequestView = new ChatRequestViewBuilder()
+      .messages([...this.chatResponseAppModelView.messages])
+      .options(this.currentOptions())
+      .build();
     const chatRequest = fromChatRequestView(chatRequestView);
     this.chatStreamService.sendMessage(chatRequest);
 
@@ -106,20 +104,10 @@ export class Chat {
   }
 
   clearChat(): void {
-    this.chatResponseAppModelView.messages = [];
-    this.chatResponseAppModelView.responseId = null;
-    this.chatResponseAppModelView.conversationId = null;
-    this.chatResponseAppModelView.modelId = null;
-    this.chatResponseAppModelView.createdAt = new Date().toISOString();
-    this.chatResponseAppModelView.finishReason = null; // Reset finish reason
+    const newResponse = new ChatResponseAppModelViewBuilder().build();
+    // Copy properties to preserve reference for signals
+    Object.assign(this.chatResponseAppModelView, newResponse);
     this.messages.update(() => [...this.chatResponseAppModelView.messages]);
   }
 
-  private generateId(): string {
-    // RFC4122 version 4 compliant
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
 }

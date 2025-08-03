@@ -13,6 +13,7 @@ import { ChatMessageAppModelViewBuilder, ChatRequestViewBuilder, AiContentAppMod
 import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
 import { fromChatRequestView, updateChatMessageAppModelViewsFromAppModelContents, updateChatResponseAppModelViewFromChatResponseUpdateAppModel } from '../../../shared/models/chat-completion-mapper.models';
 import { ChatOptionsService } from './chat-options';
+import { exportAsJsonFile } from '../../../shared/utils/file.utils';
 
 
 @Injectable({
@@ -110,4 +111,12 @@ export class Chat {
     this.messages.update(() => [...this.chatResponseAppModelView.messages]);
   }
 
+  exportChat(): void {
+    const data = this.chatResponseAppModelView;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `chat-export-${timestamp}.json`;
+    exportAsJsonFile(data, filename);
+  }
+
 }
+

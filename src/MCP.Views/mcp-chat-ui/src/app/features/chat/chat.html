@@ -38,6 +38,15 @@
         >
           <mat-icon>clear_all</mat-icon>
         </button>
+
+        <button
+          mat-icon-button
+          (click)="exportChat()"
+          matTooltip="Export chat as JSON"
+          [disabled]="messages().length === 0"
+        >
+          <mat-icon>download</mat-icon>
+        </button>
       </div>
     </mat-toolbar>
 

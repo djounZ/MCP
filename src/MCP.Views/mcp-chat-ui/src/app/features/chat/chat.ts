@@ -58,6 +58,10 @@ export class ChatComponent {
     this.chatService.clearChat();
   }
 
+  exportChat(): void {
+    this.chatService.exportChat();
+  }
+
   toggleOptions(): void {
     this.showOptions.update(show => !show);
   }

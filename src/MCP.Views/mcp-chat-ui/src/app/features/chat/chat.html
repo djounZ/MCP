@@ -37,7 +37,7 @@
     </mat-toolbar>
 
     <div class="chat-content">
-      <app-message-list [messages]="messages()" [isLoading]="isLoading()"></app-message-list>
+      <app-message-list [messages]="messages()" [isLoading]="isLoading()" [isAwaitingResponse]="chatService.isAwaitingResponse()"></app-message-list>
 
       <app-message-input
         (messageSubmit)="onMessageSubmit($event)"

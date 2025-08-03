@@ -18,7 +18,7 @@ import { Chat as ChatService } from './services/chat';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatComponent {
-  private readonly chatService = inject(ChatService);
+  protected readonly chatService = inject(ChatService);
 
   protected readonly messages = this.chatService.messages;
   protected readonly isLoading = this.chatService.isLoading;

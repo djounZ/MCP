@@ -28,6 +28,7 @@ function isErrorContent(c: unknown): c is AiContentAppModelErrorContentAppModel 
   providedIn: 'root'
 })
 export class Chat {
+  readonly isAwaitingResponse = signal(false);
   private readonly chatStreamService = inject(ChatHttpStream);
   private readonly chatOptionsService = inject(ChatOptionsService);
 
@@ -88,6 +89,7 @@ export class Chat {
 
     this.chatResponseAppModelView.messages.push(userChatMessageView);
     this.isLoading.set(true);
+    this.isAwaitingResponse.set(true);
     this.messages.update(() => [...this.chatResponseAppModelView.messages]);
 
     // Create ChatRequestView
@@ -106,6 +108,7 @@ export class Chat {
     this.messages.update(() => {
       return [...this.chatResponseAppModelView.messages];
     });
+    this.isAwaitingResponse.set(false);
     if (response.finish_reason) {
       this.isLoading.set(false);
     }

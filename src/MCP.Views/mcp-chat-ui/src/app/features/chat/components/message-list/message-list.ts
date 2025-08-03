@@ -32,6 +32,7 @@ export class MessageList {
   }
   readonly messages = input.required<ChatMessageAppModelView[]>();
   readonly isLoading = input.required<boolean>();
+  readonly isAwaitingResponse = input.required<boolean>();
 
   isErrorMessage(message: ChatMessageAppModelView): boolean {
     return message?.contents.some(c => c.$type === 'error') || false;

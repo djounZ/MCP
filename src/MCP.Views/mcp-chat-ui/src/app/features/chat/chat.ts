@@ -7,14 +7,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MessageList } from '../../shared/components/message-list/message-list';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from './components/confirm-dialog.component';
+import { ConfirmationDialog, ConfirmationDialogData } from '../../shared/components/confirmation-dialog/confirmation-dialog';
 import { ChatOptionsComponent } from './components/chat-options/chat-options';
 import { Chat as ChatService } from './services/chat';
 import { MessageInput } from '../../shared/components/message-input/message-input';
 
 @Component({
   selector: 'app-chat',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatBadgeModule, MatTooltipModule, MatSidenavModule, MatDialogModule, MessageList, MessageInput, ChatOptionsComponent, ConfirmDialogComponent],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatBadgeModule, MatTooltipModule, MatSidenavModule, MatDialogModule, MessageList, MessageInput, ChatOptionsComponent],
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,7 +23,12 @@ export class ChatComponent {
   constructor(private dialog: MatDialog) { }
 
   confirmClearChat(): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent);
+    const dialogRef = this.dialog.open<ConfirmationDialog, ConfirmationDialogData, boolean>(ConfirmationDialog, {
+      data: {
+        title: 'Clear Chat',
+        message: 'Are you sure you want to clear the chat?'
+      }
+    });
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.clearChat();

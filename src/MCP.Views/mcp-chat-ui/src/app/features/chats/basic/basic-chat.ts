@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
-import { ChatClientProviderEnumAppModelView } from '../../../shared/models/chat-completion-view.models';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,7 +37,7 @@ import { MessageInput } from '../../../shared/components/message-input/message-i
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicChatComponent {
-  protected readonly selectedProvider = signal<ChatClientProviderEnumAppModelView>(ChatClientProviderEnumAppModelView.GithubCopilot);
+  protected readonly selectedProvider = signal<string | null>(null);
   constructor(private dialog: MatDialog) { }
 
   confirmClearChat(): void {

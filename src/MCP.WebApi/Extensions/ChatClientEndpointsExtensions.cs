@@ -154,7 +154,7 @@ public static class ChatClientEndpointsExtensions
 /// <param name="Options">Chat options</param>
 public record ChatRequest(
     IEnumerable<ChatMessageAppModel> Messages,
-    string Provider = "github_copilot",
+    string? Provider = null,
     ChatOptionsAppModel? Options = null
 );
 
@@ -170,7 +170,7 @@ public record ChatRequest(
 public record SimpleChatRequest(
     string Message,
     string SystemPrompt,
-    string Provider = "github_copilot",
+    string? Provider = null,
     string? Model = null,
     float? Temperature = null,
     int? MaxTokens = null

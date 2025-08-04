@@ -23,7 +23,7 @@ export class AiContentAppModelTextContentAppModelViewBuilder {
 export class ChatRequestViewBuilder {
   private _messages: ChatMessageAppModelView[] = [];
   private _options: ChatOptionsAppModelView | null = null;
-  private _provider: ChatClientProviderEnumAppModelView | null = null;
+  private _provider: string | null = null;
 
   messages(messages: ChatMessageAppModelView[]): this {
     this._messages = messages;
@@ -35,12 +35,12 @@ export class ChatRequestViewBuilder {
     return this;
   }
 
-  provider(provider: ChatClientProviderEnumAppModelView | null): this {
+  provider(provider: string | null): this {
     this._provider = provider;
     return this;
   }
 
-  build(): { messages: ChatMessageAppModelView[]; options: ChatOptionsAppModelView | null; provider: ChatClientProviderEnumAppModelView | null } {
+  build(): { messages: ChatMessageAppModelView[]; options: ChatOptionsAppModelView | null; provider: string | null } {
     return {
       messages: this._messages,
       options: this._options,
@@ -49,7 +49,7 @@ export class ChatRequestViewBuilder {
   }
 }
 
-import { ChatResponseAppModelView, ChatMessageAppModelView, ChatFinishReasonAppModelView, ChatRoleEnumAppModelView, AiContentAppModelView, ChatOptionsAppModelView, ChatClientProviderEnumAppModelView } from './chat-completion-view.models';
+import { ChatResponseAppModelView, ChatMessageAppModelView, ChatFinishReasonAppModelView, ChatRoleEnumAppModelView, AiContentAppModelView, ChatOptionsAppModelView } from './chat-completion-view.models';
 import { generateUuid } from '../utils/uuid.utils';
 export class ChatMessageAppModelViewBuilder {
   private _role: ChatRoleEnumAppModelView = ChatRoleEnumAppModelView.User;

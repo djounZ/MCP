@@ -1,12 +1,6 @@
 // Auto-generated from OpenAPI spec (components/schemas/ChatRequest, ChatResponseAppModel)
 // See backend.openapi.json for details
 
-// --- ChatClientProviderEnumAppModel ---
-export enum ChatClientProviderEnumAppModel {
-  GithubCopilot = "github_copilot",
-  Ollama = "ollama"
-}
-
 // --- ChatRoleEnumAppModel ---
 export enum ChatRoleEnumAppModel {
   User = "user",
@@ -131,7 +125,7 @@ export interface ChatOptionsAppModel {
 export interface ChatRequest {
   messages: ChatMessageAppModel[];
   options?: ChatOptionsAppModel | null;
-  provider: ChatClientProviderEnumAppModel | null;
+  provider: string | null;
 }
 
 // --- ChatResponseAppModel ---

@@ -26,16 +26,23 @@ public sealed class ChatServiceManager
                 Keys.ToDictionary(provider => JsonSerializer.Serialize(provider).Replace("\"", string.Empty)));
     }
 
-    private IChatService GetChatService(string providerString)
+    private IChatService GetChatService(string? providerString)
     {
-        if (!_availableChatProviders.TryGetValue(providerString, out var provider) || !_chatServicesByProvider.TryGetValue(provider, out var chatService))
+        var provider = ChatClientProviderEnum.GithubCopilot;
+        if (providerString  != null && !_availableChatProviders.TryGetValue(providerString, out provider) )
         {
             throw new ArgumentException($"Chat service for provider {providerString} is not registered.");
         }
+
+        if (!_chatServicesByProvider.TryGetValue(provider, out var chatService))
+        {
+            throw new ArgumentException($"Chat service for provider {providerString} is not registered.");
+        }
+
         return (IChatService) _serviceProvider.GetRequiredService(chatService);
     }
 
-    public async Task<ChatResponseAppModel> GetResponseAsync(string provider, IEnumerable<ChatMessageAppModel> messagesAppModel, ChatOptionsAppModel? optionsAppModel = null,
+    public async Task<ChatResponseAppModel> GetResponseAsync(string? provider, IEnumerable<ChatMessageAppModel> messagesAppModel, ChatOptionsAppModel? optionsAppModel = null,
         CancellationToken cancellationToken = new())
     {
         return await GetChatService(provider).GetResponseAsync(messagesAppModel, optionsAppModel, cancellationToken);
@@ -43,7 +50,7 @@ public sealed class ChatServiceManager
 
 
 
-    public IAsyncEnumerable<ChatResponseUpdateAppModel> GetStreamingResponseAsync(string provider, IEnumerable<ChatMessageAppModel> messagesAppModel, ChatOptionsAppModel? optionsAppModel = null,
+    public IAsyncEnumerable<ChatResponseUpdateAppModel> GetStreamingResponseAsync(string? provider, IEnumerable<ChatMessageAppModel> messagesAppModel, ChatOptionsAppModel? optionsAppModel = null,
         CancellationToken cancellationToken = new())
     {
         return  GetChatService(provider).GetStreamingResponseAsync(messagesAppModel, optionsAppModel, cancellationToken);

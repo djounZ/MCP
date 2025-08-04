@@ -760,7 +760,8 @@
           },
           "provider": {
             "type": "string",
-            "default": "github_copilot"
+            "default": null,
+            "nullable": true
           },
           "options": {
             "$ref": "#/components/schemas/ChatOptionsAppModel"
@@ -1039,7 +1040,8 @@
           },
           "provider": {
             "type": "string",
-            "default": "github_copilot"
+            "default": null,
+            "nullable": true
           },
           "model": {
             "type": "string",

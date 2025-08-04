@@ -3,7 +3,6 @@
 
 import { from } from 'rxjs';
 import {
-  ChatClientProviderEnumAppModel,
   ChatRoleEnumAppModel,
   AiContentAppModel,
   AiContentAppModelDataContentAppModel,
@@ -28,7 +27,6 @@ import {
 } from './chat-completion-api.models';
 
 import {
-  ChatClientProviderEnumAppModelView,
   ChatRoleEnumAppModelView,
   AiContentAppModelView,
   AiContentAppModelDataContentAppModelView,
@@ -52,22 +50,6 @@ import {
   ChatResponseUpdateAppModelView
 } from './chat-completion-view.models';
 
-export function toChatClientProviderEnumAppModelView(provider: ChatClientProviderEnumAppModel | null): ChatClientProviderEnumAppModelView | null {
-  if (!provider) return null;
-  switch (provider) {
-    case ChatClientProviderEnumAppModel.GithubCopilot: return ChatClientProviderEnumAppModelView.GithubCopilot;
-    case ChatClientProviderEnumAppModel.Ollama: return ChatClientProviderEnumAppModelView.Ollama;
-    default: throw new Error('Unknown ChatClientProviderEnumAppModel value: ' + provider);
-  }
-}
-export function fromChatClientProviderEnumAppModelView(provider: ChatClientProviderEnumAppModelView | null): ChatClientProviderEnumAppModel | null {
-  if (!provider) return null;
-  switch (provider) {
-    case ChatClientProviderEnumAppModelView.GithubCopilot: return ChatClientProviderEnumAppModel.GithubCopilot;
-    case ChatClientProviderEnumAppModelView.Ollama: return ChatClientProviderEnumAppModel.Ollama;
-    default: throw new Error('Unknown ChatClientProviderEnumAppModelView value: ' + provider);
-  }
-}
 // --- Role Enum Mapper ---
 export function toChatRoleEnumAppModelView(role: ChatRoleEnumAppModel): ChatRoleEnumAppModelView {
   switch (role) {
@@ -332,14 +314,14 @@ export function toChatRequestView(api: ChatRequest): ChatRequestView {
   return {
     messages: api.messages.map(toChatMessageAppModelView),
     options: toChatOptionsAppModelView(api.options ?? null),
-    provider: toChatClientProviderEnumAppModelView(api.provider)
+    provider: api.provider
   };
 }
 export function fromChatRequestView(view: ChatRequestView, conversationId: string | null | undefined): ChatRequest {
   return {
     messages: view.messages.map(fromChatMessageAppModelView),
     options: fromChatOptionsAppModelView(view.options ?? null, conversationId),
-    provider: fromChatClientProviderEnumAppModelView(view.provider)
+    provider: view.provider
   };
 }
 

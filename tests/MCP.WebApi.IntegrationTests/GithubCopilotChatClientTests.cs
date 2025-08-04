@@ -1,26 +1,25 @@
 using System.Text;
-using System.Text.Json;
 using AI.GithubCopilot.Domain;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Xunit;
+using OllamaSharp;
 using Xunit.Abstractions;
 
-namespace AI.GithubCopilot.Tests.Integration;
+namespace MCP.WebApi.IntegrationTests;
 
 /// <summary>
 /// Integration tests for <see cref="GithubCopilotChatClient"/> class.
 /// </summary>
 public class GithubCopilotChatClientTests : IClassFixture<TestFixture>
 {
-    private readonly GithubCopilotChatClient _copilotChatClient;
+    private readonly IChatClient _copilotChatClient;
     private readonly ITestOutputHelper _output;
     private readonly ILoggerFactory _loggerFactory;
 
     public GithubCopilotChatClientTests(TestFixture fixture, ITestOutputHelper output)
     {
-        _copilotChatClient = fixture.ServiceProvider.GetRequiredService<GithubCopilotChatClient>();
+        _copilotChatClient = fixture.ServiceProvider.GetRequiredService<OllamaApiClient>();
         _output = output;
 
         // Register the test output logger provider for this test
@@ -297,7 +296,6 @@ public class GithubCopilotChatClientTests : IClassFixture<TestFixture>
         var chatResponseUpdates = new List<ChatResponseUpdate>();
         await foreach (var update in response)
         {
-
             chatResponseUpdates.Add(update);
             var textContent = update.Contents?.OfType<TextContent>().FirstOrDefault()?.Text;
             if (!string.IsNullOrEmpty(textContent))

@@ -52,7 +52,7 @@ public static class ServiceCollectionExtensions
         {
             var ollamaOptions = sc.GetRequiredService<IOptions<OllamaOptions>>().Value;
 
-            return new OllamaApiClient(ollamaOptions.Uri, "gemma3");
+            return new OllamaApiClient(ollamaOptions.Uri, ollamaOptions.DefaultModel);
         });
         services.AddSingleton<OllamaChatService>();
     }

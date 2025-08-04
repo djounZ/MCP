@@ -6,7 +6,7 @@ using AIChatFinishReason = Microsoft.Extensions.AI.ChatFinishReason;
 
 namespace MCP.Infrastructure.Models.Mappers;
 
-public sealed class GithubCopilotChatClientAppModelsMapper
+public sealed class ChatClientExtensionsAiAppModelsMapper
 {
     // Chat completion mappings
     public ChatResponseAppModel MapToAppModel(ChatResponse chatResponse)

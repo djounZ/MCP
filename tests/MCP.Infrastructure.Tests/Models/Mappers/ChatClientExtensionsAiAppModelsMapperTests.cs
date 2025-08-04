@@ -6,12 +6,12 @@ using Microsoft.Extensions.AI;
 namespace MCP.Infrastructure.Tests.Models.Mappers;
 
 /// <summary>
-/// Comprehensive unit tests for GithubCopilotChatClientAppModelsMapper covering all public and private methods
+/// Comprehensive unit tests for ChatClientExtensionsAiAppModelsMapper covering all public and private methods
 /// to achieve 100% code coverage
 /// </summary>
-public class GithubCopilotChatClientAppModelsMapperTests
+public class ChatClientExtensionsAiAppModelsMapperTests
 {
-    private readonly GithubCopilotChatClientAppModelsMapper _mapper = new();
+    private readonly ChatClientExtensionsAiAppModelsMapper _mapper = new();
 
     #region ChatResponse Mapping Tests
 

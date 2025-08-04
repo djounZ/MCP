@@ -38,7 +38,7 @@ public static class GithubCopilotChatClientEndpointsExtensions
         // Streaming chat completion endpoint - returns IAsyncEnumerable<ChatResponseUpdate>
         app.MapPost("/api/chat/completions/stream", (
             ChatRequest request,
-            GithubCopilotChatService chatClient,
+            OllamaChatService chatClient,
             CancellationToken cancellationToken) =>
             {
                 var streamingResponseAsync = chatClient.GetStreamingResponseAsync(request.Messages, request.Options, cancellationToken);

@@ -2,10 +2,13 @@ using AI.GithubCopilot.Configuration;
 using MCP.Application.Interfaces;
 using MCP.Domain.Interfaces;
 using MCP.Infrastructure.Models.Mappers;
+using MCP.Infrastructure.Options;
 using MCP.Infrastructure.Repositories;
 using MCP.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using OllamaSharp;
 
 namespace MCP.Infrastructure.Configuration;
 
@@ -29,9 +32,34 @@ public static class ServiceCollectionExtensions
         // Add other infrastructure services here
         // Example: Database context, external API clients, etc.
 
-        services.AddSingleton<GithubCopilotChatClientAppModelsMapper>();
+        services.AddChatServices(configuration);
+        return services;
+    }
+
+    private static IServiceCollection AddChatServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton<ChatClientExtensionsAiAppModelsMapper>();
+        services.AddCopilotChatService(configuration);
+        services.AddOllamaChatService(configuration);
+
+        return services;
+    }
+
+    private static void AddOllamaChatService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<OllamaOptions>(configuration.GetSection(nameof(OllamaOptions)));
+        services.AddTransient<OllamaApiClient>(sc =>
+        {
+            var ollamaOptions = sc.GetRequiredService<IOptions<OllamaOptions>>().Value;
+
+            return new OllamaApiClient(ollamaOptions.Uri, "gemma3");
+        });
+        services.AddSingleton<OllamaChatService>();
+    }
+
+    private static void AddCopilotChatService(this IServiceCollection services, IConfiguration configuration)
+    {
         services.AddGithubCopilot(configuration);
         services.AddSingleton<GithubCopilotChatService>();
-        return services;
     }
 }

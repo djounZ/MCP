@@ -11,10 +11,7 @@
         <PackageReference Include="Microsoft.Extensions.Http" Version="$(MicrosoftExtensionsHttpVersion)"/>
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="$(MicrosoftIdentityModelTokensVersion)"/>
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(SystemIdentityModelTokensJwtVersion)"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Options\" />
+        <PackageReference Include="OllamaSharp" Version="$(OllamaSharpVersion)"/>
     </ItemGroup>
 
 </Project>

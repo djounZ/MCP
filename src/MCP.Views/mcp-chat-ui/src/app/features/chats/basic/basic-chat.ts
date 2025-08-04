@@ -13,7 +13,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmationDialog, ConfirmationDialogData } from '../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { ChatOptionsComponent } from '../components/chat-options/chat-options';
 import { Chat as ChatService } from '../services/chat';
+import { ChatHttpStream } from '../../../core/services/chat-http-stream';
 import { MessageInput } from '../../../shared/components/message-input/message-input';
+import { formatFromSnakeCase } from '../../../shared/utils/string.utils';
 
 @Component({
   selector: 'app-basic-chat',
@@ -37,8 +39,25 @@ import { MessageInput } from '../../../shared/components/message-input/message-i
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicChatComponent {
+  formatProviderName(provider: string): string {
+    return formatFromSnakeCase(provider);
+  }
+  protected readonly providers = signal<string[]>([]);
   protected readonly selectedProvider = signal<string | null>(null);
-  constructor(private dialog: MatDialog) { }
+  protected readonly chatHttpStream = inject(ChatHttpStream);
+
+  constructor(private dialog: MatDialog) {
+    this.loadProviders();
+  }
+
+  private async loadProviders() {
+    const result = await this.chatHttpStream.getProviders() as string[];
+    this.providers.set(result);
+    const currentProvider = this.selectedProvider();
+    if (currentProvider && result.length && (!currentProvider || !result.includes(currentProvider))) {
+      this.selectedProvider.set(result[0]);
+    }
+  }
 
   confirmClearChat(): void {
     const dialogRef = this.dialog.open<ConfirmationDialog, ConfirmationDialogData, boolean>(ConfirmationDialog, {

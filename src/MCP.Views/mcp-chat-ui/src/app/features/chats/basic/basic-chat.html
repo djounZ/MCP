@@ -27,8 +27,11 @@
             [value]="selectedProvider()"
             (valueChange)="selectedProvider.set($event)"
           >
-            <mat-option [value]="'github_copilot'">GitHub Copilot</mat-option>
-            <mat-option [value]="'ollama'">Ollama</mat-option>
+            @for (provider of providers(); track provider) {
+            <mat-option [value]="provider">{{
+              formatProviderName(provider)
+            }}</mat-option>
+            }
           </mat-select>
         </mat-form-field>
         <button

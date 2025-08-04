@@ -9,6 +9,24 @@ export class ChatHttpStream {
   private readonly messageSubject$ = new Subject<ChatResponseUpdateAppModel>();
 
   private readonly apiUrl = 'http://localhost:5200/api/chat/completions/stream';
+  private readonly apiProviderUrl = 'http://localhost:5200/api/chat/providers';
+
+
+  async getProviders(): Promise<string[]> {
+    try {
+      const response = await fetch(this.apiProviderUrl, {
+        method: 'GET'
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+      }
+
+      return response.json() as Promise<string[]>;
+    } catch (error) {
+      console.error('Failed to fetch providers:', error);
+      return [];
+    }
+  }
 
   async sendMessage(message: ChatRequest): Promise<void> {
     try {

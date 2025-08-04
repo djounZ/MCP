@@ -3,9 +3,9 @@ using MCP.Application.DTOs.AI.ChatCompletion;
 using MCP.Infrastructure.Models.Mappers;
 using Microsoft.Extensions.AI;
 
-namespace MCP.Infrastructure.Services;
+namespace MCP.Infrastructure.Services.ChatServiceImplementations;
 
-public abstract class ChatServiceBase<TChatClient>(TChatClient chatClient,ChatClientExtensionsAiAppModelsMapper mapper) where TChatClient : IChatClient
+public abstract class ChatServiceBase<TChatClient>(TChatClient chatClient,ChatClientExtensionsAiAppModelsMapper mapper) : IChatService where TChatClient : IChatClient
 {
 
 

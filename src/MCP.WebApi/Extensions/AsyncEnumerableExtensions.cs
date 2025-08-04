@@ -3,7 +3,7 @@ namespace MCP.WebApi.Extensions;
 public static class AsyncEnumerableExtensions
 {
 
-    private const string StreamingContentType = "text/event-stream";
+    private const string StreamingContentType = "application/json-stream";
     public static IResult ToResult<T>(this IAsyncEnumerable<T> responseStream, CancellationToken cancellationToken)
     {
         return Results.Stream(

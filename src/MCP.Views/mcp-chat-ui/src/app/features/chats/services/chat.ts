@@ -7,7 +7,8 @@ import {
   ChatMessageAppModelView,
   ChatRequestView,
   ChatRoleEnumAppModelView,
-  ChatResponseAppModelView
+  ChatResponseAppModelView,
+  ChatClientProviderEnumAppModelView
 } from '../../../shared/models/chat-completion-view.models';
 import { ChatMessageAppModelViewBuilder, ChatRequestViewBuilder, AiContentAppModelTextContentAppModelViewBuilder } from '../../../shared/models/chat-completion-view.builder';
 import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
@@ -63,7 +64,7 @@ export class Chat {
   }
 
 
-  sendMessage(content: string): void {
+  sendMessage(content: string, provider: ChatClientProviderEnumAppModelView | null): void {
     const trimmedContent = content.trim();
     if (!trimmedContent) return;
 
@@ -86,10 +87,10 @@ export class Chat {
     const chatRequestView = new ChatRequestViewBuilder()
       .messages([...this.chatResponseAppModelView.messages])
       //.options(this.currentOptions())
+      .provider(provider)
       .build();
     const chatRequest = fromChatRequestView(chatRequestView, this.chatResponseAppModelView.conversationId);
     this.chatStreamService.sendMessage(chatRequest);
-
   }
 
   private handleStreamingResponse(response: ChatResponseUpdateAppModel): void {

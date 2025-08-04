@@ -5,6 +5,7 @@ using MCP.Infrastructure.Models.Mappers;
 using MCP.Infrastructure.Options;
 using MCP.Infrastructure.Repositories;
 using MCP.Infrastructure.Services;
+using MCP.Infrastructure.Services.ChatServiceImplementations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -41,25 +42,25 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ChatClientExtensionsAiAppModelsMapper>();
         services.AddCopilotChatService(configuration);
         services.AddOllamaChatService(configuration);
-
+        services.AddScoped<ChatServiceManager>();
         return services;
     }
 
     private static void AddOllamaChatService(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<OllamaOptions>(configuration.GetSection(nameof(OllamaOptions)));
-        services.AddTransient<OllamaApiClient>(sc =>
+        services.AddScoped<OllamaApiClient>(sc =>
         {
             var ollamaOptions = sc.GetRequiredService<IOptions<OllamaOptions>>().Value;
 
             return new OllamaApiClient(ollamaOptions.Uri, ollamaOptions.DefaultModel);
         });
-        services.AddSingleton<OllamaChatService>();
+        services.AddScoped<OllamaChatService>();
     }
 
     private static void AddCopilotChatService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddGithubCopilot(configuration);
-        services.AddSingleton<GithubCopilotChatService>();
+        services.AddScoped<GithubCopilotChatService>();
     }
 }

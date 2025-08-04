@@ -1,6 +1,14 @@
 
 // View models corresponding to chat-completion-api.models.ts
 
+import { ChatClientProviderEnumAppModel } from "./chat-completion-api.models";
+
+
+
+export enum ChatClientProviderEnumAppModelView {
+  GithubCopilot = "github_copilot",
+  Ollama = "ollama"
+}
 
 export enum ChatRoleEnumAppModelView {
   User = "user",
@@ -8,12 +16,14 @@ export enum ChatRoleEnumAppModelView {
   System = "system",
   Tool = "tool"
 }
+
 export enum ChatFinishReasonAppModelView {
   Stop = "stop",
   Length = "length",
   ToolCalls = "tool_calls",
   ContentFilter = "content_filter"
 }
+
 export type AiContentAppModelView =
   | AiContentAppModelDataContentAppModelView
   | AiContentAppModelErrorContentAppModelView
@@ -117,6 +127,7 @@ export interface ChatOptionsAppModelView {
 export interface ChatRequestView {
   messages: ChatMessageAppModelView[];
   options?: ChatOptionsAppModelView | null;
+  provider: ChatClientProviderEnumAppModelView | null;
 }
 
 export interface ChatResponseAppModelView {

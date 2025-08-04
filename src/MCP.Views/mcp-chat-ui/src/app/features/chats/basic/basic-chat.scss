@@ -33,6 +33,13 @@
         display: flex;
         align-items: center;
         gap: 8px;
+
+        .provider-select.compact {
+          min-width: 140px;
+          max-width: 180px;
+          margin-right: 8px;
+          margin-top: 20px;
+        }
       }
     }
 

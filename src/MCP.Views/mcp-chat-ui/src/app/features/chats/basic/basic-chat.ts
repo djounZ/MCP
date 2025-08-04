@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
+import { ChatClientProviderEnumAppModelView } from '../../../shared/models/chat-completion-view.models';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
 import { MessageList } from '../../../shared/components/message-list/message-list';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmationDialog, ConfirmationDialogData } from '../../../shared/components/confirmation-dialog/confirmation-dialog';
@@ -14,12 +18,27 @@ import { MessageInput } from '../../../shared/components/message-input/message-i
 
 @Component({
   selector: 'app-basic-chat',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatBadgeModule, MatTooltipModule, MatSidenavModule, MatDialogModule, MessageList, MessageInput, ChatOptionsComponent],
+  imports: [
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatBadgeModule,
+    MatTooltipModule,
+    MatSidenavModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
+    MatDialogModule,
+    MessageList,
+    MessageInput,
+    ChatOptionsComponent
+  ],
   templateUrl: './basic-chat.html',
   styleUrl: './basic-chat.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicChatComponent {
+  protected readonly selectedProvider = signal<ChatClientProviderEnumAppModelView>(ChatClientProviderEnumAppModelView.GithubCopilot);
   constructor(private dialog: MatDialog) { }
 
   confirmClearChat(): void {
@@ -53,7 +72,7 @@ export class BasicChatComponent {
   protected readonly showOptions = signal(false);
 
   onMessageSubmit(content: string): void {
-    this.chatService.sendMessage(content);
+    this.chatService.sendMessage(content, this.selectedProvider());
   }
 
   clearChat(): void {

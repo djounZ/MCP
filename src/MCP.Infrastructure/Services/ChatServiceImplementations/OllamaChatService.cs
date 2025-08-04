@@ -1,7 +1,7 @@
 using MCP.Infrastructure.Models.Mappers;
 using OllamaSharp;
 
-namespace MCP.Infrastructure.Services;
+namespace MCP.Infrastructure.Services.ChatServiceImplementations;
 
 public class OllamaChatService(
     OllamaApiClient ollamaApiClient,

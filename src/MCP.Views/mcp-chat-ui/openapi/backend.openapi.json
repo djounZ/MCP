@@ -135,13 +135,38 @@
         }
       }
     },
+    "/api/chat/providers": {
+      "get": {
+        "tags": [
+          "ChatCompletion"
+        ],
+        "summary": "Get list of available providers",
+        "description": "Return all available chat providers",
+        "operationId": "GetAvailableProviders",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chat/completions": {
       "post": {
         "tags": [
-          "GithubCopilotChat"
+          "ChatCompletion"
         ],
         "summary": "Create a chat completion",
-        "description": "Creates a non-streaming chat completion using GitHub Copilot",
+        "description": "Creates a non-streaming chat completion",
         "operationId": "CreateChatCompletion",
         "requestBody": {
           "content": {
@@ -170,10 +195,10 @@
     "/api/chat/completions/stream": {
       "post": {
         "tags": [
-          "GithubCopilotChat"
+          "ChatCompletion"
         ],
-        "summary": "Create a streaming chat completion",
-        "description": "Creates a streaming chat completion using GitHub Copilot",
+        "summary": "Create a chat completion",
+        "description": "Creates a streaming chat completion",
         "operationId": "CreateStreamingChatCompletion",
         "requestBody": {
           "content": {
@@ -205,7 +230,7 @@
     "/api/chat": {
       "post": {
         "tags": [
-          "GithubCopilotChat"
+          "ChatCompletion"
         ],
         "summary": "Simple chat endpoint",
         "description": "Send a simple message and get a non-streaming response from GitHub Copilot",
@@ -237,7 +262,7 @@
     "/api/chat/stream": {
       "post": {
         "tags": [
-          "GithubCopilotChat"
+          "ChatCompletion"
         ],
         "summary": "Simple streaming chat endpoint",
         "description": "Send a simple message and get a streaming response from GitHub Copilot",
@@ -733,6 +758,10 @@
               "$ref": "#/components/schemas/ChatMessageAppModel"
             }
           },
+          "provider": {
+            "type": "string",
+            "default": "github_copilot"
+          },
           "options": {
             "$ref": "#/components/schemas/ChatOptionsAppModel"
           }
@@ -813,6 +842,7 @@
             "type": "string"
           },
           "schema": {
+            "type": "string",
             "nullable": true
           },
           "schema_name": {
@@ -889,7 +919,12 @@
         }
       },
       "ChatRoleEnumAppModel": {
-        "type": "integer"
+        "enum": [
+          "system",
+          "assistant",
+          "user",
+          "tool"
+        ]
       },
       "ChatToolModeAppModel": {
         "required": [
@@ -970,11 +1005,23 @@
         }
       },
       "NullableOfChatFinishReasonAppModel": {
-        "type": "integer",
+        "enum": [
+          "stop",
+          "length",
+          "tool_calls",
+          "content_filter",
+          null
+        ],
         "nullable": true
       },
       "NullableOfChatRoleEnumAppModel": {
-        "type": "integer",
+        "enum": [
+          "system",
+          "assistant",
+          "user",
+          "tool",
+          null
+        ],
         "nullable": true
       },
       "SimpleChatRequest": {
@@ -989,6 +1036,10 @@
           },
           "systemPrompt": {
             "type": "string"
+          },
+          "provider": {
+            "type": "string",
+            "default": "github_copilot"
           },
           "model": {
             "type": "string",
@@ -1042,7 +1093,7 @@
       "name": "MCP.WebApi"
     },
     {
-      "name": "GithubCopilotChat"
+      "name": "ChatCompletion"
     }
   ]
 }

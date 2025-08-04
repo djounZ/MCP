@@ -21,6 +21,16 @@
       <span class="spacer"></span>
 
       <div class="toolbar-actions">
+        <mat-form-field appearance="outline" class="provider-select compact">
+          <mat-label>Provider</mat-label>
+          <mat-select
+            [value]="selectedProvider()"
+            (valueChange)="selectedProvider.set($event)"
+          >
+            <mat-option [value]="'github_copilot'">GitHub Copilot</mat-option>
+            <mat-option [value]="'ollama'">Ollama</mat-option>
+          </mat-select>
+        </mat-form-field>
         <button
           mat-icon-button
           (click)="toggleOptions()"

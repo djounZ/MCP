@@ -48,7 +48,6 @@ export class ChatOptionsComponent {
     const fileName = `instructions-${timestamp}.md`;
     const instructions = this.optionsForm.get('instructions')?.value || '';
     const dataType = 'text/markdown';
-
     exportAsFile(instructions, dataType, fileName);
   }
 
@@ -56,16 +55,24 @@ export class ChatOptionsComponent {
     this.fileInputInstructions.nativeElement.click();
   }
 
-  importInstructions(event: Event): void {
+  async importAnyInstructions(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = reader.result as string;
-      this.optionsForm.get('instructions')?.setValue(text);
-    };
-    reader.readAsText(file);
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (file.type === 'application/pdf' || ext === 'pdf') {
+      // PDF import logic
+      const markdown = "not supported yet";
+      this.optionsForm.get('instructions')?.setValue(markdown);
+    } else {
+      // Markdown/text import logic
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = reader.result as string;
+        this.optionsForm.get('instructions')?.setValue(text);
+      };
+      reader.readAsText(file);
+    }
     input.value = '';
   }
   private readonly chatOptionsService = inject(ChatOptionsService);

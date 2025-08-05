@@ -1,3 +1,11 @@
+/* Vertical column for action icon buttons next to textarea */
+.action-buttons-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  margin-left: 12px;
+}
 .options-section {
   margin: 1.5rem 0;
 

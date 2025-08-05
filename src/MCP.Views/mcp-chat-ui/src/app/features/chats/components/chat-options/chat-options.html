@@ -31,23 +31,25 @@
               rows="3"
               style="flex: 1"
             ></textarea>
-            <app-action-icon-button
-              [icon]="'download'"
-              [tooltip]="'Export instructions as file'"
-              [disabled]="!optionsForm.get('instructions')?.value?.trim()"
-              (action)="exportInstructions()"
-            />
-            <app-action-icon-button
-              [icon]="'upload'"
-              [tooltip]="'Import instructions from file'"
-              (action)="triggerImportInstructions()"
-            />
+            <div class="action-buttons-column">
+              <app-action-icon-button
+                [icon]="'download'"
+                [tooltip]="'Export instructions as file'"
+                [disabled]="!optionsForm.get('instructions')?.value?.trim()"
+                (action)="exportInstructions()"
+              />
+              <app-action-icon-button
+                [icon]="'upload'"
+                [tooltip]="'Import instructions from file or PDF'"
+                (action)="triggerImportInstructions()"
+              />
+            </div>
             <input
               #fileInputInstructions
               type="file"
-              accept=".md,text/markdown"
+              accept=".md,text/markdown,application/pdf"
               style="display: none"
-              (change)="importInstructions($event)"
+              (change)="importAnyInstructions($event)"
             />
           </div>
           <mat-hint

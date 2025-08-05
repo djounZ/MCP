@@ -10,74 +10,78 @@
     <form [formGroup]="optionsForm">
       <!-- Model Selection -->
       <section class="options-section">
-        <h3>Model Configuration</h3>
+        <section class="options-section">
+          <h3>System Instructions</h3>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Model</mat-label>
-          <mat-select formControlName="modelId">
-            @for (model of modelOptions; track model.value) {
-            <mat-option [value]="model.value">{{ model.label }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>System Instructions</mat-label>
-          <div class="instructions-row">
-            <textarea
-              matInput
-              formControlName="instructions"
-              placeholder="Enter system instructions for the model..."
-              rows="3"
-              style="flex: 1"
-            ></textarea>
-            <div class="action-buttons-column">
-              <app-action-icon-button
-                [icon]="'download'"
-                [tooltip]="'Export instructions as file'"
-                [disabled]="!optionsForm.get('instructions')?.value?.trim()"
-                (action)="exportInstructions()"
-              />
-              <app-action-icon-button
-                [icon]="'upload'"
-                [tooltip]="'Import instructions from file or PDF'"
-                (action)="triggerImportInstructions()"
+          <mat-form-field appearance="outline" class="full-width">
+            <div class="instructions-row">
+              <textarea
+                matInput
+                formControlName="instructions"
+                placeholder="Enter system instructions for the model..."
+                rows="3"
+                style="flex: 1"
+              ></textarea>
+              <div class="action-buttons-column">
+                <app-action-icon-button
+                  [icon]="'download'"
+                  [tooltip]="'Export instructions as file'"
+                  [disabled]="!optionsForm.get('instructions')?.value?.trim()"
+                  (action)="exportInstructions()"
+                />
+                <app-action-icon-button
+                  [icon]="'upload'"
+                  [tooltip]="'Import instructions from file or PDF'"
+                  (action)="triggerImportInstructions()"
+                />
+              </div>
+              <input
+                #fileInputInstructions
+                type="file"
+                accept=".md,text/markdown,application/pdf"
+                style="display: none"
+                (change)="importAnyInstructions($event)"
               />
             </div>
+            <mat-hint
+              >Instructions that guide the model's behavior throughout the
+              conversation
+            </mat-hint> </mat-form-field
+          ><!-- New: Import from URL -->
+          <div class="import-url-row">
             <input
-              #fileInputInstructions
-              type="file"
-              accept=".md,text/markdown,application/pdf"
-              style="display: none"
-              (change)="importAnyInstructions($event)"
+              matInput
+              [(ngModel)]="importUrl"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Paste URL to markdown file..."
+              style="width: 180px; margin-right: 4px"
+              name="importUrl"
             />
+            <button
+              mat-icon-button
+              type="button"
+              (click)="importInstructionsFromUrl()"
+              [disabled]="!importUrl.trim()"
+              matTooltip="Import instructions from URL"
+            >
+              <mat-icon>link</mat-icon>
+            </button>
           </div>
-          <mat-hint
-            >Instructions that guide the model's behavior throughout the
-            conversation
-          </mat-hint> </mat-form-field
-        ><!-- New: Import from URL -->
-        <div class="import-url-row">
-          <input
-            matInput
-            [(ngModel)]="importUrl"
-            [ngModelOptions]="{ standalone: true }"
-            placeholder="Paste URL to markdown file..."
-            style="width: 180px; margin-right: 4px"
-            name="importUrl"
-          />
-          <button
-            mat-icon-button
-            type="button"
-            (click)="importInstructionsFromUrl()"
-            [disabled]="!importUrl.trim()"
-            matTooltip="Import instructions from URL"
-          >
-            <mat-icon>link</mat-icon>
-          </button>
-        </div>
-      </section>
+        </section>
+        <mat-divider></mat-divider>
 
+        <section class="options-section">
+          <h3>Model Configuration</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Model</mat-label>
+            <mat-select formControlName="modelId">
+              @for (model of modelOptions; track model.value) {
+              <mat-option [value]="model.value">{{ model.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </section>
+      </section>
       <mat-divider></mat-divider>
 
       <!-- Quick Presets -->

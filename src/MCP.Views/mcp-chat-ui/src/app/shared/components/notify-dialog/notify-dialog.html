@@ -1,0 +1,16 @@
+<div class="notify-dialog-container">
+  <div class="notify-dialog-header">
+    <mat-icon color="primary">{{ data.icon || "info" }}</mat-icon>
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+  </div>
+  <mat-dialog-content>
+    <p class="notify-dialog-message">
+      {{ data.message }}
+    </p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" type="button" (click)="onClose()">
+      Close
+    </button>
+  </mat-dialog-actions>
+</div>

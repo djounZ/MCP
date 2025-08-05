@@ -1,0 +1,31 @@
+.notify-dialog-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+}
+
+.notify-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  min-height: 40px;
+}
+
+.notify-dialog-icon {
+  font-size: 32px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notify-dialog-message {
+  margin: 0;
+  font-size: 1rem;
+}
+
+mat-dialog-actions {
+  margin-top: 16px;
+}

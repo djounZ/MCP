@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -18,6 +19,8 @@ import { ChatOptionsService } from '../../services/chat-options';
 import { ChatOptionsAppModelView, ChatResponseFormatAppModelView, ChatToolModeAppModelView } from '../../../../shared/models/chat-completion-view.models';
 import { ViewChild, ElementRef } from '@angular/core';
 import { ActionIconButton } from './chat-options.action-icon';
+import { NotifyDialog, NotifyDialogData } from '../../../../shared/components/notify-dialog/notify-dialog';
+import { ConfirmationDialog, ConfirmationDialogData } from '../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { exportAsFile } from '../../../../shared/utils/file.utils';
 
 @Component({
@@ -40,10 +43,21 @@ import { exportAsFile } from '../../../../shared/utils/file.utils';
     ActionIconButton
   ],
   templateUrl: './chat-options.html',
-  styleUrl: './chat-options.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./chat-options.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatOptionsComponent {
+  constructor(private dialog: MatDialog) {
+    // Initialize form with current options
+    this.updateFormFromOptions();
+
+    // Subscribe to form changes
+    this.optionsForm.valueChanges.subscribe(() => {
+      if (this.optionsForm.valid) {
+        this.updateOptionsFromForm();
+      }
+    });
+  }
   // Signal for system instructions mode: 'input', 'file', 'url'
   protected readonly instructionsMode = signal<'input' | 'file' | 'url'>('input');
   // For URL import
@@ -57,18 +71,17 @@ export class ChatOptionsComponent {
     // Detect GitHub URLs and convert to raw format
     const githubMatch = url.match(/^https:\/\/github.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/);
     if (githubMatch) {
-      // githubMatch[1]=owner, [2]=repo, [3]=path
       url = `https://raw.githubusercontent.com/${githubMatch[1]}/${githubMatch[2]}/${githubMatch[3]}`;
     }
     try {
       // Only allow .md or .txt files for now
       if (!url.match(/\.md$|\.txt$/i)) {
-        this.optionsForm.get('instructions')?.setValue('Only .md or .txt files are supported for web import.');
+        this.showErrorDialog('Import Error', 'Only .md or .txt files are supported for web import.');
         return;
       }
       const response = await fetch(url);
       if (!response.ok) {
-        this.optionsForm.get('instructions')?.setValue(`Failed to fetch file: ${response.statusText}`);
+        this.showErrorDialog('Import Error', `Failed to fetch file: ${response.statusText}`);
         return;
       }
       const text = await response.text();
@@ -80,9 +93,20 @@ export class ChatOptionsComponent {
       } else {
         message += err?.message || err;
       }
-      this.optionsForm.get('instructions')?.setValue(message);
+      this.showErrorDialog('Import Error', message);
     }
     this.importUrl = '';
+  }
+
+  private showErrorDialog(title: string, message: string): void {
+    this.dialog.open(NotifyDialog, {
+      data: {
+        title,
+        message,
+        icon: 'error'
+      } as NotifyDialogData,
+      disableClose: false
+    });
   }
   @ViewChild('fileInputInstructions') fileInputInstructions!: ElementRef<HTMLInputElement>;
 
@@ -156,18 +180,6 @@ export class ChatOptionsComponent {
     { value: 'balanced', label: 'Balanced', description: 'Good balance of creativity and consistency' },
     { value: 'precise', label: 'Precise', description: 'Low randomness, more deterministic' }
   ];
-
-  constructor() {
-    // Initialize form with current options
-    this.updateFormFromOptions();
-
-    // Subscribe to form changes
-    this.optionsForm.valueChanges.subscribe(() => {
-      if (this.optionsForm.valid) {
-        this.updateOptionsFromForm();
-      }
-    });
-  }
 
   protected loadPreset(preset: 'creative' | 'balanced' | 'precise'): void {
     this.chatOptionsService.loadPreset(preset);

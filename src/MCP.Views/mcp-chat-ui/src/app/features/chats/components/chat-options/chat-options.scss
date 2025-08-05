@@ -1,3 +1,29 @@
+.instructions-mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.mode-tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  color: var(--mdc-theme-primary, #1976d2);
+}
+.mode-tab.active {
+  background: rgba(25, 118, 210, 0.1);
+  color: #1976d2;
+}
+.instructions-mode-content {
+  margin-bottom: 8px;
+}
+.instructions-export-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
 /* Style for the System Instructions row */
 .instructions-row {
   display: flex;

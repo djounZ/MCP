@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -43,6 +44,8 @@ import { exportAsFile } from '../../../../shared/utils/file.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatOptionsComponent {
+  // Signal for system instructions mode: 'input', 'file', 'url'
+  protected readonly instructionsMode = signal<'input' | 'file' | 'url'>('input');
   // For URL import
   public importUrl: string = '';
   /**

@@ -12,8 +12,37 @@
       <section class="options-section">
         <section class="options-section">
           <h3>System Instructions</h3>
-
-          <mat-form-field appearance="outline" class="full-width">
+          <div class="instructions-mode-tabs">
+            <button
+              type="button"
+              class="mode-tab"
+              [class.active]="instructionsMode() === 'input'"
+              (click)="instructionsMode.set('input')"
+              matTooltip="Direct Input"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              type="button"
+              class="mode-tab"
+              [class.active]="instructionsMode() === 'file'"
+              (click)="instructionsMode.set('file')"
+              matTooltip="Import from File"
+            >
+              <mat-icon>upload</mat-icon>
+            </button>
+            <button
+              type="button"
+              class="mode-tab"
+              [class.active]="instructionsMode() === 'url'"
+              (click)="instructionsMode.set('url')"
+              matTooltip="Import from URL"
+            >
+              <mat-icon>link</mat-icon>
+            </button>
+          </div>
+          <div class="instructions-mode-content">
+            @if (instructionsMode() === 'input') {
             <div class="instructions-row">
               <textarea
                 matInput
@@ -22,19 +51,17 @@
                 rows="3"
                 style="flex: 1"
               ></textarea>
-              <div class="action-buttons-column">
-                <app-action-icon-button
-                  [icon]="'download'"
-                  [tooltip]="'Export instructions as file'"
-                  [disabled]="!optionsForm.get('instructions')?.value?.trim()"
-                  (action)="exportInstructions()"
-                />
-                <app-action-icon-button
-                  [icon]="'upload'"
-                  [tooltip]="'Import instructions from file or PDF'"
-                  (action)="triggerImportInstructions()"
-                />
-              </div>
+            </div>
+            } @if (instructionsMode() === 'file') {
+            <div class="instructions-row">
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="triggerImportInstructions()"
+                matTooltip="Import from file"
+              >
+                <mat-icon>upload</mat-icon> Import from file
+              </button>
               <input
                 #fileInputInstructions
                 type="file"
@@ -43,29 +70,39 @@
                 (change)="importAnyInstructions($event)"
               />
             </div>
-            <mat-hint
-              >Instructions that guide the model's behavior throughout the
-              conversation
-            </mat-hint> </mat-form-field
-          ><!-- New: Import from URL -->
-          <div class="import-url-row">
-            <input
-              matInput
-              [(ngModel)]="importUrl"
-              [ngModelOptions]="{ standalone: true }"
-              placeholder="Paste URL to markdown file..."
-              style="width: 180px; margin-right: 4px"
-              name="importUrl"
+            } @if (instructionsMode() === 'url') {
+            <div class="instructions-row">
+              <input
+                matInput
+                [(ngModel)]="importUrl"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Paste URL to markdown file..."
+                style="width: 180px; margin-right: 4px"
+                name="importUrl"
+              />
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="importInstructionsFromUrl()"
+                [disabled]="!importUrl.trim()"
+                matTooltip="Import from URL"
+              >
+                <mat-icon>link</mat-icon> Import from URL
+              </button>
+            </div>
+            }
+          </div>
+          <div class="instructions-export-row">
+            <app-action-icon-button
+              [icon]="'download'"
+              [tooltip]="'Export instructions as file'"
+              [disabled]="!optionsForm.get('instructions')?.value?.trim()"
+              (action)="exportInstructions()"
             />
-            <button
-              mat-icon-button
-              type="button"
-              (click)="importInstructionsFromUrl()"
-              [disabled]="!importUrl.trim()"
-              matTooltip="Import instructions from URL"
-            >
-              <mat-icon>link</mat-icon>
-            </button>
+          </div>
+          <div class="system-instructions-hint">
+            Instructions that guide the model's behavior throughout the
+            conversation
           </div>
         </section>
         <mat-divider></mat-divider>

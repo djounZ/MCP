@@ -1,3 +1,15 @@
+/* Style for the System Instructions row */
+.instructions-row {
+  display: flex;
+  align-items: center;
+}
+/* Style for the URL import row */
+.import-url-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 8px;
+}
 /* Vertical column for action icon buttons next to textarea */
 .action-buttons-column {
   display: flex;

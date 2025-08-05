@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -22,6 +23,7 @@ import { exportAsFile } from '../../../../shared/utils/file.utils';
   selector: 'app-chat-options',
   imports: [
     ReactiveFormsModule,
+    FormsModule,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
@@ -41,6 +43,44 @@ import { exportAsFile } from '../../../../shared/utils/file.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatOptionsComponent {
+  // For URL import
+  public importUrl: string = '';
+  /**
+   * Imports instructions from a markdown/text file at the given URL.
+   */
+  async importInstructionsFromUrl(): Promise<void> {
+    let url = this.importUrl?.trim();
+    if (!url) return;
+    // Detect GitHub URLs and convert to raw format
+    const githubMatch = url.match(/^https:\/\/github.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/);
+    if (githubMatch) {
+      // githubMatch[1]=owner, [2]=repo, [3]=path
+      url = `https://raw.githubusercontent.com/${githubMatch[1]}/${githubMatch[2]}/${githubMatch[3]}`;
+    }
+    try {
+      // Only allow .md or .txt files for now
+      if (!url.match(/\.md$|\.txt$/i)) {
+        this.optionsForm.get('instructions')?.setValue('Only .md or .txt files are supported for web import.');
+        return;
+      }
+      const response = await fetch(url);
+      if (!response.ok) {
+        this.optionsForm.get('instructions')?.setValue(`Failed to fetch file: ${response.statusText}`);
+        return;
+      }
+      const text = await response.text();
+      this.optionsForm.get('instructions')?.setValue(text);
+    } catch (err: any) {
+      let message = 'Error importing from URL: ';
+      if (err?.name === 'TypeError' && err?.message === 'Failed to fetch') {
+        message += 'Network error or CORS issue. If using GitHub, use the raw file URL or let the app auto-convert.';
+      } else {
+        message += err?.message || err;
+      }
+      this.optionsForm.get('instructions')?.setValue(message);
+    }
+    this.importUrl = '';
+  }
   @ViewChild('fileInputInstructions') fileInputInstructions!: ElementRef<HTMLInputElement>;
 
   exportInstructions(): void {

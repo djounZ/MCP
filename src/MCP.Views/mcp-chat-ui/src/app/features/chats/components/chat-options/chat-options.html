@@ -23,7 +23,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>System Instructions</mat-label>
-          <div style="display: flex; align-items: center">
+          <div class="instructions-row">
             <textarea
               matInput
               formControlName="instructions"
@@ -54,9 +54,28 @@
           </div>
           <mat-hint
             >Instructions that guide the model's behavior throughout the
-            conversation</mat-hint
+            conversation
+          </mat-hint> </mat-form-field
+        ><!-- New: Import from URL -->
+        <div class="import-url-row">
+          <input
+            matInput
+            [(ngModel)]="importUrl"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Paste URL to markdown file..."
+            style="width: 180px; margin-right: 4px"
+            name="importUrl"
+          />
+          <button
+            mat-icon-button
+            type="button"
+            (click)="importInstructionsFromUrl()"
+            [disabled]="!importUrl.trim()"
+            matTooltip="Import instructions from URL"
           >
-        </mat-form-field>
+            <mat-icon>link</mat-icon>
+          </button>
+        </div>
       </section>
 
       <mat-divider></mat-divider>

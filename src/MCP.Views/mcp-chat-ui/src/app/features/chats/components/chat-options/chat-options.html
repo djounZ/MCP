@@ -111,19 +111,6 @@
             conversation
           </div>
         </section>
-        <mat-divider></mat-divider>
-
-        <section class="options-section">
-          <h3>Model Configuration</h3>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Model</mat-label>
-            <mat-select formControlName="modelId">
-              @for (model of modelOptions; track model.value) {
-              <mat-option [value]="model.value">{{ model.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </section>
       </section>
       <mat-divider></mat-divider>
 

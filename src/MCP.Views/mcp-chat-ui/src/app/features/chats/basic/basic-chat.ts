@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,12 +36,24 @@ import { formatFromSnakeCase } from '../../../shared/utils/string.utils';
     MessageInput,
     ChatOptionsComponent,
     ActionIconButton
+    , ReactiveFormsModule
   ],
   templateUrl: './basic-chat.html',
   styleUrl: './basic-chat.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicChatComponent {
+  // Model options for selection
+  protected readonly modelOptions = [
+    { value: 'gpt-4', label: 'GPT-4' },
+    { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+    { value: 'claude-3', label: 'Claude 3' },
+    { value: 'gemini-pro', label: 'Gemini Pro' }
+  ];
+
+  // Form control for model selection
+  public readonly modelIdControl = new FormControl('gpt-4');
   formatProviderName(provider: string): string {
     return formatFromSnakeCase(provider);
   }
@@ -92,7 +105,7 @@ export class BasicChatComponent {
   protected readonly showOptions = signal(false);
 
   onMessageSubmit(content: string): void {
-    this.chatService.sendMessage(content, this.selectedProvider());
+    this.chatService.sendMessage(content, this.selectedProvider(), this.modelIdControl.value);
   }
 
   clearChat(): void {

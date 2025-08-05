@@ -8,8 +8,8 @@ import { ChatFinishReasonAppModel, ChatRequest, ChatResponseUpdateAppModel, Chat
 export class ChatHttpStream {
   private readonly messageSubject$ = new Subject<ChatResponseUpdateAppModel>();
 
-  private readonly apiUrl = 'http://localhost:5200/api/chat/completions/stream';
-  private readonly apiProviderUrl = 'http://localhost:5200/api/chat/providers';
+  private readonly apiUrl = 'http://localhost:5000/api/chat/completions/stream';
+  private readonly apiProviderUrl = 'http://localhost:5000/api/chat/providers';
 
 
   async getProviders(): Promise<string[]> {

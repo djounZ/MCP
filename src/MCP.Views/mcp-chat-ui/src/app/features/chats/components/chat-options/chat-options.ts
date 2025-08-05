@@ -154,7 +154,6 @@ export class ChatOptionsComponent {
   readonly optionsChanged = output<void>();
 
   protected readonly optionsForm = new FormGroup({
-    modelId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     instructions: new FormControl('', { nonNullable: true }),
     temperature: new FormControl(0.7, { nonNullable: true, validators: [Validators.min(0), Validators.max(2)] }),
     maxOutputTokens: new FormControl(2048, { nonNullable: true, validators: [Validators.min(1), Validators.max(8192)] }),
@@ -174,13 +173,6 @@ export class ChatOptionsComponent {
 
   protected newStopSequence = new FormControl('', { nonNullable: true });
 
-  protected readonly modelOptions = [
-    { value: 'gpt-4', label: 'GPT-4' },
-    { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-    { value: 'claude-3', label: 'Claude 3' },
-    { value: 'gemini-pro', label: 'Gemini Pro' }
-  ];
 
   protected readonly presets: Array<{ value: 'creative' | 'balanced' | 'precise', label: string, description: string }> = [
     { value: 'creative', label: 'Creative', description: 'High creativity and randomness' },
@@ -230,7 +222,6 @@ export class ChatOptionsComponent {
   private updateFormFromOptions(): void {
     const options = this.options();
     this.optionsForm.patchValue({
-      modelId: options.modelId || 'gpt-4',
       instructions: options.instructions || '',
       temperature: options.temperature || 0.7,
       maxOutputTokens: options.maxOutputTokens || 2048,
@@ -277,7 +268,6 @@ export class ChatOptionsComponent {
     })();
 
     const updates: Partial<ChatOptionsAppModelView> = {
-      modelId: formValue.modelId!,
       instructions: formValue.instructions || undefined,
       temperature: formValue.temperature!,
       maxOutputTokens: formValue.maxOutputTokens!,

@@ -34,6 +34,15 @@
             }
           </mat-select>
         </mat-form-field>
+        <!-- Model Configuration Section moved from chat-options.html -->
+        <mat-form-field appearance="outline" class="provider-select compact">
+          <mat-label>Model</mat-label>
+          <mat-select [formControl]="modelIdControl">
+            @for (model of modelOptions; track model.value) {
+            <mat-option [value]="model.value">{{ model.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
         <button
           mat-icon-button
           (click)="toggleOptions()"

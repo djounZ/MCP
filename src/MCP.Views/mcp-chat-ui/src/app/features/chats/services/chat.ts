@@ -63,7 +63,7 @@ export class Chat {
   }
 
 
-  sendMessage(content: string, provider: string | null): void {
+  sendMessage(content: string, provider: string | null, model?: string | null): void {
     const trimmedContent = content.trim();
     if (!trimmedContent) return;
 
@@ -82,10 +82,16 @@ export class Chat {
     this.isAwaitingResponse.set(true);
     this.messages.update(() => [...this.chatResponseAppModelView.messages]);
 
+    // Clone options and set model if provided
+    const options = { ...this.currentOptions() };
+    if (model) {
+      options.modelId = model;
+    }
+
     // Create ChatRequestView using builder
     const chatRequestView = new ChatRequestViewBuilder()
       .messages([...this.chatResponseAppModelView.messages])
-      .options(this.currentOptions())
+      .options(options)
       .provider(provider)
       .build();
     const chatRequest = fromChatRequestView(chatRequestView, this.chatResponseAppModelView.conversationId);

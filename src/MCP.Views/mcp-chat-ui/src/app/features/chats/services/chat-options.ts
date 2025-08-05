@@ -22,7 +22,6 @@ export class ChatOptionsService {
   private readonly optionsState = signal<ChatOptionsAppModelView>(DEFAULT_OPTIONS);
 
   readonly options = this.optionsState.asReadonly();
-  readonly chatOptionsView = this.optionsState.asReadonly();
 
   updateOptions(updates: Partial<ChatOptionsAppModelView>): void {
     this.optionsState.update(current => ({ ...current, ...updates }));

@@ -26,7 +26,7 @@ export class Chat {
 
   readonly messages = signal<ChatMessageAppModelView[]>([]);
   readonly isLoading = signal(false);
-  readonly currentOptions = this.chatOptionsService.chatOptionsView;
+  readonly currentOptions = this.chatOptionsService.options;
 
 
   // Create placeholder for LLM response using builder

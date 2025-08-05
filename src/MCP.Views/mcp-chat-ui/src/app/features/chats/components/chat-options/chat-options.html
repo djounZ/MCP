@@ -23,13 +23,33 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>System Instructions</mat-label>
-          <textarea
-            matInput
-            formControlName="instructions"
-            placeholder="Enter system instructions for the model..."
-            rows="3"
-          >
-          </textarea>
+          <div style="display: flex; align-items: center">
+            <textarea
+              matInput
+              formControlName="instructions"
+              placeholder="Enter system instructions for the model..."
+              rows="3"
+              style="flex: 1"
+            ></textarea>
+            <app-action-icon-button
+              [icon]="'download'"
+              [tooltip]="'Export instructions as file'"
+              [disabled]="!optionsForm.get('instructions')?.value?.trim()"
+              (action)="exportInstructions()"
+            />
+            <app-action-icon-button
+              [icon]="'upload'"
+              [tooltip]="'Import instructions from file'"
+              (action)="triggerImportInstructions()"
+            />
+            <input
+              #fileInputInstructions
+              type="file"
+              accept=".md,text/markdown"
+              style="display: none"
+              (change)="importInstructions($event)"
+            />
+          </div>
           <mat-hint
             >Instructions that guide the model's behavior throughout the
             conversation</mat-hint

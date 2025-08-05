@@ -60,13 +60,17 @@ function isIsoDateString(value: string): boolean {
  */
 export function exportAsJsonFile(data: unknown, filename: string): void {
   const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
+  const dataType = 'application/json';
+  exportAsFile(json, dataType, filename);
+}
+
+export function exportAsFile(json: string, dataType: string, fileName: string) {
+  const blob = new Blob([json], { type: dataType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
+  a.download = fileName;
   a.click();
-  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+

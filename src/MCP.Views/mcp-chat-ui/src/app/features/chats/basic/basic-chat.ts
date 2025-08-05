@@ -56,7 +56,7 @@ export class BasicChatComponent {
     const result = await this.chatHttpStream.getProviders() as string[];
     this.providers.set(result);
     const currentProvider = this.selectedProvider();
-    if (currentProvider && result.length && (!currentProvider || !result.includes(currentProvider))) {
+    if (!currentProvider && result.length > 0) {
       this.selectedProvider.set(result[0]);
     }
   }

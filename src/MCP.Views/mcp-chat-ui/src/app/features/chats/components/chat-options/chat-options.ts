@@ -47,6 +47,7 @@ import { exportAsFile } from '../../../../shared/utils/file.utils';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatOptionsComponent {
+  // Editable filename for instructions export (reactive forms best practice)
   constructor(private dialog: MatDialog) {
     // Initialize form with current options
     this.updateFormFromOptions();
@@ -86,6 +87,10 @@ export class ChatOptionsComponent {
       }
       const text = await response.text();
       this.optionsForm.get('instructions')?.setValue(text);
+      // Set filename from URL
+      const urlParts = url.split('/');
+      const lastSegment = urlParts[urlParts.length - 1] || 'instructions.md';
+      this.optionsForm.get('instructionsFilename')?.setValue(lastSegment);
     } catch (err: any) {
       let message = 'Error importing from URL: ';
       if (err?.name === 'TypeError' && err?.message === 'Failed to fetch') {
@@ -111,8 +116,7 @@ export class ChatOptionsComponent {
   @ViewChild('fileInputInstructions') fileInputInstructions!: ElementRef<HTMLInputElement>;
 
   exportInstructions(): void {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const fileName = `instructions-${timestamp}.md`;
+    const fileName = this.optionsForm.get('instructionsFilename')?.value || 'instructions.md';
     const instructions = this.optionsForm.get('instructions')?.value || '';
     const dataType = 'text/markdown';
     exportAsFile(instructions, dataType, fileName);
@@ -131,12 +135,14 @@ export class ChatOptionsComponent {
       // PDF import logic
       const markdown = "not supported yet";
       this.optionsForm.get('instructions')?.setValue(markdown);
+      this.optionsForm.get('instructionsFilename')?.setValue('instructions.md');
     } else {
       // Markdown/text import logic
       const reader = new FileReader();
       reader.onload = () => {
         const text = reader.result as string;
         this.optionsForm.get('instructions')?.setValue(text);
+        this.optionsForm.get('instructionsFilename')?.setValue(file.name || 'instructions.md');
       };
       reader.readAsText(file);
     }
@@ -162,7 +168,8 @@ export class ChatOptionsComponent {
     toolMode: new FormControl<'none' | 'auto' | 'required'>('none', { nonNullable: true }),
     requiredFunctionName: new FormControl('', { nonNullable: true }),
     jsonSchemaName: new FormControl('', { nonNullable: true }),
-    jsonSchemaDescription: new FormControl('', { nonNullable: true })
+    jsonSchemaDescription: new FormControl('', { nonNullable: true }),
+    instructionsFilename: new FormControl('instructions.md', { nonNullable: true })
   });
 
   protected newStopSequence = new FormControl('', { nonNullable: true });
@@ -231,7 +238,6 @@ export class ChatOptionsComponent {
       topK: options.topK || 40,
       frequencyPenalty: options.frequencyPenalty || 0,
       presencePenalty: options.presencePenalty || 0,
-      seed: options.seed,
       responseFormat: options.responseFormat?.$type || 'text',
       allowMultipleToolCalls: options.allowMultipleToolCalls || false,
       toolMode: options.toolMode?.$type || 'none',
@@ -242,11 +248,14 @@ export class ChatOptionsComponent {
       jsonSchemaDescription: (options.responseFormat?.$type === 'json' && 'schemaDescription' in options.responseFormat)
         ? options.responseFormat.schemaDescription || '' : ''
     });
+    // Set default filename for input mode
+    if (this.instructionsMode() === 'input') {
+      this.optionsForm.get('instructionsFilename')?.setValue('instructions.md');
+    }
   }
 
   private updateOptionsFromForm(): void {
     const formValue = this.optionsForm.value;
-
     const responseFormat: ChatResponseFormatAppModelView = formValue.responseFormat === 'json'
       ? {
         $type: 'json',
@@ -277,7 +286,6 @@ export class ChatOptionsComponent {
       frequencyPenalty: formValue.frequencyPenalty!,
       presencePenalty: formValue.presencePenalty!,
       seed: formValue.seed,
-      responseFormat,
       allowMultipleToolCalls: formValue.allowMultipleToolCalls!,
       toolMode
     };

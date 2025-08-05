@@ -1,3 +1,58 @@
+.filename-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.filename-row input[matInput],
+.instructions-row input[matInput][name="importUrl"] {
+  width: 180px;
+  height: 32px;
+  padding: 0 10px;
+  font-size: 1rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 4px;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.filename-row input[matInput]:focus,
+.instructions-row input[matInput][name="importUrl"]:focus {
+  border-color: #1976d2;
+  outline: none;
+}
+/* Ensure file input is hidden */
+.instructions-row input[type="file"] {
+  display: none;
+}
+
+/* Ensure filename and URL input fields have correct width and margin */
+.filename-row input[matInput],
+.instructions-row input[matInput][name="importUrl"] {
+  width: 180px;
+  margin-right: 8px;
+}
+
+/* Make textarea fill available space */
+.instructions-row textarea[matInput] {
+  flex: 1;
+  min-width: 0;
+}
+/* Match previous inline styles from HTML */
+.instructions-row textarea[matInput] {
+  flex: 1;
+}
+
+input[type="file"]#fileInputInstructions {
+  display: none;
+}
+
+.instructions-row input[matInput][formControlName="instructionsFilename"],
+.instructions-row input[matInput][name="importUrl"] {
+  width: 180px;
+  margin-right: 8px;
+}
 .instructions-mode-tabs {
   display: flex;
   gap: 8px;

@@ -85,7 +85,7 @@ export class Chat {
     // Create ChatRequestView using builder
     const chatRequestView = new ChatRequestViewBuilder()
       .messages([...this.chatResponseAppModelView.messages])
-      //.options(this.currentOptions())
+      .options(this.currentOptions())
       .provider(provider)
       .build();
     const chatRequest = fromChatRequestView(chatRequestView, this.chatResponseAppModelView.conversationId);

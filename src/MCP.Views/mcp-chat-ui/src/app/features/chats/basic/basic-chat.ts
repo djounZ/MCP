@@ -12,6 +12,7 @@ import { MessageList } from '../../../shared/components/message-list/message-lis
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmationDialog, ConfirmationDialogData } from '../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { ChatOptionsComponent } from '../components/chat-options/chat-options';
+import { ActionIconButton } from '../../../shared/components/action-icon-button/action-icon-button';
 import { Chat as ChatService } from '../services/chat';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
 import { MessageInput } from '../../../shared/components/message-input/message-input';
@@ -32,7 +33,8 @@ import { formatFromSnakeCase } from '../../../shared/utils/string.utils';
     MatDialogModule,
     MessageList,
     MessageInput,
-    ChatOptionsComponent
+    ChatOptionsComponent,
+    ActionIconButton
   ],
   templateUrl: './basic-chat.html',
   styleUrl: './basic-chat.scss',

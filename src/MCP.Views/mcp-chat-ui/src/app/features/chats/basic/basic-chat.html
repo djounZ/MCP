@@ -52,22 +52,17 @@
           <mat-icon>clear_all</mat-icon>
         </button>
 
-        <button
-          mat-icon-button
-          (click)="exportChat()"
-          matTooltip="Export chat as JSON"
+        <app-action-icon-button
+          [icon]="'download'"
+          [tooltip]="'Export chat as JSON'"
           [disabled]="messages().length === 0"
-        >
-          <mat-icon>download</mat-icon>
-        </button>
-
-        <button
-          mat-icon-button
-          (click)="triggerImport()"
-          matTooltip="Import chat from JSON"
-        >
-          <mat-icon>upload</mat-icon>
-        </button>
+          (action)="exportChat()"
+        />
+        <app-action-icon-button
+          [icon]="'upload'"
+          [tooltip]="'Import chat from JSON'"
+          (action)="triggerImport()"
+        />
         <input
           #fileInput
           type="file"

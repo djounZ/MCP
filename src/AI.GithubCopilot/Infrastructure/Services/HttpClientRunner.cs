@@ -142,12 +142,23 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
         }
     }
 
-    private static async Task<TOut> ReadContentAsync<TOut>(JsonSerializerOptions? options,
+    private async Task<TOut> ReadContentAsync<TOut>(JsonSerializerOptions? options,
+        CancellationToken cancellationToken, HttpResponseMessage response)
+    {
+#if DEBUG
+        return await ReadContentInDebugAsync<TOut>(options, cancellationToken, response);
+#else
+        return await ReadContentInReleaseAsync<TOut>(options, cancellationToken, response);
+#endif
+    }
+
+
+#if RELEASE
+    private static async Task<TOut> ReadContentInReleaseAsync<TOut>(JsonSerializerOptions? options,
         CancellationToken cancellationToken, HttpResponseMessage response)
     {
         await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-
-        // Handle gzip decompression efficiently without buffering
+        // In release, deserialize directly from the stream for efficiency
         if (response.Content.Headers.ContentEncoding.Contains("gzip"))
         {
             await using var gzipStream = new GZipStream(responseStream, CompressionMode.Decompress);
@@ -160,7 +171,31 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
             return result!;
         }
     }
-
+#endif
+#if DEBUG
+    private async Task<TOut> ReadContentInDebugAsync<TOut>(JsonSerializerOptions? options,
+        CancellationToken cancellationToken, HttpResponseMessage response)
+    {
+        await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        // Buffer the stream to memory for logging and deserialization only in debug builds
+        using var memoryStream = new MemoryStream();
+        if (response.Content.Headers.ContentEncoding.Contains("gzip"))
+        {
+            await using var gzipStream = new GZipStream(responseStream, CompressionMode.Decompress);
+            await gzipStream.CopyToAsync(memoryStream, cancellationToken);
+        }
+        else
+        {
+            await responseStream.CopyToAsync(memoryStream, cancellationToken);
+        }
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        var contentString = Encoding.UTF8.GetString(memoryStream.ToArray());
+        logger.LogInformation("Response stream content: {Content}", contentString);
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        var result = await JsonSerializer.DeserializeAsync<TOut>(memoryStream, options, cancellationToken);
+        return result!;
+    }
+#endif
     private static async IAsyncEnumerable<StreamItem<TOut>> ReadContentStreamAsync<TOut>(
         [EnumeratorCancellation] CancellationToken cancellationToken,
         HttpResponseMessage response,

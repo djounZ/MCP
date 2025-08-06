@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { ChatFinishReasonAppModel, ChatRequest, ChatResponseUpdateAppModel, ChatRoleEnumAppModel } from '../../shared/models/chat-completion-api.models';
+import { ChatFinishReasonAppModel, ChatRequest, ChatResponseUpdateAppModel, ChatRoleEnumAppModel, AiProviderAppModel } from '../../shared/models/chat-completion-api.models';
 
 @Injectable({
   providedIn: 'root'
@@ -8,11 +8,11 @@ import { ChatFinishReasonAppModel, ChatRequest, ChatResponseUpdateAppModel, Chat
 export class ChatHttpStream {
   private readonly messageSubject$ = new Subject<ChatResponseUpdateAppModel>();
 
-  private readonly apiUrl = 'http://localhost:5000/api/chat/completions/stream';
-  private readonly apiProviderUrl = 'http://localhost:5000/api/chat/providers';
+  private readonly apiUrl = 'http://localhost:5200/api/chat/completions/stream';
+  private readonly apiProviderUrl = 'http://localhost:5200/api/chat/providers';
 
 
-  async getProviders(): Promise<string[]> {
+  async getProviders(): Promise<AiProviderAppModel[]> {
     try {
       const response = await fetch(this.apiProviderUrl, {
         method: 'GET'
@@ -21,7 +21,7 @@ export class ChatHttpStream {
         throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
       }
 
-      return response.json() as Promise<string[]>;
+      return response.json() as Promise<AiProviderAppModel[]>;
     } catch (error) {
       console.error('Failed to fetch providers:', error);
       return [];

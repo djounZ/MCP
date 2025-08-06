@@ -1,3 +1,35 @@
+// --- Array Mapper ---
+export function toAiProviderAppModelViewArray(apiArray: AiProviderAppModel[]): AiProviderAppModelView[] {
+  return Array.isArray(apiArray) ? apiArray.map(toAiProviderAppModelView) : [];
+}
+// --- AiProvider Mappers ---
+export function toAiProviderAiModelAppModelView(api: AiProviderAiModelAppModel): AiProviderAiModelAppModelView {
+  return {
+    id: api.id,
+    name: api.name
+  };
+}
+
+export function fromAiProviderAiModelAppModelView(view: AiProviderAiModelAppModelView): AiProviderAiModelAppModel {
+  return {
+    id: view.id,
+    name: view.name
+  };
+}
+
+export function toAiProviderAppModelView(api: AiProviderAppModel): AiProviderAppModelView {
+  return {
+    name: api.name,
+    models: Array.isArray(api.models) ? api.models.map(toAiProviderAiModelAppModelView) : []
+  };
+}
+
+export function fromAiProviderAppModelView(view: AiProviderAppModelView): AiProviderAppModel {
+  return {
+    name: view.name,
+    models: Array.isArray(view.models) ? view.models.map(fromAiProviderAiModelAppModelView) : []
+  };
+}
 // Bi-directional mappers between API and View models for chat completion
 // Auto-generated for ChatRequest, ChatResponseAppModel, and all nested types
 
@@ -23,9 +55,10 @@ import {
   ChatRequest,
   ChatResponseAppModel,
   ChatFinishReasonAppModel,
-  ChatResponseUpdateAppModel
+  ChatResponseUpdateAppModel,
+  AiProviderAiModelAppModel,
+  AiProviderAppModel
 } from './chat-completion-api.models';
-
 import {
   ChatRoleEnumAppModelView,
   AiContentAppModelView,
@@ -47,7 +80,9 @@ import {
   ChatRequestView,
   ChatResponseAppModelView,
   ChatFinishReasonAppModelView,
-  ChatResponseUpdateAppModelView
+  ChatResponseUpdateAppModelView,
+  AiProviderAiModelAppModelView,
+  AiProviderAppModelView
 } from './chat-completion-view.models';
 
 // --- Role Enum Mapper ---

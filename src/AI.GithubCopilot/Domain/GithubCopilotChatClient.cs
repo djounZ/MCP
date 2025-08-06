@@ -27,8 +27,12 @@ public sealed class GithubCopilotChatClient(GithubCopilotChatCompletion githubCo
         return chatCompletionStreamAsync.ToChatResponseUpdateStream(cancellationToken);
     }
 
-    public object? GetService(Type serviceType, object? serviceKey = null)
+    public object? GetService(Type serviceType, object? serviceKey)
     {
-        return null;
+        return
+            serviceKey is not null ? null :
+            serviceType.IsInstanceOfType(this) ? this :
+            null;
     }
+
 }

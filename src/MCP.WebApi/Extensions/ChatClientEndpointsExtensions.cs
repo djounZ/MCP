@@ -1,5 +1,6 @@
 using MCP.Application.DTOs.AI.ChatCompletion;
 using MCP.Application.DTOs.AI.Contents;
+using MCP.Application.DTOs.AI.Provider;
 using MCP.Infrastructure.Services;
 
 namespace MCP.WebApi.Extensions;
@@ -17,17 +18,18 @@ public static class ChatClientEndpointsExtensions
     public static WebApplication MapGithubCopilotChatEndpoints(this WebApplication app)
     {
         // provider
-        app.MapGet("/api/chat/providers",  (
-                ChatServiceManager chatClient) =>
+        app.MapGet("/api/chat/providers", async (
+                AiProviderManager chatClient,
+                CancellationToken cancellationToken) =>
             {
-                var response = chatClient.GetAvailableChatProviders();
+                var response = await chatClient.GetAvailableAiProvidersAsync(cancellationToken);
                 return Results.Ok(response);
             })
             .WithName("GetAvailableProviders")
             .WithSummary("Get list of available providers")
-            .WithDescription("Return all available chat providers")
+            .WithDescription("Return all available providers")
             .WithTags("ChatCompletion")
-            .Produces<IEnumerable<string>>()
+            .Produces<IEnumerable<IList<AiProviderAppModel>>>()
             .WithOpenApi();
 
 

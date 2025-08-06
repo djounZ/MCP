@@ -18,6 +18,9 @@ import { Chat as ChatService } from '../services/chat';
 import { ChatHttpStream } from '../../../core/services/chat-http-stream';
 import { MessageInput } from '../../../shared/components/message-input/message-input';
 import { formatFromSnakeCase } from '../../../shared/utils/string.utils';
+import { AiProviderAppModel } from '../../../shared/models/chat-completion-api.models';
+import { AiProviderAppModelView, AiProviderAiModelAppModelView } from '../../../shared/models/chat-completion-view.models';
+import { toAiProviderAppModelViewArray } from '../../../shared/models/chat-completion-mapper.models';
 
 @Component({
   selector: 'app-basic-chat',
@@ -43,34 +46,39 @@ import { formatFromSnakeCase } from '../../../shared/utils/string.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicChatComponent {
-  // Model options for selection
-  protected readonly modelOptions = [
-    { value: 'gpt-4', label: 'GPT-4' },
-    { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-    { value: 'claude-3', label: 'Claude 3' },
-    { value: 'gemini-pro', label: 'Gemini Pro' }
-  ];
-
-  // Form control for model selection
-  public readonly modelIdControl = new FormControl('gpt-4');
   formatProviderName(provider: string): string {
     return formatFromSnakeCase(provider);
   }
-  protected readonly providers = signal<string[]>([]);
-  protected readonly selectedProvider = signal<string | null>(null);
+  protected readonly providers = signal<AiProviderAppModelView[]>([]);
+  protected readonly selectedProvider = signal<AiProviderAppModelView | null>(null);
   protected readonly chatHttpStream = inject(ChatHttpStream);
+
+  // Models for selected provider
+  protected readonly models = signal<AiProviderAiModelAppModelView[]>([]);
+  protected readonly selectedModel = signal<AiProviderAiModelAppModelView | null>(null);
 
   constructor(private dialog: MatDialog) {
     this.loadProviders();
+    // React to provider changes
+    effect(() => {
+      const provider = this.selectedProvider();
+      const models = provider?.models ?? [];
+      this.models.set(models);
+      // If current selectedModel is not in models, reset
+      if (!models.length) {
+        this.selectedModel.set(null);
+      } else if (!models.some(m => m.id === this.selectedModel()?.id)) {
+        this.selectedModel.set(models[0]);
+      }
+    });
   }
 
   private async loadProviders() {
-    const result = await this.chatHttpStream.getProviders() as string[];
-    this.providers.set(result);
-    const currentProvider = this.selectedProvider();
-    if (!currentProvider && result.length > 0) {
-      this.selectedProvider.set(result[0]);
+    const result = await this.chatHttpStream.getProviders();
+    const viewProviders = toAiProviderAppModelViewArray(result);
+    this.providers.set(viewProviders);
+    if (!this.selectedProvider() && viewProviders.length > 0) {
+      this.selectedProvider.set(viewProviders[0]);
     }
   }
 
@@ -105,7 +113,7 @@ export class BasicChatComponent {
   protected readonly showOptions = signal(false);
 
   onMessageSubmit(content: string): void {
-    this.chatService.sendMessage(content, this.selectedProvider(), this.modelIdControl.value);
+    this.chatService.sendMessage(content, this.selectedProvider(), this.selectedModel());
   }
 
   clearChat(): void {

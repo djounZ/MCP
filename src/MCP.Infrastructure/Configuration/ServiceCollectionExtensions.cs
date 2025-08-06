@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
         services.AddCopilotChatService(configuration);
         services.AddOllamaChatService(configuration);
         services.AddScoped<ChatServiceManager>();
+        services.AddScoped<AiProviderManager>();
         return services;
     }
 

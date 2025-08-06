@@ -141,7 +141,7 @@
           "ChatCompletion"
         ],
         "summary": "Get list of available providers",
-        "description": "Return all available chat providers",
+        "description": "Return all available providers",
         "operationId": "GetAvailableProviders",
         "responses": {
           "200": {
@@ -151,7 +151,10 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AiProviderAppModel"
+                    }
                   }
                 }
               }
@@ -640,6 +643,45 @@
             "nullable": true
           }
         }
+      },
+      "AiProviderAiModelAppModel": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "AiProviderAppModel": {
+        "required": [
+          "name",
+          "models"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/AiProviderEnum"
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProviderAiModelAppModel"
+            }
+          }
+        }
+      },
+      "AiProviderEnum": {
+        "enum": [
+          "github_copilot",
+          "ollama"
+        ]
       },
       "ChatMessageAppModel": {
         "required": [

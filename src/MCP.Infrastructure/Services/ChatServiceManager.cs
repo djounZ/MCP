@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using MCP.Application.DTOs.AI.ChatCompletion;
+using MCP.Application.DTOs.AI.Provider;
 using MCP.Infrastructure.Services.ChatServiceImplementations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,26 +10,26 @@ namespace MCP.Infrastructure.Services;
 public sealed class ChatServiceManager
 {
 
-    private readonly IDictionary<ChatClientProviderEnum, Type> _chatServicesByProvider = new ReadOnlyDictionary<ChatClientProviderEnum, Type>(new Dictionary<ChatClientProviderEnum, Type>
+    private readonly IDictionary<AiProviderEnum, Type> _chatServicesByProvider = new ReadOnlyDictionary<AiProviderEnum, Type>(new Dictionary<AiProviderEnum, Type>
     {
-        { ChatClientProviderEnum.GithubCopilot, typeof(GithubCopilotChatService) },
-        { ChatClientProviderEnum.Ollama, typeof(OllamaChatService) }
+        { AiProviderEnum.GithubCopilot, typeof(GithubCopilotChatService) },
+        { AiProviderEnum.Ollama, typeof(OllamaChatService) }
     });
 
     private readonly IServiceProvider _serviceProvider;
 
-    private readonly ReadOnlyDictionary<string, ChatClientProviderEnum> _availableChatProviders;
+    private readonly ReadOnlyDictionary<string, AiProviderEnum> _availableChatProviders;
     public ChatServiceManager(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _availableChatProviders = new ReadOnlyDictionary<string, ChatClientProviderEnum>(
+        _availableChatProviders = new ReadOnlyDictionary<string, AiProviderEnum>(
             _chatServicesByProvider.
                 Keys.ToDictionary(provider => JsonSerializer.Serialize(provider).Replace("\"", string.Empty)));
     }
 
     private IChatService GetChatService(string? providerString)
     {
-        var provider = ChatClientProviderEnum.GithubCopilot;
+        var provider = AiProviderEnum.GithubCopilot;
         if (providerString  != null && !_availableChatProviders.TryGetValue(providerString, out provider) )
         {
             throw new ArgumentException($"Chat service for provider {providerString} is not registered.");
@@ -56,8 +57,4 @@ public sealed class ChatServiceManager
         return  GetChatService(provider).GetStreamingResponseAsync(messagesAppModel, optionsAppModel, cancellationToken);
     }
 
-    public IEnumerable<string> GetAvailableChatProviders()
-    {
-        return _availableChatProviders.Keys;
-    }
 }

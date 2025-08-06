@@ -7,7 +7,9 @@ import {
   ChatMessageAppModelView,
   ChatRequestView,
   ChatRoleEnumAppModelView,
-  ChatResponseAppModelView
+  ChatResponseAppModelView,
+  AiProviderAppModelView,
+  AiProviderAiModelAppModelView
 } from '../../../shared/models/chat-completion-view.models';
 import { ChatMessageAppModelViewBuilder, ChatRequestViewBuilder, AiContentAppModelTextContentAppModelViewBuilder } from '../../../shared/models/chat-completion-view.builder';
 import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
@@ -63,7 +65,7 @@ export class Chat {
   }
 
 
-  sendMessage(content: string, provider: string | null, model?: string | null): void {
+  sendMessage(content: string, provider: AiProviderAppModelView | null, model?: AiProviderAiModelAppModelView | null): void {
     const trimmedContent = content.trim();
     if (!trimmedContent) return;
 
@@ -85,14 +87,16 @@ export class Chat {
     // Clone options and set model if provided
     const options = { ...this.currentOptions() };
     if (model) {
-      options.modelId = model;
+      options.modelId = model.id;
     }
 
+
+    const name = provider ? provider.name : null;
     // Create ChatRequestView using builder
     const chatRequestView = new ChatRequestViewBuilder()
       .messages([...this.chatResponseAppModelView.messages])
       .options(options)
-      .provider(provider)
+      .provider(name)
       .build();
     const chatRequest = fromChatRequestView(chatRequestView, this.chatResponseAppModelView.conversationId);
     this.chatStreamService.sendMessage(chatRequest);

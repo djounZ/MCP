@@ -29,7 +29,7 @@
           >
             @for (provider of providers(); track provider) {
             <mat-option [value]="provider">{{
-              formatProviderName(provider)
+              formatProviderName(provider.name)
             }}</mat-option>
             }
           </mat-select>
@@ -37,9 +37,12 @@
         <!-- Model Configuration Section moved from chat-options.html -->
         <mat-form-field appearance="outline" class="provider-select compact">
           <mat-label>Model</mat-label>
-          <mat-select [formControl]="modelIdControl">
-            @for (model of modelOptions; track model.value) {
-            <mat-option [value]="model.value">{{ model.label }}</mat-option>
+          <mat-select
+            [value]="selectedModel()"
+            (valueChange)="selectedModel.set($event)"
+          >
+            @for (model of models(); track model) {
+            <mat-option [value]="model">{{ model.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>

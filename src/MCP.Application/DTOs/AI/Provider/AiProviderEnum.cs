@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
 
-namespace MCP.Application.DTOs.AI.ChatCompletion;
+namespace MCP.Application.DTOs.AI.Provider;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum ChatClientProviderEnum
+public enum AiProviderEnum
 {
     [JsonStringEnumMemberName("github_copilot")]
     GithubCopilot = 1,

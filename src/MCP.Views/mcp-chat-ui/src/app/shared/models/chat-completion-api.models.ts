@@ -159,3 +159,14 @@ export interface ChatResponseUpdateAppModel {
   finish_reason?: ChatFinishReasonAppModel | null;
   model_id?: string | null;
 }
+
+export interface AiProviderAiModelAppModel {
+  id: string;
+  name: string;
+}
+
+export interface AiProviderAppModel {
+  name: string;
+  models: AiProviderAiModelAppModel[];
+}
+

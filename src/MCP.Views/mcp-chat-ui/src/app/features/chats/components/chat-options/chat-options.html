@@ -17,7 +17,7 @@
               type="button"
               class="mode-tab"
               [class.active]="instructionsMode() === 'input'"
-              (click)="instructionsMode.set('input')"
+              (click)="setInstructionsMode('input')"
               matTooltip="Direct Input"
             >
               <mat-icon>edit</mat-icon>
@@ -26,7 +26,7 @@
               type="button"
               class="mode-tab"
               [class.active]="instructionsMode() === 'file'"
-              (click)="instructionsMode.set('file')"
+              (click)="setInstructionsMode('file')"
               matTooltip="Import from File"
             >
               <mat-icon>upload</mat-icon>
@@ -34,8 +34,17 @@
             <button
               type="button"
               class="mode-tab"
+              [class.active]="instructionsMode() === 'github'"
+              (click)="setInstructionsMode('github')"
+              matTooltip="Import from GitHub"
+            >
+              <mat-icon>cloud_download</mat-icon>
+            </button>
+            <button
+              type="button"
+              class="mode-tab"
               [class.active]="instructionsMode() === 'url'"
-              (click)="instructionsMode.set('url')"
+              (click)="setInstructionsMode('url')"
               matTooltip="Import from URL"
             >
               <mat-icon>link</mat-icon>
@@ -86,6 +95,29 @@
               >
                 <mat-icon>link</mat-icon> Import from URL
               </button>
+            </div>
+            } @if (instructionsMode() === 'github') {
+            <div class="instructions-row github-instructions-row">
+              <mat-form-field
+                appearance="outline"
+                class="full-width github-instructions-field"
+              >
+                <mat-label>Select GitHub Instruction</mat-label>
+                <mat-select
+                  [value]="selectedGithubInstruction"
+                  (valueChange)="
+                    onGithubInstructionSelected($event);
+                    importInstructionsFromGithub()
+                  "
+                >
+                  @for (file of githubInstructionsFiles; track
+                  file.download_url) {
+                  <mat-option [value]="file.download_url">{{
+                    file.name
+                  }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
             </div>
             }
           </div>

@@ -29,7 +29,7 @@ public static class ChatClientEndpointsExtensions
             .WithSummary("Get list of available providers")
             .WithDescription("Return all available providers")
             .WithTags("ChatCompletion")
-            .Produces<IEnumerable<IList<AiProviderAppModel>>>()
+            .Produces<AiProviderAppModel[]>()
             .WithOpenApi();
 
 

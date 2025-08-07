@@ -48,6 +48,14 @@ import { exportAsFile } from '../../../../shared/utils/file.utils';
 })
 export class ChatOptionsComponent {
   // Editable filename for instructions export (reactive forms best practice)
+  // Only one constructor allowed
+  // Signal for system instructions mode: 'input', 'file', 'url', 'github'
+  protected readonly instructionsMode = signal<'input' | 'file' | 'url' | 'github'>('input');
+
+  // State for GitHub instructions files and selection
+  protected githubInstructionsFiles: Array<{ name: string; download_url: string }> = [];
+  protected selectedGithubInstruction: string | null = null;
+
   constructor(private dialog: MatDialog) {
     // Initialize form with current options
     this.updateFormFromOptions();
@@ -59,8 +67,58 @@ export class ChatOptionsComponent {
       }
     });
   }
-  // Signal for system instructions mode: 'input', 'file', 'url'
-  protected readonly instructionsMode = signal<'input' | 'file' | 'url'>('input');
+
+  // React to mode changes (call in template or setter)
+  setInstructionsMode(mode: 'input' | 'file' | 'url' | 'github') {
+    this.instructionsMode.set(mode);
+    if (mode === 'github') {
+      this.fetchGithubInstructionsFiles();
+    }
+  }
+
+  /**
+   * Fetches the list of markdown files from the GitHub instructions folder.
+   */
+  async fetchGithubInstructionsFiles(): Promise<void> {
+    const apiUrl = 'https://api.github.com/repos/github/awesome-copilot/contents/instructions';
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error('Failed to fetch GitHub instructions list');
+      const files = await response.json();
+      this.githubInstructionsFiles = (Array.isArray(files)
+        ? files.filter((f) => f.type === 'file' && f.name.endsWith('.md'))
+        : []);
+    } catch (err: any) {
+      this.githubInstructionsFiles = [];
+      this.showErrorDialog('GitHub Import Error', err?.message || 'Unknown error fetching GitHub instructions.');
+    }
+  }
+
+  /**
+   * Handles selection of a GitHub instruction file.
+   */
+  onGithubInstructionSelected(downloadUrl: string): void {
+    this.selectedGithubInstruction = downloadUrl;
+  }
+
+  /**
+   * Imports the selected GitHub instruction file as instructions.
+   */
+  async importInstructionsFromGithub(): Promise<void> {
+    if (!this.selectedGithubInstruction) return;
+    try {
+      const response = await fetch(this.selectedGithubInstruction);
+      if (!response.ok) throw new Error('Failed to fetch file from GitHub');
+      const text = await response.text();
+      this.optionsForm.get('instructions')?.setValue(text);
+      // Set filename from URL
+      const urlParts = this.selectedGithubInstruction.split('/');
+      const lastSegment = urlParts[urlParts.length - 1] || 'instructions.md';
+      this.optionsForm.get('instructionsFilename')?.setValue(lastSegment);
+    } catch (err: any) {
+      this.showErrorDialog('GitHub Import Error', err?.message || 'Unknown error importing from GitHub.');
+    }
+  }
   // For URL import
   public importUrl: string = '';
   /**

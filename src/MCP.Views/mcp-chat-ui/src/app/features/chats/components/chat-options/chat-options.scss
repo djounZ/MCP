@@ -1,3 +1,11 @@
+// Remove extra space for GitHub instructions dropdown
+.github-instructions-row {
+  margin-bottom: 0 !important;
+}
+
+.github-instructions-field {
+  margin-bottom: 0 !important;
+}
 .filename-row {
   display: flex;
   align-items: center;

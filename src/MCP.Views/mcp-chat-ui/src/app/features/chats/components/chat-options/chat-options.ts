@@ -21,7 +21,7 @@ import { ViewChild, ElementRef } from '@angular/core';
 import { ActionIconButton } from './chat-options.action-icon';
 import { NotifyDialog, NotifyDialogData } from '../../../../shared/components/notify-dialog/notify-dialog';
 import { ConfirmationDialog, ConfirmationDialogData } from '../../../../shared/components/confirmation-dialog/confirmation-dialog';
-import { exportAsFile } from '../../../../shared/utils/file.utils';
+import { exportAsFile, fetchFilesFromUrlUrlUnsafe as fetchFilesFromUrlUrlUnSafe } from '../../../../shared/utils/file.utils';
 
 @Component({
   selector: 'app-chat-options',
@@ -82,17 +82,14 @@ export class ChatOptionsComponent {
   async fetchGithubInstructionsFiles(): Promise<void> {
     const apiUrl = 'https://api.github.com/repos/github/awesome-copilot/contents/instructions';
     try {
-      const response = await fetch(apiUrl);
-      if (!response.ok) throw new Error('Failed to fetch GitHub instructions list');
-      const files = await response.json();
-      this.githubInstructionsFiles = (Array.isArray(files)
-        ? files.filter((f) => f.type === 'file' && f.name.endsWith('.md'))
-        : []);
+      this.githubInstructionsFiles = await fetchFilesFromUrlUrlUnSafe(apiUrl, '.md', 'GitHub');
     } catch (err: any) {
       this.githubInstructionsFiles = [];
       this.showErrorDialog('GitHub Import Error', err?.message || 'Unknown error fetching GitHub instructions.');
     }
   }
+
+
 
   /**
    * Handles selection of a GitHub instruction file.

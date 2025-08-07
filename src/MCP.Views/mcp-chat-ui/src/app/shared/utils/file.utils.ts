@@ -1,4 +1,19 @@
 /**
+ * Fetches a list of files from a remote API endpoint, filtering by extension and file type.
+ * @param apiUrl The API endpoint URL
+ * @param fileExtension The file extension to filter by (e.g. '.md')
+ * @param apiName The name of the API (for error messages)
+ * @returns Promise resolving to an array of files with name and download_url
+ */
+export async function fetchFilesFromUrlUrlUnsafe(apiUrl: string, fileExtension: string, apiName: string): Promise<Array<{ name: string; download_url: string }>> {
+  const response = await fetch(apiUrl);
+  if (!response.ok) throw new Error('Failed to fetch files from ' + apiName + '.');
+  const files = await response.json();
+  return (Array.isArray(files)
+    ? files.filter((f) => f.type === 'file' && f.name.endsWith(fileExtension))
+    : []);
+}
+/**
  * Reads and parses an uploaded JSON file
  * @param file The uploaded File object
  * @returns A Promise resolving to the parsed object

@@ -63,7 +63,7 @@ public sealed class GithubCopilotChatCompletion(
 
         // Ensure streaming is enabled
         var streamingRequest = request with { Stream = true };
-
+        ChatCompletionResponse? previousResponse = null;
 
         await foreach (var item in httpClientRunner.SendAndReadStreamAsync(
                            streamingRequest,
@@ -78,23 +78,99 @@ public sealed class GithubCopilotChatCompletion(
         {
             if (item.IsIgnored)
             {
-                logger.LogInformation("Ignored Item Received: {@RawMessage}",item.Ignored);
                 continue;
             }
 
             if (item.IsEnded)
             {
+                if(previousResponse is not null)
+                {
+                    // If we have a previous response, yield it before ending
+
+                    logger.LogInformation("Tool call detected in response: {Response}", previousResponse);
+                    yield return previousResponse;
+                }
                 break;
             }
 
-            yield return  item.Value;
+            var itemValue = item.Value;
+            if(itemValue!=null && IsToolCall(itemValue))
+            {
+                if (previousResponse == null)
+                {
+                    previousResponse = itemValue;
+                }
+                else if(previousResponse.Id!= itemValue.Id)
+                {
+                    // If the ID has changed, yield the previous response
+                    yield return previousResponse;
+
+                    logger.LogInformation("Tool call detected in response: {Response}", previousResponse);
+                    previousResponse = itemValue;
+                }
+                else
+                {
+                    // If the ID is the same, we are still processing the same response
+                    previousResponse = AccumulateToolCallArguments(previousResponse, itemValue);
+                }
+                continue;
+            }
+            yield return  itemValue;
         }
+    }
+
+    private ChatCompletionResponse AccumulateToolCallArguments(ChatCompletionResponse previousResponse, ChatCompletionResponse itemValue)
+    {
+        // If the ID is the same, we are still processing the same response
+        var functionArguments = itemValue.Choices.Single().Delta?.ToolCalls?.Single()?.Function?.Arguments ?? string.Empty;
+
+        // Get the existing function arguments and append the new ones
+        var existingChoice = previousResponse.Choices.Single();
+        var existingToolCall = existingChoice.Delta?.ToolCalls?.Single();
+        var existingArguments = existingToolCall?.Function?.Arguments ?? string.Empty;
+
+        if (existingToolCall?.Function != null && existingChoice.Delta != null)
+        {
+            // Create updated tool call with accumulated arguments
+            var updatedFunction = existingToolCall.Function with
+            {
+                Arguments = existingArguments + functionArguments
+            };
+
+            var updatedToolCall = existingToolCall with { Function = updatedFunction };
+            var updatedDelta = existingChoice.Delta with
+            {
+                ToolCalls = [updatedToolCall]
+            };
+            var updatedChoice = existingChoice with { Delta = updatedDelta };
+
+            return previousResponse with
+            {
+                Choices = [updatedChoice]
+            };
+        }
+        return previousResponse;
+    }
+    private bool IsToolCall(ChatCompletionResponse itemValue)
+    {
+        if(itemValue.Choices.Count == 0)
+        {
+            return false;
+        }
+
+        var choice = itemValue.Choices[0];
+        if(choice.Delta is null)
+        {
+            return false;
+        }
+
+        return choice.Delta.ToolCalls != null && choice.Delta.ToolCalls.Count != 0;
     }
 
     private async Task<StreamItem<ChatCompletionResponse>> ReadItemAsync(StreamReader reader, CancellationToken o)
     {
         var line = await reader.ReadLineAsync(o);
-
+        logger.LogTrace(line);
         if (string.IsNullOrWhiteSpace(line) || line.StartsWith("event:") || line.StartsWith(":"))
         {
             return StreamItem<ChatCompletionResponse>.BuildIgnored(line);

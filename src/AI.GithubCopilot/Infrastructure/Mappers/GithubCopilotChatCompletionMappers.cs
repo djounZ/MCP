@@ -383,15 +383,12 @@ public static class GithubCopilotChatCompletionMappers
         {
             if (tool is AIFunction function)
             {
-                // Extract parameters from the function's metadata or use a default schema
-                var parameters = ExtractFunctionParameters(function);
-
                 copilotTools.Add(new Tool(
                     Type: "function",
                     Function: new FunctionDefinition(
                         Name: function.Name,
                         Description: function.Description ?? string.Empty,
-                        Parameters: parameters
+                        Parameters: function.JsonSchema
                     )
                 ));
             }
@@ -399,23 +396,6 @@ public static class GithubCopilotChatCompletionMappers
 
         return copilotTools.Count > 0 ? copilotTools : null;
     }
-
-    /// <summary>
-    /// Extracts function parameters from AIFunction
-    /// </summary>
-    private static object ExtractFunctionParameters(AIFunction function)
-    {
-        // Try to get schema from additional properties first
-        if (function.AdditionalProperties.TryGetValue("schema", out var schema) && schema != null)
-        {
-            return schema;
-        }
-
-        // For now, return a basic object schema - this could be enhanced to introspect
-        // the function's parameters using reflection or other metadata
-        return new { type = "object", properties = new { } };
-    }
-
     /// <summary>
     /// Converts Microsoft.Extensions.AI tool mode to GitHub Copilot tool choice
     /// </summary>

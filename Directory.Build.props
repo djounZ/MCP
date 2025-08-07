@@ -51,6 +51,7 @@
         <MicrosoftAspNetCoreAuthenticationJwtBearerVersion>9.0.0</MicrosoftAspNetCoreAuthenticationJwtBearerVersion>
 
         <OllamaSharpVersion>5.3.4</OllamaSharpVersion>
+        <ModelContextProtocolCoreVersion>0.3.0-preview.3</ModelContextProtocolCoreVersion>
 
     </PropertyGroup>
 

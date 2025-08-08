@@ -25,35 +25,22 @@
     <!-- Package Versions -->
     <PropertyGroup>
         <!-- Microsoft packages -->
-        <MicrosoftExtensionsHostingAbstractionsVersion>9.0.7</MicrosoftExtensionsHostingAbstractionsVersion>
-        <MicrosoftExtensionsLoggingAbstractions>9.0.7</MicrosoftExtensionsLoggingAbstractions>
-        <MicrosoftAspNetCoreOpenApiVersion>9.0.6</MicrosoftAspNetCoreOpenApiVersion>
-        <MicrosoftExtensionsConfigurationAbstractionsVersion>9.0.7</MicrosoftExtensionsConfigurationAbstractionsVersion>
-        <MicrosoftExtensionsConfigurationJsonVersion>9.0.7</MicrosoftExtensionsConfigurationJsonVersion>
-        <MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>9.0.7</MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>
-        <MicrosoftExtensionsConfigurationFileExtensionsVersion>9.0.7</MicrosoftExtensionsConfigurationFileExtensionsVersion>
-        <MicrosoftExtensionsDependencyInjectionVersion>9.0.7</MicrosoftExtensionsDependencyInjectionVersion>
-        <MicrosoftExtensionsDependencyInjectionAbstractionsVersion>9.0.7</MicrosoftExtensionsDependencyInjectionAbstractionsVersion>
-        <MicrosoftExtensionsOptionsVersion>9.0.7</MicrosoftExtensionsOptionsVersion>
-        <MicrosoftExtensionsOptionsConfigurationExtensionsVersion>9.0.7</MicrosoftExtensionsOptionsConfigurationExtensionsVersion>
-        <MicrosoftExtensionsHttpVersion>9.0.7</MicrosoftExtensionsHttpVersion>
-        <MicrosoftNETTestSdkVersion>17.12.0</MicrosoftNETTestSdkVersion>
-        <MicrosoftCodeAnalysisAnalyzersVersion>3.3.4</MicrosoftCodeAnalysisAnalyzersVersion>
-        <MicrosoftExtensionsAIAbstractions>9.7.1</MicrosoftExtensionsAIAbstractions>
-        <MicrosoftExtensionsAI>9.7.1</MicrosoftExtensionsAI>
+        <MicrosoftExtensionsPackagesCommonVersion>9.0.7</MicrosoftExtensionsPackagesCommonVersion>
+        <MicrosoftNETTestSdkVersion>17.14.1</MicrosoftNETTestSdkVersion>
+        <MicrosoftCodeAnalysisAnalyzersVersion>4.14.0</MicrosoftCodeAnalysisAnalyzersVersion>
+        <MicrosoftExtensionsAIPackagesCommonVersion>9.7.1</MicrosoftExtensionsAIPackagesCommonVersion>
         <!-- Testing packages -->
-        <XunitVersion>2.9.2</XunitVersion>
-        <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
-        <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
-        <NSubstituteVersion>5.1.0</NSubstituteVersion>
-        <FluentAssertionsVersion>6.12.0</FluentAssertionsVersion>
+        <XunitVersion>2.9.3</XunitVersion>
+        <XunitRunnerVisualStudioVersion>3.1.3</XunitRunnerVisualStudioVersion>
+        <CoverletCollectorVersion>6.0.4</CoverletCollectorVersion>
+        <NSubstituteVersion>5.3.0</NSubstituteVersion>
+        <FluentAssertionsVersion>8.5.0</FluentAssertionsVersion>
         <!-- JWT & Auth packages -->
         <SystemIdentityModelTokensJwtVersion>8.13.0</SystemIdentityModelTokensJwtVersion>
         <MicrosoftIdentityModelTokensVersion>8.13.0</MicrosoftIdentityModelTokensVersion>
-        <MicrosoftAspNetCoreAuthenticationJwtBearerVersion>9.0.0</MicrosoftAspNetCoreAuthenticationJwtBearerVersion>
 
         <OllamaSharpVersion>5.3.4</OllamaSharpVersion>
-        <ModelContextProtocolCoreVersion>0.3.0-preview.3</ModelContextProtocolCoreVersion>
+        <ModelContextProtocolPackagesCommonVersion>0.3.0-preview.3</ModelContextProtocolPackagesCommonVersion>
 
     </PropertyGroup>
 

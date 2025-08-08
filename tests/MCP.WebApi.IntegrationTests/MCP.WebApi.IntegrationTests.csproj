@@ -7,9 +7,10 @@
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="$(CoverletCollectorVersion)"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)"/>
+        <PackageReference Include="ModelContextProtocol.Core" Version="0.3.0-preview.3" />
         <PackageReference Include="xunit" Version="$(XunitVersion)"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)"/>
-        <PackageReference Include="Microsoft.Extensions.AI" Version="$(MicrosoftExtensionsAI)" />
+        <PackageReference Include="Microsoft.Extensions.AI" Version="$(MicrosoftExtensionsAIPackagesCommonVersion)" />
     </ItemGroup>
 
     <ItemGroup>
@@ -17,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\MCP.Tools\MCP.Tools.csproj" />
         <ProjectReference Include="..\..\src\MCP.WebApi\MCP.WebApi.csproj"/>
     </ItemGroup>
 

@@ -335,7 +335,7 @@ All package versions are centralized in `Directory.Build.props`:
   <!-- JWT & Auth packages -->
   <SystemIdentityModelTokensJwtVersion>8.13.0</SystemIdentityModelTokensJwtVersion>
   <MicrosoftIdentityModelTokensVersion>8.13.0</MicrosoftIdentityModelTokensVersion>
-  <MicrosoftAspNetCoreAuthenticationJwtBearerVersion>9.0.0</MicrosoftAspNetCoreAuthenticationJwtBearerVersion>
+  <MicrosoftExtensionsPackagesCommonVersion>9.0.0</MicrosoftExtensionsPackagesCommonVersion>
 </PropertyGroup>
 ```
 

@@ -29,16 +29,18 @@
         <MicrosoftExtensionsLoggingAbstractions>9.0.7</MicrosoftExtensionsLoggingAbstractions>
         <MicrosoftAspNetCoreOpenApiVersion>9.0.6</MicrosoftAspNetCoreOpenApiVersion>
         <MicrosoftExtensionsConfigurationAbstractionsVersion>9.0.7</MicrosoftExtensionsConfigurationAbstractionsVersion>
+        <MicrosoftExtensionsConfigurationJsonVersion>9.0.7</MicrosoftExtensionsConfigurationJsonVersion>
+        <MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>9.0.7</MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>
+        <MicrosoftExtensionsConfigurationFileExtensionsVersion>9.0.7</MicrosoftExtensionsConfigurationFileExtensionsVersion>
         <MicrosoftExtensionsDependencyInjectionVersion>9.0.7</MicrosoftExtensionsDependencyInjectionVersion>
         <MicrosoftExtensionsDependencyInjectionAbstractionsVersion>9.0.7</MicrosoftExtensionsDependencyInjectionAbstractionsVersion>
+        <MicrosoftExtensionsOptionsVersion>9.0.7</MicrosoftExtensionsOptionsVersion>
+        <MicrosoftExtensionsOptionsConfigurationExtensionsVersion>9.0.7</MicrosoftExtensionsOptionsConfigurationExtensionsVersion>
         <MicrosoftExtensionsHttpVersion>9.0.7</MicrosoftExtensionsHttpVersion>
         <MicrosoftNETTestSdkVersion>17.12.0</MicrosoftNETTestSdkVersion>
         <MicrosoftCodeAnalysisAnalyzersVersion>3.3.4</MicrosoftCodeAnalysisAnalyzersVersion>
         <MicrosoftExtensionsAIAbstractions>9.7.1</MicrosoftExtensionsAIAbstractions>
         <MicrosoftExtensionsAI>9.7.1</MicrosoftExtensionsAI>
-        <MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>9.0.7</MicrosoftExtensionsConfigurationEnvironmentVariablesVersion>
-        <MicrosoftExtensionsConfigurationFileExtensionsVersion>9.0.7</MicrosoftExtensionsConfigurationFileExtensionsVersion>
-        <MicrosoftExtensionsConfigurationJsonVersion>9.0.7</MicrosoftExtensionsConfigurationJsonVersion>
         <!-- Testing packages -->
         <XunitVersion>2.9.2</XunitVersion>
         <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>

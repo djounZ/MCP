@@ -5,21 +5,21 @@ namespace MCP.Tools.Infrastructure.Mappers;
 
 public class McpServerConfigurationMapper
 {
-    public StdioClientTransportOptions Map(McpServerConfigurationItemStdio configurationItem)
+    public StdioClientTransportOptions MapStdioClientTransportOptions(McpServerConfigurationItem configurationItem)
     {
         return new StdioClientTransportOptions
         {
-            Command = configurationItem.Command,
+            Command = configurationItem.Command!,
             Arguments = configurationItem.Arguments,
             EnvironmentVariables = configurationItem.EnvironmentVariables
         };
     }
 
-    public SseClientTransportOptions Map(McpServerConfigurationItemHttp configurationItem)
+    public SseClientTransportOptions MapSseClientTransport(McpServerConfigurationItem configurationItem)
     {
         return new SseClientTransportOptions
         {
-            Endpoint = configurationItem.Endpoint
+            Endpoint = configurationItem.Endpoint!
         };
     }
 

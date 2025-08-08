@@ -6,6 +6,7 @@ using MCP.Infrastructure.Options;
 using MCP.Infrastructure.Repositories;
 using MCP.Infrastructure.Services;
 using MCP.Infrastructure.Services.ChatServiceImplementations;
+using MCP.Tools.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -34,6 +35,7 @@ public static class ServiceCollectionExtensions
         // Example: Database context, external API clients, etc.
 
         services.AddChatServices(configuration);
+        services.AddMcpTools(configuration);
         return services;
     }
 

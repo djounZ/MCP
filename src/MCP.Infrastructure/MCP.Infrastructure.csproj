@@ -4,6 +4,7 @@
         <ProjectReference Include="..\AI.GithubCopilot\AI.GithubCopilot.csproj" />
         <ProjectReference Include="..\MCP.Domain\MCP.Domain.csproj"/>
         <ProjectReference Include="..\MCP.Application\MCP.Application.csproj"/>
+        <ProjectReference Include="..\MCP.Tools\MCP.Tools.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -9,11 +9,11 @@ public class ClientTransportFactoryService(ILogger<ClientTransportFactoryService
 {
 
 
-    public IDictionary<string, IClientTransport> Create(McpServerConfiguration configuration)
+    public IDictionary<string, IClientTransport> Create(IDictionary<string, McpServerConfigurationItem> serverConfiguration)
     {
         var transports = new Dictionary<string, IClientTransport>();
 
-        foreach (var kvp in configuration.Servers)
+        foreach (var kvp in serverConfiguration)
         {
             try
             {
@@ -31,14 +31,14 @@ public class ClientTransportFactoryService(ILogger<ClientTransportFactoryService
 
     private IClientTransport Create(McpServerConfigurationItem configurationItem)
     {
-        if (configurationItem is McpServerConfigurationItemStdio stdioConfig)
+        if (configurationItem.Type is McpServerTransportType.Stdio)
         {
-            return new StdioClientTransport(mapper.Map(stdioConfig), loggerFactory);
+            return new StdioClientTransport(mapper.MapStdioClientTransportOptions(configurationItem), loggerFactory);
         }
 
-        if (configurationItem is McpServerConfigurationItemHttp httpConfig)
+        if (configurationItem.Type is McpServerTransportType.Http)
         {
-            return new SseClientTransport(mapper.Map(httpConfig), loggerFactory);
+            return new SseClientTransport(mapper.MapSseClientTransport(configurationItem), loggerFactory);
         }
 
         logger.LogError("Unsupported configuration type: {ConfigurationType}", configurationItem.GetType().Name);

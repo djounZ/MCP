@@ -3,21 +3,24 @@ using System.Text.Json.Serialization;
 
 namespace MCP.Tools.Infrastructure.Models;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
-[JsonDerivedType(typeof(McpServerConfigurationItemStdio), typeDiscriminator: "stdio")]
-[JsonDerivedType(typeof(McpServerConfigurationItemHttp), typeDiscriminator: "stdio")]
-public abstract record McpServerConfigurationItem(
-    [property: JsonPropertyName("category")] string? Category);
-public sealed record McpServerConfigurationItemStdio(
-    string? Category,
-    [property: JsonPropertyName("command")] string Command,
+
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum McpServerTransportType
+{
+    [JsonStringEnumMemberName("stdio")]
+    Stdio = 1,
+    [JsonStringEnumMemberName("http")]
+    Http = 2
+}
+
+public sealed record McpServerConfigurationItem(
+    [property: JsonPropertyName("category")] string? Category,
+    [property: JsonPropertyName("command")] string? Command,
     [property: JsonPropertyName("args")] IList<string>? Arguments,
-    [property: JsonPropertyName("env")] IDictionary<string, string?>? EnvironmentVariables
-    ):McpServerConfigurationItem(Category);
-public sealed record McpServerConfigurationItemHttp(
-    string? Category,
-    [property: JsonPropertyName("url")] Uri Endpoint
-):McpServerConfigurationItem(Category);
+    [property: JsonPropertyName("env")] IDictionary<string, string?>? EnvironmentVariables,
+    [property: JsonPropertyName("url")] Uri? Endpoint,
+    [property: JsonPropertyName("type")] McpServerTransportType Type = McpServerTransportType.Stdio);
 
 
 public sealed record McpServerConfiguration(

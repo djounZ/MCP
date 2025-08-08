@@ -12,18 +12,18 @@ public class McpClientToolProviderService(IOptions<McpToolsOptions> options, Cli
 
     private McpToolsOptions Options => options.Value;
 
-    public async Task<IDictionary<string, IList<McpToolDescription>>> DescribeAsync()
+    public async Task<IDictionary<string, IList<McpToolDescription>>> DescribeAsync(CancellationToken cancellationToken)
     {
         var mcpToolDescriptions = new Dictionary<string, IList<McpToolDescription>>();
 
         await using var stream = File.OpenRead(Options.McpServerConfigurationFilePath);
-        var mcpServerConfiguration = await JsonSerializer.DeserializeAsync<McpServerConfiguration>(stream);
+        var mcpServerConfiguration = await JsonSerializer.DeserializeAsync<McpServerConfiguration>(stream, cancellationToken: cancellationToken);
         var clientTransports = clientTransportFactoryService.Create(mcpServerConfiguration!.Servers);
 
         foreach (var (name, clientTransport) in clientTransports)
         {
-            await using var client = await McpClientFactory.CreateAsync(clientTransport);
-            var mcpClientTools = await client.ListToolsAsync();
+            await using var client = await McpClientFactory.CreateAsync(clientTransport, cancellationToken: cancellationToken);
+            var mcpClientTools = await client.ListToolsAsync(cancellationToken: cancellationToken);
             mcpToolDescriptions[name] = mcpServerConfigurationMapper.Map(mcpClientTools);
         }
         return mcpToolDescriptions;

@@ -55,6 +55,7 @@ app.MapAuthEndpoints();
 app.MapSecuredHealthEndpoints();
 app.MapWeatherEndpoints();
 app.MapGithubCopilotChatEndpoints();
+app.MapMcpToolsEndpoints();
 
 // Initialize startup operations (device registration and browser opening)
 await app.Services.UseMcpInfrastructureAsync(CancellationToken.None);

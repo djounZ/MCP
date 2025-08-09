@@ -29,19 +29,19 @@
 
 .tab-content {
   padding-top: 24px;
-  
+
   mat-card {
     margin-bottom: 16px;
-    
+
     mat-card-header {
       margin-bottom: 16px;
-      
+
       mat-card-title {
         display: flex;
         align-items: center;
         gap: 8px;
         font-size: 1.25rem;
-        
+
         mat-icon {
           color: var(--mat-sys-primary);
         }
@@ -55,10 +55,10 @@
   .settings-container {
     padding: 16px;
   }
-  
+
   .settings-header {
     margin-bottom: 24px;
-    
+
     h1 {
       font-size: 1.75rem;
     }

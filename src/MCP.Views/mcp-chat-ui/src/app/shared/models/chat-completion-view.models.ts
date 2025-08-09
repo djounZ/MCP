@@ -114,6 +114,11 @@ export interface ChatOptionsAppModelView {
   stopSequences?: string[] | null;
   allowMultipleToolCalls?: boolean | null;
   toolMode?: ChatToolModeAppModelView | null;
+  tools?: Map<string, AiToolAppModelView[]> | null;
+}
+// View model for AiToolAppModel
+export interface AiToolAppModelView {
+  name: string;
 }
 
 export interface ChatRequestView {
@@ -152,3 +157,4 @@ export interface AiProviderAppModelView {
   name: string;
   models: AiProviderAiModelAppModelView[];
 }
+

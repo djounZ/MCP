@@ -322,6 +322,7 @@ export function toChatOptionsAppModelView(api: ChatOptionsAppModel | null): Chat
     stopSequences: api.stop_sequences ?? null,
     allowMultipleToolCalls: api.allow_multiple_tool_calls ?? null,
     toolMode: toChatToolModeAppModelView(api.tool_mode ?? null)
+    , tools: api.tools ?? null
   };
 }
 export function fromChatOptionsAppModelView(view: ChatOptionsAppModelView | null, conversationId: string | null | undefined): ChatOptionsAppModel | null {
@@ -341,6 +342,7 @@ export function fromChatOptionsAppModelView(view: ChatOptionsAppModelView | null
     stop_sequences: view.stopSequences ?? null,
     allow_multiple_tool_calls: view.allowMultipleToolCalls ?? null,
     tool_mode: fromChatToolModeAppModelView(view.toolMode ?? null)
+    , tools: view.tools ?? null
   };
 }
 

@@ -74,7 +74,7 @@
     background-color: var(--mat-sys-surface-container);
     padding: 4px 8px;
     border-radius: 4px;
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     font-size: 0.875rem;
     max-width: 300px;
     overflow: hidden;
@@ -114,7 +114,7 @@
     mat-chip {
       font-size: 0.75rem;
       height: 24px;
-      
+
       mat-icon {
         font-size: 16px;
         width: 16px;
@@ -132,7 +132,7 @@
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid var(--mat-sys-outline-variant);
-  
+
   p {
     margin: 0;
     color: var(--mat-sys-on-surface-variant);
@@ -145,7 +145,7 @@
   .header-actions {
     flex-direction: column;
     align-items: stretch;
-    
+
     button {
       width: 100%;
     }
@@ -161,7 +161,7 @@
 
   .empty-state {
     padding: 32px 16px;
-    
+
     .empty-icon {
       font-size: 48px;
       width: 48px;

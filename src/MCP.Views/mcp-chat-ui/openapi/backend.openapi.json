@@ -880,6 +880,17 @@
           "ollama"
         ]
       },
+      "AiToolAppModel": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "ChatMessageAppModel": {
         "required": [
           "role",
@@ -913,7 +924,8 @@
           "model_id",
           "stop_sequences",
           "allow_multiple_tool_calls",
-          "tool_mode"
+          "tool_mode",
+          "tools"
         ],
         "type": "object",
         "properties": {
@@ -980,6 +992,16 @@
           },
           "tool_mode": {
             "$ref": "#/components/schemas/ChatToolModeAppModel"
+          },
+          "tools": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AiToolAppModel"
+              }
+            },
+            "nullable": true
           }
         },
         "default": null,

@@ -1,3 +1,7 @@
+// --- AiToolAppModel ---
+export interface AiToolAppModel {
+  name: string;
+}
 // Auto-generated from OpenAPI spec (components/schemas/ChatRequest, ChatResponseAppModel)
 // See backend.openapi.json for details
 
@@ -119,6 +123,7 @@ export interface ChatOptionsAppModel {
   stop_sequences?: string[] | null;
   allow_multiple_tool_calls?: boolean | null;
   tool_mode?: ChatToolModeAppModel | null;
+  tools?: Map<string, AiToolAppModel[]> | null;
 }
 
 // --- ChatRequest ---

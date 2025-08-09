@@ -1,3 +1,102 @@
+import { AiToolAppModel } from './chat-completion-api.models';
+export class ChatOptionsAppModelViewBuilder {
+  private _conversationId: string | null = null;
+  private _instructions: string | null = null;
+  private _temperature: number | null = null;
+  private _maxOutputTokens: number | null = null;
+  private _topP: number | null = null;
+  private _topK: number | null = null;
+  private _frequencyPenalty: number | null = null;
+  private _presencePenalty: number | null = null;
+  private _seed: number | null = null;
+  private _responseFormat: ChatResponseFormatAppModelView | null = null;
+  private _modelId: string | null = null;
+  private _stopSequences: string[] | null = null;
+  private _allowMultipleToolCalls: boolean | null = null;
+  private _toolMode: ChatToolModeAppModelView | null = null;
+  private _tools: Map<string, AiToolAppModel[]> | null = null;
+
+  conversationId(conversationId: string | null): this {
+    this._conversationId = conversationId;
+    return this;
+  }
+  instructions(instructions: string | null): this {
+    this._instructions = instructions;
+    return this;
+  }
+  temperature(temperature: number | null): this {
+    this._temperature = temperature;
+    return this;
+  }
+  maxOutputTokens(maxOutputTokens: number | null): this {
+    this._maxOutputTokens = maxOutputTokens;
+    return this;
+  }
+  topP(topP: number | null): this {
+    this._topP = topP;
+    return this;
+  }
+  topK(topK: number | null): this {
+    this._topK = topK;
+    return this;
+  }
+  frequencyPenalty(frequencyPenalty: number | null): this {
+    this._frequencyPenalty = frequencyPenalty;
+    return this;
+  }
+  presencePenalty(presencePenalty: number | null): this {
+    this._presencePenalty = presencePenalty;
+    return this;
+  }
+  seed(seed: number | null): this {
+    this._seed = seed;
+    return this;
+  }
+  responseFormat(responseFormat: ChatResponseFormatAppModelView | null): this {
+    this._responseFormat = responseFormat;
+    return this;
+  }
+  modelId(modelId: string | null): this {
+    this._modelId = modelId;
+    return this;
+  }
+  stopSequences(stopSequences: string[] | null): this {
+    this._stopSequences = stopSequences;
+    return this;
+  }
+  allowMultipleToolCalls(allowMultipleToolCalls: boolean | null): this {
+    this._allowMultipleToolCalls = allowMultipleToolCalls;
+    return this;
+  }
+  toolMode(toolMode: ChatToolModeAppModelView | null): this {
+    this._toolMode = toolMode;
+    return this;
+  }
+  tools(tools: Map<string, AiToolAppModel[]> | null): this {
+    this._tools = tools;
+    return this;
+  }
+
+  build(): ChatOptionsAppModelView {
+    return {
+      conversationId: this._conversationId,
+      instructions: this._instructions,
+      temperature: this._temperature,
+      maxOutputTokens: this._maxOutputTokens,
+      topP: this._topP,
+      topK: this._topK,
+      frequencyPenalty: this._frequencyPenalty,
+      presencePenalty: this._presencePenalty,
+      seed: this._seed,
+      responseFormat: this._responseFormat,
+      modelId: this._modelId,
+      stopSequences: this._stopSequences,
+      allowMultipleToolCalls: this._allowMultipleToolCalls,
+      toolMode: this._toolMode,
+      tools: this._tools
+    };
+  }
+}
 export class AiContentAppModelTextContentAppModelViewBuilder {
   private _text: string | null = null;
   private _annotations: unknown[] | null = null;
@@ -49,7 +148,7 @@ export class ChatRequestViewBuilder {
   }
 }
 
-import { ChatResponseAppModelView, ChatMessageAppModelView, ChatFinishReasonAppModelView, ChatRoleEnumAppModelView, AiContentAppModelView, ChatOptionsAppModelView } from './chat-completion-view.models';
+import { ChatResponseAppModelView, ChatMessageAppModelView, ChatFinishReasonAppModelView, ChatRoleEnumAppModelView, AiContentAppModelView, ChatOptionsAppModelView, ChatResponseFormatAppModelView, ChatToolModeAppModelView } from './chat-completion-view.models';
 import { generateUuid } from '../utils/uuid.utils';
 export class ChatMessageAppModelViewBuilder {
   private _role: ChatRoleEnumAppModelView = ChatRoleEnumAppModelView.User;

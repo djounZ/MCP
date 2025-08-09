@@ -30,6 +30,11 @@ export class MessageInput {
   readonly messageSubmit = output<string>();
   readonly disabled = input<boolean>(false);
 
+  configureTools(): void {
+    // TODO: Implement tool configuration logic
+    // For now, just a stub to resolve template error
+  }
+
   sendMessage(): void {
     const content = this.messageContent().trim();
     if (content) {

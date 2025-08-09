@@ -43,9 +43,9 @@ export class ServerFormComponent {
   protected readonly serverForm: FormGroup;
   protected readonly isEdit = signal(this.data?.isEdit ?? false);
   protected readonly argsArray = signal<string[]>([]);
-  protected readonly envArray = signal<Array<{key: string, value: string}>>([]);
+  protected readonly envArray = signal<Array<{ key: string, value: string }>>([]);
 
-  protected readonly formTitle = computed(() => 
+  protected readonly formTitle = computed(() =>
     this.isEdit() ? 'Edit MCP Server' : 'Add New MCP Server'
   );
 
@@ -108,7 +108,7 @@ export class ServerFormComponent {
   addEnvironmentVariable(): void {
     const key = this.serverForm.get('newEnvKey')?.value?.trim();
     const value = this.serverForm.get('newEnvValue')?.value?.trim();
-    
+
     if (key && value) {
       this.envArray.update(env => [...env, { key, value }]);
       this.serverForm.patchValue({ newEnvKey: '', newEnvValue: '' });
@@ -126,7 +126,7 @@ export class ServerFormComponent {
   onSave(): void {
     if (this.serverForm.valid) {
       const formValue = this.serverForm.value;
-      
+
       const config: McpServerConfigurationItem = {
         type: formValue.type,
         category: formValue.category || null,

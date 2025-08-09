@@ -12,17 +12,38 @@
       cdkTextareaAutosize
       #autosize="cdkTextareaAutosize"
       cdkAutosizeMinRows="1"
-      cdkAutosizeMaxRows="5">
+      cdkAutosizeMaxRows="5"
+    >
     </textarea>
   </mat-form-field>
 
-  <button
-    mat-fab
-    color="primary"
-    class="send-button"
-    (click)="sendMessage()"
-    [disabled]="disabled() || !messageContent().trim()"
-    aria-label="Send message">
-    <mat-icon>send</mat-icon>
-  </button>
+  <div
+    style="
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    "
+  >
+    <button
+      mat-fab
+      color="primary"
+      class="configure-tools-button"
+      (click)="configureTools()"
+      aria-label="Configure tools"
+      matTooltip="Configure tools"
+    >
+      <mat-icon>settings</mat-icon>
+    </button>
+    <button
+      mat-fab
+      color="primary"
+      class="send-button"
+      (click)="sendMessage()"
+      [disabled]="disabled() || !messageContent().trim()"
+      aria-label="Send message"
+    >
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
 </div>

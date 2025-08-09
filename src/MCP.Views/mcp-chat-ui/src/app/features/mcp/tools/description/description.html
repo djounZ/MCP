@@ -1,0 +1,121 @@
+<section class="mcp-tools-description">
+  <div class="header">
+    <h1 class="page-title">MCP Tools</h1>
+    <p class="page-subtitle">
+      Available Model Context Protocol tools and integrations
+    </p>
+  </div>
+
+  @if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading tools...</p>
+  </div>
+  } @else if (totalToolsCount === 0) {
+  <div class="empty-state">
+    <div class="empty-icon">🔧</div>
+    <h3>No tools found</h3>
+    <p>
+      No MCP tools are currently available. Check your server configuration.
+    </p>
+  </div>
+  } @else {
+  <div class="tools-header">
+    <div class="tools-count">
+      <span class="count">{{ totalToolsCount }}</span>
+      <span class="label"
+        >{{ totalToolsCount === 1 ? "tool" : "tools" }} available across
+        {{ toolGroups.length }}
+        {{ toolGroups.length === 1 ? "group" : "groups" }}</span
+      >
+    </div>
+  </div>
+
+  <div class="tools-scroll-container">
+    @for (group of toolGroups; track group.groupName) {
+    <div class="tool-group">
+      <div class="group-header" (click)="toggleGroup(group.groupName)">
+        <div class="group-info">
+          <h2 class="group-title">{{ group.groupName }}</h2>
+          <span class="group-count">{{ group.tools.length }} tools</span>
+        </div>
+        <div
+          class="expand-button"
+          [class.expanded]="isGroupExpanded(group.groupName)"
+        >
+          <span class="expand-icon">{{
+            isGroupExpanded(group.groupName) ? "▼" : "▶"
+          }}</span>
+        </div>
+      </div>
+
+      @if (isGroupExpanded(group.groupName)) {
+      <div class="tools-grid">
+        @for (tool of group.tools; track tool.name) {
+        <div class="tool-card">
+          <div class="tool-header">
+            <div class="tool-icon">🛠️</div>
+            <div class="tool-title-section">
+              <h3 class="tool-name">{{ tool.name }}</h3>
+              @if (tool.title && tool.title !== tool.name) {
+              <p class="tool-title">{{ tool.title }}</p>
+              } @if (tool.version) {
+              <span class="tool-version">v{{ tool.version }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="tool-body">
+            <p class="tool-description">{{ tool.description }}</p>
+
+            <!-- Input Schema Section -->
+            @if (tool.inputSchema) {
+            <div class="schema-section">
+              <h4 class="schema-title">Input Parameters</h4>
+              <div class="schema-content">
+                <pre class="schema-json">{{
+                  formatSchema(tool.inputSchema)
+                }}</pre>
+              </div>
+            </div>
+            }
+
+            <!-- Output Schema Section -->
+            @if (tool.outputSchema) {
+            <div class="schema-section">
+              <h4 class="schema-title">Output Schema</h4>
+              <div class="schema-content">
+                <pre class="schema-json">{{
+                  formatSchema(tool.outputSchema)
+                }}</pre>
+              </div>
+            </div>
+            }
+
+            <div class="tool-metadata">
+              @if (tool.author) {
+              <div class="metadata-item">
+                <span class="metadata-label">Author:</span>
+                <span class="metadata-value">{{ tool.author }}</span>
+              </div>
+              } @if (tool.tags?.length) {
+              <div class="metadata-item tags-section">
+                <span class="metadata-label">Tags:</span>
+                <div class="tags-container">
+                  @for (tag of tool.tags; track tag) {
+                  <span class="tag">{{ tag }}</span>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+</section>

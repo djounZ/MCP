@@ -18,5 +18,9 @@ export const routes: Routes = [
   {
     path: 'dev-in-progress',
     loadComponent: () => import('./features/dev-in-progress/dev-in-progress').then(m => m.DevInProgressComponent)
+  },
+  {
+    path: 'mcp-tools-description',
+    loadComponent: () => import('./features/mcp/tools/description/description').then(m => m.McpToolsDescriptionComponent)
   }
 ];

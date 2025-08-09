@@ -151,10 +151,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/AiProviderAppModel"
-                    }
+                    "$ref": "#/components/schemas/AiProviderAppModel"
                   }
                 }
               }
@@ -289,6 +286,34 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ChatResponseUpdateAppModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mcp_tools/descriptions": {
+      "get": {
+        "tags": [
+          "MCP Tools"
+        ],
+        "summary": "Get description of MCP tools",
+        "description": "Return all available MCP tools descriptions",
+        "operationId": "GetMcpToolDescriptions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/McpToolDescription"
+                    }
                   }
                 }
               }
@@ -1032,6 +1057,7 @@
           }
         }
       },
+      "JsonElement": { },
       "LoginRequest": {
         "required": [
           "username",
@@ -1044,6 +1070,30 @@
           },
           "password": {
             "type": "string"
+          }
+        }
+      },
+      "McpToolDescription": {
+        "required": [
+          "name",
+          "description",
+          "json_schema",
+          "return_json_schema"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "json_schema": {
+            "$ref": "#/components/schemas/JsonElement"
+          },
+          "return_json_schema": {
+            "$ref": "#/components/schemas/NullableOfJsonElement"
           }
         }
       },
@@ -1065,6 +1115,9 @@
           "tool",
           null
         ],
+        "nullable": true
+      },
+      "NullableOfJsonElement": {
         "nullable": true
       },
       "SimpleChatRequest": {
@@ -1138,6 +1191,9 @@
     },
     {
       "name": "ChatCompletion"
+    },
+    {
+      "name": "MCP Tools"
     }
   ]
 }

@@ -32,7 +32,7 @@ public sealed record McpToolDescription(
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("description")]
     string? Description,
-    [property: JsonPropertyName("json_schema")]
-    JsonElement JsonSchema,
-    [property: JsonPropertyName("return_json_schema")]
-    JsonElement? ReturnJsonSchema);
+    [property: JsonPropertyName("input_schema")]
+    JsonElement InputSchema,
+    [property: JsonPropertyName("output_schema")]
+    JsonElement? OutputSchema);

@@ -21,4 +21,11 @@
     display: flex;
     flex-direction: column;
   }
+
+  app-mcp-tools-description {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
 }

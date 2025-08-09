@@ -26,6 +26,10 @@ public abstract class ChatServiceBase<TChatClient>(TChatClient chatClient,ChatCl
 
         await foreach (var update in chatCompletionStreamAsync)
         {
+            if (update.Contents.Count >0 && update.Contents.All(c => c is FunctionCallContent || c is FunctionResultContent))
+            {
+                continue;
+            }
             yield return mapper.MapToAppModel(update);
         }
     }

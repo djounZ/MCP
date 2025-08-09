@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit, computed } from '@angular/core';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit, computed, Inject } from '@angular/core';
+import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTreeModule, MatTreeNestedDataSource } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,6 +15,10 @@ interface ToolTreeNode {
     isSelected: boolean;
     children?: ToolTreeNode[];
     description?: McpToolDescription;
+}
+
+export interface ToolConfigurationDialogData {
+    currentTools?: Map<string, AiToolAppModelView[]> | null;
 }
 
 @Component({
@@ -33,6 +37,8 @@ interface ToolTreeNode {
 export class ToolConfigurationDialog implements OnInit {
     private readonly mcpToolsClient = inject(McpToolsHttpClient);
     private readonly dialogRef = inject(MatDialogRef<ToolConfigurationDialog>);
+
+    constructor(@Inject(MAT_DIALOG_DATA) public data: ToolConfigurationDialogData) { }
 
     protected readonly isLoading = signal(false);
     protected readonly treeData = signal<ToolTreeNode[]>([]);
@@ -55,17 +61,23 @@ export class ToolConfigurationDialog implements OnInit {
         try {
             const toolsMap = await this.mcpToolsClient.getToolDescriptions();
             const treeNodes: ToolTreeNode[] = [];
+            const currentTools = this.data?.currentTools;
 
             for (const [serverName, tools] of toolsMap.entries()) {
+                const selectedToolsForServer = currentTools?.get(serverName) || [];
+                const selectedToolNames = new Set(selectedToolsForServer.map(t => t.name));
+
+                const children = tools.map(tool => ({
+                    name: tool.name,
+                    isSelected: selectedToolNames.has(tool.name),
+                    description: tool
+                }));
+
                 const serverNode: ToolTreeNode = {
                     name: serverName,
                     isServer: true,
-                    isSelected: false,
-                    children: tools.map(tool => ({
-                        name: tool.name,
-                        isSelected: false,
-                        description: tool
-                    }))
+                    isSelected: children.length > 0 && children.every(child => child.isSelected),
+                    children: children
                 };
                 treeNodes.push(serverNode);
             }

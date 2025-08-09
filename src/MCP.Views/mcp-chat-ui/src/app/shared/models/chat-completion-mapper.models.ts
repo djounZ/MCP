@@ -2,6 +2,38 @@
 export function toAiProviderAppModelViewArray(apiArray: AiProviderAppModel[]): AiProviderAppModelView[] {
   return Array.isArray(apiArray) ? apiArray.map(toAiProviderAppModelView) : [];
 }
+
+// --- AiTool Mappers ---
+export function toAiToolAppModelView(api: AiToolAppModel): AiToolAppModelView {
+  return {
+    name: api.name
+  };
+}
+
+export function fromAiToolAppModelView(view: AiToolAppModelView): AiToolAppModel {
+  return {
+    name: view.name
+  };
+}
+
+export function toToolsMapView(apiTools: Map<string, AiToolAppModel[]> | null): Map<string, AiToolAppModelView[]> | null {
+  if (!apiTools) return null;
+  const viewTools = new Map<string, AiToolAppModelView[]>();
+  for (const [server, tools] of apiTools.entries()) {
+    viewTools.set(server, tools.map(toAiToolAppModelView));
+  }
+  return viewTools;
+}
+
+export function fromToolsMapView(viewTools: Map<string, AiToolAppModelView[]> | null): Map<string, AiToolAppModel[]> | null {
+  if (!viewTools) return null;
+  const apiTools = new Map<string, AiToolAppModel[]>();
+  for (const [server, tools] of viewTools.entries()) {
+    apiTools.set(server, tools.map(fromAiToolAppModelView));
+  }
+  return apiTools;
+}
+
 // --- AiProvider Mappers ---
 export function toAiProviderAiModelAppModelView(api: AiProviderAiModelAppModel): AiProviderAiModelAppModelView {
   return {
@@ -57,7 +89,8 @@ import {
   ChatFinishReasonAppModel,
   ChatResponseUpdateAppModel,
   AiProviderAiModelAppModel,
-  AiProviderAppModel
+  AiProviderAppModel,
+  AiToolAppModel
 } from './chat-completion-api.models';
 import {
   ChatRoleEnumAppModelView,
@@ -82,7 +115,8 @@ import {
   ChatFinishReasonAppModelView,
   ChatResponseUpdateAppModelView,
   AiProviderAiModelAppModelView,
-  AiProviderAppModelView
+  AiProviderAppModelView,
+  AiToolAppModelView
 } from './chat-completion-view.models';
 
 // --- Role Enum Mapper ---
@@ -321,8 +355,8 @@ export function toChatOptionsAppModelView(api: ChatOptionsAppModel | null): Chat
     modelId: api.model_id ?? null,
     stopSequences: api.stop_sequences ?? null,
     allowMultipleToolCalls: api.allow_multiple_tool_calls ?? null,
-    toolMode: toChatToolModeAppModelView(api.tool_mode ?? null)
-    , tools: api.tools ?? null
+    toolMode: toChatToolModeAppModelView(api.tool_mode ?? null),
+    tools: toToolsMapView(api.tools ?? null)
   };
 }
 export function fromChatOptionsAppModelView(view: ChatOptionsAppModelView | null, conversationId: string | null | undefined): ChatOptionsAppModel | null {
@@ -341,8 +375,8 @@ export function fromChatOptionsAppModelView(view: ChatOptionsAppModelView | null
     model_id: view.modelId ?? null,
     stop_sequences: view.stopSequences ?? null,
     allow_multiple_tool_calls: view.allowMultipleToolCalls ?? null,
-    tool_mode: fromChatToolModeAppModelView(view.toolMode ?? null)
-    , tools: view.tools ?? null
+    tool_mode: fromChatToolModeAppModelView(view.toolMode ?? null),
+    tools: fromToolsMapView(view.tools ?? null)
   };
 }
 

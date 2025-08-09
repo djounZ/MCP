@@ -7,7 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { ToolConfigurationDialog } from '../tool-configuration-dialog/tool-configuration-dialog';
+import { ToolConfigurationDialog, ToolConfigurationDialogData } from '../tool-configuration-dialog/tool-configuration-dialog';
 import { AiToolAppModelView } from '../../models/chat-completion-view.models';
 
 @Component({
@@ -35,11 +35,15 @@ export class MessageInput {
   protected readonly messageContent = signal('');
   readonly messageSubmit = output<string>();
   readonly toolsConfigured = output<Map<string, AiToolAppModelView[]> | null>();
+  readonly currentTools = input<Map<string, AiToolAppModelView[]> | null>(null);
   readonly disabled = input<boolean>(false);
 
   configureTools(): void {
-    const dialogRef = this.dialog.open(ToolConfigurationDialog, {
-      disableClose: false
+    const dialogRef = this.dialog.open<ToolConfigurationDialog, ToolConfigurationDialogData>(ToolConfigurationDialog, {
+      disableClose: false,
+      data: {
+        currentTools: this.currentTools()
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {

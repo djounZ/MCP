@@ -31,12 +31,25 @@ export class ChatHttpStream {
     }
   }
 
+  private serializeChatRequest(message: ChatRequest): string {
+    // Create a serializable version of the ChatRequest
+    const serializable = {
+      ...message,
+      options: message.options ? {
+        ...message.options,
+        // Convert Map to plain object for serialization
+        tools: message.options.tools ? Object.fromEntries(message.options.tools) : null
+      } : null
+    };
+    return JSON.stringify(serializable);
+  }
+
   async sendMessage(message: ChatRequest): Promise<void> {
     try {
       const response = await fetch(this.apiBaseUrl + this.endpoints.completionsStream, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message)
+        body: this.serializeChatRequest(message)
       });
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}: ${response.statusText}`);

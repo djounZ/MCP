@@ -196,7 +196,26 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
         return result!;
     }
 #endif
-    private static async IAsyncEnumerable<StreamItem<TOut>> ReadContentStreamAsync<TOut>(
+    private async IAsyncEnumerable<StreamItem<TOut>> ReadContentStreamAsync<TOut>(
+        [EnumeratorCancellation] CancellationToken cancellationToken,
+        HttpResponseMessage response,
+        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync)
+    {
+#if DEBUG
+        await foreach (var item in ReadContentStreamInDebugAsync(cancellationToken, response, contentReaderAsync))
+        {
+            yield return item;
+        }
+#else
+        await foreach (var item in ReadContentStreamInReleaseAsync(cancellationToken, response, contentReaderAsync))
+        {
+            yield return item;
+        }
+#endif
+    }
+
+#if RELEASE
+    private static async IAsyncEnumerable<StreamItem<TOut>> ReadContentStreamInReleaseAsync<TOut>(
         [EnumeratorCancellation] CancellationToken cancellationToken,
         HttpResponseMessage response,
         Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync)
@@ -206,9 +225,27 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
 
         while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
         {
-            yield return await contentReaderAsync(reader,cancellationToken);
+            yield return await contentReaderAsync(reader, cancellationToken);
         }
     }
+#endif
+#if DEBUG
+    private async IAsyncEnumerable<StreamItem<TOut>> ReadContentStreamInDebugAsync<TOut>(
+        [EnumeratorCancellation] CancellationToken cancellationToken,
+        HttpResponseMessage response,
+        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync)
+    {
+        await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var reader = new StreamReader(responseStream);
+
+        while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
+        {
+            var item = await contentReaderAsync(reader, cancellationToken);
+            logger.LogInformation("Stream item content: {@StreamItem}", item);
+            yield return item;
+        }
+    }
+#endif
 
     private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response)
     {

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MarkdownComponent } from 'ngx-markdown';
 import { McpToolsHttpClient } from '../../../../core/services/mcp-tools-http-client';
 import { McpToolDescriptionView, McpToolGroupView } from '../../../../shared/models/mcp-tools-view.models';
 import { toMcpToolDescriptionView } from '../../../../shared/models/mcp-tools-mapper.models';
@@ -7,7 +8,7 @@ import { toMcpToolDescriptionView } from '../../../../shared/models/mcp-tools-ma
 @Component({
   selector: 'app-mcp-tools-description',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MarkdownComponent],
   templateUrl: './description.html',
   styleUrls: ['./description.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -63,4 +64,5 @@ export class McpToolsDescriptionComponent {
       return 'Invalid schema format';
     }
   }
+
 }

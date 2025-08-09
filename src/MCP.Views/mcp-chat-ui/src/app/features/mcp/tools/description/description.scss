@@ -351,6 +351,54 @@
         color: #4b5563;
         margin: 0 0 1.5rem 0;
         word-break: break-word;
+
+        /* Markdown styling */
+        strong {
+          font-weight: 600;
+          color: #374151;
+        }
+
+        em {
+          font-style: italic;
+          color: #6b7280;
+        }
+
+        code {
+          background: #f3f4f6;
+          color: #dc2626;
+          padding: 0.125rem 0.25rem;
+          border-radius: 0.25rem;
+          font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+          font-size: 0.875rem;
+        }
+
+        pre {
+          background: #f8fafc;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          padding: 1rem;
+          margin: 0.5rem 0;
+          overflow-x: auto;
+
+          code {
+            background: none;
+            color: #374151;
+            padding: 0;
+            border-radius: 0;
+            font-size: 0.875rem;
+          }
+        }
+
+        a {
+          color: #667eea;
+          text-decoration: none;
+          border-bottom: 1px solid transparent;
+          transition: border-color 0.2s ease;
+
+          &:hover {
+            border-bottom-color: #667eea;
+          }
+        }
       }
 
       .schema-section {

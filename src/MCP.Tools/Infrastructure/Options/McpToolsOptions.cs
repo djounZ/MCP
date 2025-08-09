@@ -1,5 +1,3 @@
-using MCP.Tools.Infrastructure.Models;
-
 namespace MCP.Tools.Infrastructure.Options;
 
 public class McpToolsOptions

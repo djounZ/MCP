@@ -29,7 +29,7 @@ public class ClientTransportFactoryService(ILogger<ClientTransportFactoryService
         return transports;
     }
 
-    private IClientTransport Create(McpServerConfigurationItem configurationItem)
+    public IClientTransport Create(McpServerConfigurationItem configurationItem)
     {
         if (configurationItem.Type is McpServerTransportType.Stdio)
         {

@@ -2,7 +2,6 @@ using AI.GithubCopilot.Infrastructure.Builders;
 using AI.GithubCopilot.Infrastructure.Extensions;
 using AI.GithubCopilot.Infrastructure.Models;
 using System.Text.Json;
-using Xunit;
 using MultipartContent = AI.GithubCopilot.Infrastructure.Models.MultipartContent;
 
 namespace AI.GithubCopilot.Tests.Infrastructure.Models;

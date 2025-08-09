@@ -16,6 +16,10 @@ export const routes: Routes = [
   }
   ,
   {
+    path: 'settings',
+    loadComponent: () => import('./features/settings/settings').then(m => m.SettingsComponent)
+  },
+  {
     path: 'dev-in-progress',
     loadComponent: () => import('./features/dev-in-progress/dev-in-progress').then(m => m.DevInProgressComponent)
   },

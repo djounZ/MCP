@@ -321,6 +321,178 @@
           }
         }
       }
+    },
+    "/mcp-servers": {
+      "get": {
+        "tags": [
+          "McpServerConfiguration"
+        ],
+        "summary": "Get all MCP servers",
+        "description": "Returns all MCP server configuration items",
+        "operationId": "GetAllMcpServers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/McpServerConfigurationItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp-servers/{serverName}": {
+      "get": {
+        "tags": [
+          "McpServerConfiguration"
+        ],
+        "summary": "Get MCP server by name",
+        "description": "Returns a single MCP server configuration item by name",
+        "operationId": "GetMcpServerByName",
+        "parameters": [
+          {
+            "name": "serverName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerConfigurationItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "McpServerConfiguration"
+        ],
+        "summary": "Create MCP server",
+        "description": "Creates a new MCP server configuration item",
+        "operationId": "CreateMcpServer",
+        "parameters": [
+          {
+            "name": "serverName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McpServerConfigurationItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerConfigurationItem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "McpServerConfiguration"
+        ],
+        "summary": "Update MCP server",
+        "description": "Updates an existing MCP server configuration item",
+        "operationId": "UpdateMcpServer",
+        "parameters": [
+          {
+            "name": "serverName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McpServerConfigurationItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerConfigurationItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "McpServerConfiguration"
+        ],
+        "summary": "Delete MCP server",
+        "description": "Deletes an MCP server configuration item",
+        "operationId": "DeleteMcpServer",
+        "parameters": [
+          {
+            "name": "serverName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1073,12 +1245,61 @@
           }
         }
       },
+      "McpServerConfigurationItem": {
+        "required": [
+          "category",
+          "command",
+          "args",
+          "env",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "command": {
+            "type": "string",
+            "nullable": true
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "env": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/McpServerTransportType"
+          }
+        }
+      },
+      "McpServerTransportType": {
+        "enum": [
+          "stdio",
+          "http"
+        ],
+        "default": "stdio"
+      },
       "McpToolDescription": {
         "required": [
           "name",
           "description",
-          "json_schema",
-          "return_json_schema"
+          "input_schema",
+          "output_schema"
         ],
         "type": "object",
         "properties": {
@@ -1089,10 +1310,10 @@
             "type": "string",
             "nullable": true
           },
-          "json_schema": {
+          "input_schema": {
             "$ref": "#/components/schemas/JsonElement"
           },
-          "return_json_schema": {
+          "output_schema": {
             "$ref": "#/components/schemas/NullableOfJsonElement"
           }
         }
@@ -1194,6 +1415,9 @@
     },
     {
       "name": "MCP Tools"
+    },
+    {
+      "name": "McpServerConfiguration"
     }
   ]
 }

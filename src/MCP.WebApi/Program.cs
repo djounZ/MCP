@@ -57,6 +57,9 @@ app.MapWeatherEndpoints();
 app.MapGithubCopilotChatEndpoints();
 app.MapMcpToolsEndpoints();
 
+// Register McpServerConfiguration CRUD endpoints
+app.MapMcpServerConfigurationEndpoints();
+
 // Initialize startup operations (device registration and browser opening)
 await app.Services.UseMcpInfrastructureAsync(CancellationToken.None);
 app.Run();

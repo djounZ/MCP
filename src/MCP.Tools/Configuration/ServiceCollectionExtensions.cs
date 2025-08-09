@@ -45,6 +45,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<ClientTransportFactoryService>();
+        services.AddSingleton<McpServerConfigurationProviderService>();
         services.AddSingleton<McpClientToolProviderService>();
         return services;
     }

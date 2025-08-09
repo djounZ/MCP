@@ -1,0 +1,66 @@
+.settings-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.settings-header {
+  margin-bottom: 32px;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 400;
+    margin: 0 0 8px 0;
+    color: var(--mat-sys-on-surface);
+  }
+
+  p {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 1rem;
+  }
+}
+
+.settings-tabs {
+  .mat-mdc-tab-group {
+    --mdc-tab-indicator-active-indicator-color: var(--mat-sys-primary);
+  }
+}
+
+.tab-content {
+  padding-top: 24px;
+  
+  mat-card {
+    margin-bottom: 16px;
+    
+    mat-card-header {
+      margin-bottom: 16px;
+      
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.25rem;
+        
+        mat-icon {
+          color: var(--mat-sys-primary);
+        }
+      }
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .settings-container {
+    padding: 16px;
+  }
+  
+  .settings-header {
+    margin-bottom: 24px;
+    
+    h1 {
+      font-size: 1.75rem;
+    }
+  }
+}

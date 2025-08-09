@@ -1,0 +1,142 @@
+<div class="server-form-container">
+  <h2 mat-dialog-title>{{ formTitle() }}</h2>
+  
+  <form [formGroup]="serverForm" (ngSubmit)="onSave()">
+    <mat-dialog-content class="form-content">
+      
+      <!-- Server Name -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Server Name</mat-label>
+        <input matInput formControlName="serverName" placeholder="Enter a unique server name" [readonly]="isEdit()">
+        <mat-icon matSuffix>dns</mat-icon>
+        @if (serverForm.get('serverName')?.hasError('required')) {
+          <mat-error>Server name is required</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Server Type -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Connection Type</mat-label>
+        <mat-select formControlName="type">
+          @for (type of serverTypes; track type.value) {
+            <mat-option [value]="type.value">
+              <div class="type-option">
+                <mat-icon>{{ type.icon }}</mat-icon>
+                <span>{{ type.label }}</span>
+              </div>
+            </mat-option>
+          }
+        </mat-select>
+        <mat-icon matSuffix>settings_ethernet</mat-icon>
+      </mat-form-field>
+
+      <!-- Category -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Category</mat-label>
+        <input matInput formControlName="category" placeholder="e.g., Development, Production">
+        <mat-icon matSuffix>category</mat-icon>
+      </mat-form-field>
+
+      <!-- Command (for stdio type) -->
+      @if (serverForm.get('type')?.value === 'stdio') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Command</mat-label>
+          <input matInput formControlName="command" placeholder="e.g., node server.js">
+          <mat-icon matSuffix>terminal</mat-icon>
+          @if (serverForm.get('command')?.hasError('required')) {
+            <mat-error>Command is required for stdio connections</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <!-- URL (for http type) -->
+      @if (serverForm.get('type')?.value === 'http') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>URL</mat-label>
+          <input matInput formControlName="url" placeholder="https://example.com/mcp">
+          <mat-icon matSuffix>link</mat-icon>
+          @if (serverForm.get('url')?.hasError('required')) {
+            <mat-error>URL is required for HTTP connections</mat-error>
+          }
+          @if (serverForm.get('url')?.hasError('pattern')) {
+            <mat-error>Please enter a valid URL (http:// or https://)</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <!-- Arguments Section -->
+      <div class="section">
+        <h3>Arguments</h3>
+        <div class="add-item-container">
+          <mat-form-field appearance="outline" class="flex-grow">
+            <mat-label>Add Argument</mat-label>
+            <input matInput formControlName="newArg" placeholder="Enter argument" (keyup.enter)="addArgument()">
+          </mat-form-field>
+          <button type="button" mat-icon-button color="primary" (click)="addArgument()" [disabled]="!serverForm.get('newArg')?.value">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        
+        @if (argsArray().length > 0) {
+          <div class="items-list">
+            @for (arg of argsArray(); track $index) {
+              <mat-chip-row (removed)="removeArgument($index)">
+                {{ arg }}
+                <button matChipRemove aria-label="Remove argument">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip-row>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Environment Variables Section -->
+      <div class="section">
+        <h3>Environment Variables</h3>
+        <div class="add-env-container">
+          <mat-form-field appearance="outline" class="env-key">
+            <mat-label>Key</mat-label>
+            <input matInput formControlName="newEnvKey" placeholder="VARIABLE_NAME">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="env-value">
+            <mat-label>Value</mat-label>
+            <input matInput formControlName="newEnvValue" placeholder="variable value">
+          </mat-form-field>
+          <button type="button" mat-icon-button color="primary" (click)="addEnvironmentVariable()" 
+                  [disabled]="!serverForm.get('newEnvKey')?.value || !serverForm.get('newEnvValue')?.value">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        
+        @if (envArray().length > 0) {
+          <div class="env-list">
+            @for (env of envArray(); track $index) {
+              <mat-card class="env-item">
+                <mat-card-content>
+                  <div class="env-content">
+                    <div class="env-details">
+                      <strong>{{ env.key }}</strong>
+                      <span class="env-value">{{ env.value }}</span>
+                    </div>
+                    <button mat-icon-button color="warn" (click)="removeEnvironmentVariable($index)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        }
+      </div>
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!serverForm.valid">
+        {{ isEdit() ? 'Update' : 'Create' }} Server
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

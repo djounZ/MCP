@@ -2,7 +2,6 @@ using System.Text;
 using AI.GithubCopilot.Infrastructure.Models;
 using AI.GithubCopilot.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace AI.GithubCopilot.Tests.Integration;

@@ -1,0 +1,125 @@
+<div class="mcp-servers-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>dns</mat-icon>
+        MCP Servers
+      </mat-card-title>
+      <mat-card-subtitle>
+        Manage Model Context Protocol server configurations
+      </mat-card-subtitle>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="addNewServer()">
+          <mat-icon>add</mat-icon>
+          Add Server
+        </button>
+        <button mat-icon-button (click)="loadServers()" matTooltip="Refresh">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (isLoading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading MCP servers...</p>
+        </div>
+      } @else if (servers().size === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">dns</mat-icon>
+          <h3>No MCP servers configured</h3>
+          <p>Get started by adding your first MCP server configuration.</p>
+          <button mat-raised-button color="primary" (click)="addNewServer()">
+            <mat-icon>add</mat-icon>
+            Add Your First Server
+          </button>
+        </div>
+      } @else {
+        <div class="servers-table-container">
+          <table mat-table [dataSource]="getServerEntries()" class="servers-table">
+            
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let serverEntry">
+                <div class="server-name">
+                  <strong>{{ serverEntry[0] }}</strong>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let serverEntry">
+                <mat-chip-set>
+                  <mat-chip [color]="getConnectionColor(serverEntry[1].type)">
+                    <mat-icon matChipIcon>{{ getServerTypeIcon(serverEntry[1].type) }}</mat-icon>
+                    {{ serverEntry[1].type || 'Unknown' }}
+                  </mat-chip>
+                </mat-chip-set>
+              </td>
+            </ng-container>
+
+            <!-- Category Column -->
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let serverEntry">
+                @if (serverEntry[1].category) {
+                  <mat-chip>{{ serverEntry[1].category }}</mat-chip>
+                } @else {
+                  <span class="no-data">—</span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Command Column -->
+            <ng-container matColumnDef="command">
+              <th mat-header-cell *matHeaderCellDef>Command/URL</th>
+              <td mat-cell *matCellDef="let serverEntry">
+                @if (serverEntry[1].command) {
+                  <code class="command-text">{{ serverEntry[1].command }}</code>
+                } @else if (serverEntry[1].url) {
+                  <a [href]="serverEntry[1].url" target="_blank" class="url-link">
+                    {{ serverEntry[1].url }}
+                    <mat-icon class="external-link-icon">open_in_new</mat-icon>
+                  </a>
+                } @else {
+                  <span class="no-data">—</span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let serverEntry">
+                <button mat-icon-button [matMenuTriggerFor]="serverMenu" matTooltip="Server actions">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #serverMenu="matMenu">
+                  <button mat-menu-item (click)="editServer(serverEntry[0], serverEntry[1])">
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </button>
+                  <button mat-menu-item (click)="deleteServer(serverEntry[0])" class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <div class="servers-summary">
+          <p>{{ servers().size }} server{{ servers().size !== 1 ? 's' : '' }} configured</p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

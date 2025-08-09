@@ -1,10 +1,8 @@
 using System.Text;
-using System.Text.Json;
 using AI.GithubCopilot.Domain;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace AI.GithubCopilot.Tests.Integration;

@@ -9,3 +9,4 @@ export interface McpToolDescription {
   author?: string | null;
   tags?: string[] | null;
 }
+

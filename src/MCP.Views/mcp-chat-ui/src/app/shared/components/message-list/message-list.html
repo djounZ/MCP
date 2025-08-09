@@ -1,5 +1,50 @@
 <div class="message-list-container">
-  @if (messages().length === 0) {
+  <!-- Search Section -->
+  @if (messages().length > 0) {
+  <div class="search-section">
+    <div class="search-input-container">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search messages..."
+        [value]="searchQuery()"
+        (input)="updateSearchQuery($any($event.target).value)"
+      />
+      @if (searchQuery()) {
+      <button
+        mat-icon-button
+        class="clear-search-button"
+        (click)="clearSearch()"
+        title="Clear search"
+        aria-label="Clear search"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      }
+    </div>
+    @if (searchResultInfo(); as resultInfo) {
+    <div class="search-results-info">
+      <span class="results-text">
+        Found {{ resultInfo.filtered }} of {{ resultInfo.total }}
+        {{ resultInfo.total === 1 ? "message" : "messages" }}
+      </span>
+    </div>
+    }
+  </div>
+  } @if (filteredMessages().length === 0 && messages().length > 0) {
+  <div class="empty-state">
+    @if (searchQuery()) {
+    <mat-icon class="empty-icon">search_off</mat-icon>
+    <h3>No messages found</h3>
+    <p>No messages match your search criteria. Try a different search term.</p>
+    } @else {
+    <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
+    <h3>Start a conversation</h3>
+    <p>Type a message below to begin chatting with the AI assistant.</p>
+    }
+  </div>
+  } @else if (messages().length === 0) {
   <div class="empty-state">
     <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
     <h3>Start a conversation</h3>
@@ -7,16 +52,25 @@
   </div>
   } @else {
   <div class="messages">
-    @for (message of messages(); track $index) {
-    <div class="message-wrapper" [class.user-message]="message.role === 'user'"
-      [class.assistant-message]="message.role === 'assistant'">
-      <mat-card class="message-card" [class.error-message]="isErrorMessage(message)">
+    @for (message of filteredMessages(); track $index) {
+    <div
+      class="message-wrapper"
+      [class.user-message]="message.role === 'user'"
+      [class.assistant-message]="message.role === 'assistant'"
+    >
+      <mat-card
+        class="message-card"
+        [class.error-message]="isErrorMessage(message)"
+      >
         <mat-card-content>
           <div class="message-header">
             <span class="message-author">
-              {{ message.role === 'user' ? 'You' : 'AI Assistant' }}
+              {{ message.role === "user" ? "You" : "AI Assistant" }}
             </span>
-            <span class="message-time" matTooltip="{{ message.messageTime | date:'full' }}">
+            <span
+              class="message-time"
+              matTooltip="{{ message.messageTime | date : 'full' }}"
+            >
               {{ getFormattedTime(message.messageTime) }}
             </span>
           </div>
@@ -28,49 +82,65 @@
               <span>{{ getErrorMessage(message) }}</span>
             </div>
             } @else {
-            {{ getDisplayContent(message) }}
-            @if (message.role !== 'user' && isLoading() && $index === messages().length - 1) {
-            <mat-spinner diameter="16" class="streaming-indicator"></mat-spinner>
-            }
-            @if (hasUsageContent(message)) {
+            <div
+              class="message-text"
+              [innerHTML]="getDisplayContentWithHighlight(message)"
+            ></div>
+            @if (message.role !== 'user' && isLoading() && $index ===
+            filteredMessages().length - 1) {
+            <mat-spinner
+              diameter="16"
+              class="streaming-indicator"
+            ></mat-spinner>
+            } @if (hasUsageContent(message)) {
             <div class="usage-info">
-              @let usage = getUsageContent(message);
-              @if (usage) {
+              @let usage = getUsageContent(message); @if (usage) {
               <div class="message-meta-row">
-                <div class="usage-details" [matTooltip]="getUsageTooltip(usage)">
+                <div
+                  class="usage-details"
+                  [matTooltip]="getUsageTooltip(usage)"
+                >
                   <mat-icon class="usage-icon">analytics</mat-icon>
                   <span class="usage-text">
                     @if (usage.details.totalTokenCount) {
-                    {{ usage.details.totalTokenCount }} tokens
-                    } @else if (usage.details.inputTokenCount || usage.details.outputTokenCount) {
-                    {{ (usage.details.inputTokenCount || 0) + (usage.details.outputTokenCount || 0) }} tokens
-                    } @else {
-                    Usage tracked
-                    }
+                    {{ usage.details.totalTokenCount }} tokens } @else if
+                    (usage.details.inputTokenCount ||
+                    usage.details.outputTokenCount) {
+                    {{
+                      (usage.details.inputTokenCount || 0) +
+                        (usage.details.outputTokenCount || 0)
+                    }}
+                    tokens } @else { Usage tracked }
                   </span>
                 </div>
                 <div class="commands-area">
-                  <button mat-icon-button class="copy-message-btn" aria-label="Copy message"
-                    [matTooltip]="'Copy to clipboard'" (click)="copyMessageContent(message)">
+                  <button
+                    mat-icon-button
+                    class="copy-message-btn"
+                    aria-label="Copy message"
+                    [matTooltip]="'Copy to clipboard'"
+                    (click)="copyMessageContent(message)"
+                  >
                     <mat-icon>content_copy</mat-icon>
                   </button>
                 </div>
               </div>
               }
             </div>
-            }
-            }
+            } }
           </div>
         </mat-card-content>
       </mat-card>
     </div>
-    }
-    @if (isAwaitingResponse() ) {
+    } @if (isAwaitingResponse() ) {
     <div class="waiting-server-indicator">
       <mat-spinner diameter="32" color="primary"></mat-spinner>
       <div class="waiting-text">
         <mat-icon color="primary" class="waiting-icon">cloud_sync</mat-icon>
-        <span><strong>Connecting to AI server...</strong><br>Please wait while we process your request.</span>
+        <span
+          ><strong>Connecting to AI server...</strong><br />Please wait while we
+          process your request.</span
+        >
       </div>
     </div>
     }

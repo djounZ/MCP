@@ -5,5 +5,6 @@ namespace MCP.Infrastructure.Services.ChatServiceImplementations;
 
 public class GithubCopilotChatService(
     GithubCopilotChatClient githubCopilotChatClient,
-    ChatClientExtensionsAiAppModelsMapper mapper)
-    : ChatServiceBase<GithubCopilotChatClient>(githubCopilotChatClient, mapper);
+    ChatClientExtensionsAiAppModelsMapper mapper,
+    AiToolsManager aiToolsManager)
+    : ChatServiceBase<GithubCopilotChatClient>(githubCopilotChatClient, mapper, aiToolsManager);

@@ -46,6 +46,7 @@ public static class ServiceCollectionExtensions
         services.AddOllamaChatService(configuration);
         services.AddScoped<ChatServiceManager>();
         services.AddScoped<AiProviderManager>();
+        services.AddScoped<AiToolsManager>();
         return services;
     }
 

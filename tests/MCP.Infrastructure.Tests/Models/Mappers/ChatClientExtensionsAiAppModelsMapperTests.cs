@@ -2,6 +2,7 @@ using MCP.Application.DTOs.AI.ChatCompletion;
 using MCP.Application.DTOs.AI.Contents;
 using MCP.Infrastructure.Models.Mappers;
 using Microsoft.Extensions.AI;
+using MCP.Application.DTOs.AI;
 
 namespace MCP.Infrastructure.Tests.Models.Mappers;
 
@@ -12,6 +13,15 @@ namespace MCP.Infrastructure.Tests.Models.Mappers;
 public class ChatClientExtensionsAiAppModelsMapperTests
 {
     private readonly ChatClientExtensionsAiAppModelsMapper _mapper = new();
+
+    // Test implementation for abstract AITool
+    private sealed class TestAiTool : AITool
+    {
+        private readonly string _name;
+        public TestAiTool(string name) : base() { _name = name; }
+        public override string Name => _name;
+        public override string Description => "Test tool";
+    }
 
     #region ChatResponse Mapping Tests
 
@@ -60,6 +70,59 @@ public class ChatClientExtensionsAiAppModelsMapperTests
     }
 
     #endregion
+
+        #region Tools Mapping Tests
+
+        [Fact]
+        public void MapToAppModel_ChatOptions_WithTools_ShouldMapToolsProperty()
+        {
+            // Arrange
+                var chatOptions = new ChatOptions
+                {
+                    Tools = [ new TestAiTool("ToolA"), new TestAiTool("ToolB") ]
+                };
+
+            // Act
+            var result = _mapper.MapToAppModel(chatOptions);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Tools.Should().NotBeNull();
+            result.Tools.Should().ContainKey("default");
+            result.Tools["default"].Should().HaveCount(2);
+            result.Tools["default"].Select(t => t.Name).Should().Contain(new[] { "ToolA", "ToolB" });
+        }
+
+        [Fact]
+        public void MapToAppModel_ChatOptions_WithNullTools_ShouldHandleGracefully()
+        {
+            // Arrange
+                var chatOptions = new ChatOptions { Tools = null };
+
+            // Act
+            var result = _mapper.MapToAppModel(chatOptions);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Tools.Should().BeNull();
+        }
+
+        [Fact]
+        public void MapFromAppModel_AiToolAppModel_ShouldMapCorrectly()
+        {
+            // Arrange
+                var aiTool = new TestAiTool("ToolX");
+
+            // Act
+            var result = typeof(ChatClientExtensionsAiAppModelsMapper)
+                .GetMethod("MapFromAppModel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.Invoke(_mapper, new object[] { aiTool }) as AiToolAppModel;
+
+            // Assert
+            result.Should().NotBeNull();
+            result!.Name.Should().Be("ToolX");
+        }
+        #endregion
 
     #region ChatResponseUpdate Mapping Tests
 
@@ -781,22 +844,23 @@ public class ChatClientExtensionsAiAppModelsMapperTests
     public void MapFromAppModel_ChatOptionsAppModel_ShouldMapAllProperties()
     {
         // Arrange
-        var appModel = new ChatOptionsAppModel(
-            ConversationId: "conv-123",
-            Instructions: "Be helpful",
-            Temperature: 0.7f,
-            MaxOutputTokens: 1000,
-            TopP: 0.9f,
-            TopK: 50,
-            FrequencyPenalty: 0.1f,
-            PresencePenalty: 0.2f,
-            Seed: 42,
-            ResponseFormat: new ChatResponseFormatTextAppModel(),
-            ModelId: "gpt-4",
-            StopSequences: ["STOP", "END"],
-            AllowMultipleToolCalls: true,
-            ToolMode: new AutoChatToolModeAppModel()
-        );
+            var appModel = new ChatOptionsAppModel(
+                ConversationId: "conv-123",
+                Instructions: "Be helpful",
+                Temperature: 0.7f,
+                MaxOutputTokens: 1000,
+                TopP: 0.9f,
+                TopK: 50,
+                FrequencyPenalty: 0.1f,
+                PresencePenalty: 0.2f,
+                Seed: 42,
+                ResponseFormat: new ChatResponseFormatTextAppModel(),
+                ModelId: "gpt-4",
+                StopSequences: ["STOP", "END"],
+                AllowMultipleToolCalls: true,
+                ToolMode: new AutoChatToolModeAppModel(),
+                Tools: null
+            );
 
         // Act
         var result = _mapper.MapFromAppModel(appModel);
@@ -827,12 +891,13 @@ public class ChatClientExtensionsAiAppModelsMapperTests
     public void MapFromAppModel_ChatToolModeAppModel_WithAuto_ShouldMapCorrectly()
     {
         // Arrange
-        var appModel = new ChatOptionsAppModel(
-            ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
-            TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
-            ResponseFormat: null, ModelId: null, StopSequences: null, AllowMultipleToolCalls: null,
-            ToolMode: new AutoChatToolModeAppModel()
-        );
+            var appModel = new ChatOptionsAppModel(
+                ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
+                TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
+                ResponseFormat: null, ModelId: null, StopSequences: null, AllowMultipleToolCalls: null,
+                ToolMode: new AutoChatToolModeAppModel(),
+                Tools: null
+            );
 
         // Act
         var result = _mapper.MapFromAppModel(appModel);
@@ -845,12 +910,13 @@ public class ChatClientExtensionsAiAppModelsMapperTests
     public void MapFromAppModel_ChatToolModeAppModel_WithNone_ShouldMapCorrectly()
     {
         // Arrange
-        var appModel = new ChatOptionsAppModel(
-            ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
-            TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
-            ResponseFormat: null, ModelId: null, StopSequences: null, AllowMultipleToolCalls: null,
-            ToolMode: new NoneChatToolModeAppModel()
-        );
+            var appModel = new ChatOptionsAppModel(
+                ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
+                TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
+                ResponseFormat: null, ModelId: null, StopSequences: null, AllowMultipleToolCalls: null,
+                ToolMode: new NoneChatToolModeAppModel(),
+                Tools: null
+            );
 
         // Act
         var result = _mapper.MapFromAppModel(appModel);
@@ -863,12 +929,13 @@ public class ChatClientExtensionsAiAppModelsMapperTests
     public void MapFromAppModel_ChatToolModeAppModel_WithRequired_ShouldMapCorrectly()
     {
         // Arrange
-        var appModel = new ChatOptionsAppModel(
-            ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
-            TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
-            ResponseFormat: null, ModelId: null, StopSequences: null, AllowMultipleToolCalls: null,
-            ToolMode: new RequiredChatToolModeAppModel("test_function")
-        );
+            var appModel = new ChatOptionsAppModel(
+                ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
+                TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
+                ResponseFormat: null, ModelId: null, StopSequences: null, AllowMultipleToolCalls: null,
+                ToolMode: new RequiredChatToolModeAppModel("test_function"),
+                Tools: null
+            );
 
         // Act
         var result = _mapper.MapFromAppModel(appModel);
@@ -883,12 +950,13 @@ public class ChatClientExtensionsAiAppModelsMapperTests
     public void MapFromAppModel_ChatToolModeAppModel_WithNull_ShouldReturnNull()
     {
         // Arrange
-        var appModel = new ChatOptionsAppModel(
-            ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
-            TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
-            ResponseFormat: null, ModelId: null, StopSequences: null, AllowMultipleToolCalls: null,
-            ToolMode: null
-        );
+            var appModel = new ChatOptionsAppModel(
+                ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
+                TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
+                ResponseFormat: null, ModelId: null, StopSequences: null, AllowMultipleToolCalls: null,
+                ToolMode: null,
+                Tools: null
+            );
 
         // Act
         var result = _mapper.MapFromAppModel(appModel);
@@ -905,12 +973,13 @@ public class ChatClientExtensionsAiAppModelsMapperTests
     public void MapFromAppModel_ChatResponseFormatAppModel_WithText_ShouldMapCorrectly()
     {
         // Arrange
-        var appModel = new ChatOptionsAppModel(
-            ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
-            TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
-            ResponseFormat: new ChatResponseFormatTextAppModel(), ModelId: null, StopSequences: null,
-            AllowMultipleToolCalls: null, ToolMode: null
-        );
+            var appModel = new ChatOptionsAppModel(
+                ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
+                TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
+                ResponseFormat: new ChatResponseFormatTextAppModel(), ModelId: null, StopSequences: null,
+                AllowMultipleToolCalls: null, ToolMode: null,
+                Tools: null
+            );
 
         // Act
         var result = _mapper.MapFromAppModel(appModel);
@@ -923,16 +992,17 @@ public class ChatClientExtensionsAiAppModelsMapperTests
     public void MapFromAppModel_ChatResponseFormatAppModel_WithJson_ShouldMapCorrectly()
     {
         // Arrange
-        var appModel = new ChatOptionsAppModel(
-            ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
-            TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
-            ResponseFormat: new ChatResponseFormatJsonAppModel(
-                "{}",
-                "Test Schema",
-                "A test schema"
-            ),
-            ModelId: null, StopSequences: null, AllowMultipleToolCalls: null, ToolMode: null
-        );
+            var appModel = new ChatOptionsAppModel(
+                ConversationId: null, Instructions: null, Temperature: null, MaxOutputTokens: null,
+                TopP: null, TopK: null, FrequencyPenalty: null, PresencePenalty: null, Seed: null,
+                ResponseFormat: new ChatResponseFormatJsonAppModel(
+                    "{}",
+                    "Test Schema",
+                    "A test schema"
+                ),
+                ModelId: null, StopSequences: null, AllowMultipleToolCalls: null, ToolMode: null,
+                Tools: null
+            );
 
         // Act
         var result = _mapper.MapFromAppModel(appModel);

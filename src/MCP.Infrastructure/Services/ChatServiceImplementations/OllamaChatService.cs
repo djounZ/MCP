@@ -5,5 +5,6 @@ namespace MCP.Infrastructure.Services.ChatServiceImplementations;
 
 public class OllamaChatService(
     OllamaApiClient ollamaApiClient,
-    ChatClientExtensionsAiAppModelsMapper mapper)
-    : ChatServiceBase<OllamaApiClient>(ollamaApiClient, mapper);
+    ChatClientExtensionsAiAppModelsMapper mapper,
+    AiToolsManager aiToolsManager)
+    : ChatServiceBase<OllamaApiClient>(ollamaApiClient, mapper, aiToolsManager);

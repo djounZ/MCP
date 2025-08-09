@@ -12,7 +12,7 @@ public class McpClientToolProviderService(McpServerConfigurationProviderService 
     private readonly ConcurrentDictionary<string, ServerValue > _serversDescription = new();
 
     private record ServerValue(McpServerConfigurationItem ServerConfiguration, IList<McpToolDescription> McpToolDescriptions);
-    public async Task<IDictionary<string, IList<McpToolDescription>>> DescribeAsync(CancellationToken cancellationToken)
+    public async Task<IDictionary<string, IList<McpToolDescription>>> GetAll(CancellationToken cancellationToken)
     {
         var mcpToolDescriptions = new Dictionary<string, IList<McpToolDescription>>();
         var servers =  mcpServerConfigurationProviderService.GetMcpServerConfiguration()!.Servers;
@@ -25,7 +25,7 @@ public class McpClientToolProviderService(McpServerConfigurationProviderService 
                 continue;
             }
             var clientTransport = clientTransportFactoryService.Create(serverConfiguration);
-            await using var client = await McpClientFactory.CreateAsync(clientTransport, cancellationToken: cancellationToken);
+            await using IMcpClient client = await McpClientFactory.CreateAsync(clientTransport, cancellationToken: cancellationToken);
             var mcpClientTools = await client.ListToolsAsync(cancellationToken: cancellationToken);
             var toolDescriptions = mcpServerConfigurationMapper.Map(mcpClientTools);
             mcpToolDescriptions[serverName] = toolDescriptions;

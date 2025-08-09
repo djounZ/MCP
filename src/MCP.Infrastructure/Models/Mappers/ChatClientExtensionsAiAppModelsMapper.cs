@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MCP.Application.DTOs.AI;
 using MCP.Application.DTOs.AI.ChatCompletion;
 using MCP.Application.DTOs.AI.Contents;
 using Microsoft.Extensions.AI;
@@ -66,10 +67,28 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
             ModelId: chatOptions.ModelId,
             StopSequences: chatOptions.StopSequences?.ToList(),
             AllowMultipleToolCalls: chatOptions.AllowMultipleToolCalls,
-            ToolMode: MapToAppModel(chatOptions.ToolMode)
+            ToolMode: MapToAppModel(chatOptions.ToolMode),
+            Tools: MapFromAppModel(chatOptions.Tools)
         );
     }
 
+    private  IDictionary<string,IList<AiToolAppModel>>? MapFromAppModel(IList<AITool>? chatOptionsTools)
+    {
+        if (chatOptionsTools is null)
+        {
+            return null;
+        }
+
+        var toolsByServer = new Dictionary<string, IList<AiToolAppModel>>();
+        toolsByServer["default"] = [.. chatOptionsTools.Select(MapFromAppModel)];
+        return toolsByServer;
+    }
+
+
+    private AiToolAppModel MapFromAppModel(AITool tool)
+    {
+        return new AiToolAppModel(tool.Name);
+    }
     private ChatToolModeAppModel? MapToAppModel(ChatToolMode? toolMode)
     {
         if( toolMode == null)

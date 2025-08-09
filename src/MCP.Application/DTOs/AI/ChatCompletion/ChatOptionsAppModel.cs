@@ -16,5 +16,6 @@ public sealed record ChatOptionsAppModel(
     [property: JsonPropertyName("model_id")] string? ModelId,
     [property: JsonPropertyName("stop_sequences")] IList<string>? StopSequences,
     [property: JsonPropertyName("allow_multiple_tool_calls")] bool? AllowMultipleToolCalls,
-    [property: JsonPropertyName("tool_mode")] ChatToolModeAppModel? ToolMode
+    [property: JsonPropertyName("tool_mode")] ChatToolModeAppModel? ToolMode,
+    [property: JsonPropertyName("tools")] IDictionary<string,IList<AiToolAppModel>>? Tools
 );

@@ -12,7 +12,7 @@ public static class McpToolDescriptionEndpointsExtensions
                 McpClientToolProviderService mcpClientToolProviderService,
                 CancellationToken cancellationToken) =>
             {
-                var response = await mcpClientToolProviderService.DescribeAsync(cancellationToken);
+                var response = await mcpClientToolProviderService.GetAll(cancellationToken);
                 return Results.Ok(response);
             })
             .WithName("GetMcpToolDescriptions")

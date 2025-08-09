@@ -91,6 +91,7 @@ public static class ChatClientEndpointsExtensions
                     request.Model ?? "gpt-4",
                     null,
                     null,
+                    null,
                     null
                     );
 
@@ -129,6 +130,7 @@ public static class ChatClientEndpointsExtensions
                     null,
                     null,
                     request.Model ?? "gpt-4",
+                    null,
                     null,
                     null,
                     null

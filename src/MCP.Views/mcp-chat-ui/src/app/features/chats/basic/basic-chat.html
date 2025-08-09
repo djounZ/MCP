@@ -94,6 +94,7 @@
 
       <app-message-input
         (messageSubmit)="onMessageSubmit($event)"
+        (toolsConfigured)="onToolsConfigured($event)"
         [disabled]="isLoading()"
       >
       </app-message-input>

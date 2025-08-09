@@ -9,7 +9,8 @@ import {
   ChatRoleEnumAppModelView,
   ChatResponseAppModelView,
   AiProviderAppModelView,
-  AiProviderAiModelAppModelView
+  AiProviderAiModelAppModelView,
+  AiToolAppModelView
 } from '../../../shared/models/chat-completion-view.models';
 import { ChatMessageAppModelViewBuilder, ChatRequestViewBuilder, AiContentAppModelTextContentAppModelViewBuilder } from '../../../shared/models/chat-completion-view.builder';
 import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
@@ -29,6 +30,7 @@ export class Chat {
   readonly messages = signal<ChatMessageAppModelView[]>([]);
   readonly isLoading = signal(false);
   readonly currentOptions = this.chatOptionsService.options;
+  readonly selectedTools = signal<Map<string, AiToolAppModelView[]> | null>(null);
 
 
   // Create placeholder for LLM response using builder
@@ -89,6 +91,8 @@ export class Chat {
     if (model) {
       options.modelId = model.id;
     }
+    // Set selected tools
+    options.tools = this.selectedTools();
 
 
     const name = provider ? provider.name : null;
@@ -118,6 +122,10 @@ export class Chat {
     const newResponse = new ChatResponseAppModelViewBuilder().build();
     // Copy properties to preserve reference for signals
     this.assignChatResponseAppModelView(newResponse);
+  }
+
+  updateSelectedTools(tools: Map<string, AiToolAppModelView[]> | null): void {
+    this.selectedTools.set(tools);
   }
 
   public assignChatResponseAppModelView(newResponse: ChatResponseAppModelView) {

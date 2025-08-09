@@ -116,6 +116,10 @@ export class BasicChatComponent {
     this.chatService.sendMessage(content, this.selectedProvider(), this.selectedModel());
   }
 
+  onToolsConfigured(tools: Map<string, import("../../../shared/models/chat-completion-view.models").AiToolAppModelView[]> | null): void {
+    this.chatService.updateSelectedTools(tools);
+  }
+
   clearChat(): void {
     this.chatService.clearChat();
   }

@@ -1,19 +1,25 @@
 // ...existing code...
-import { ChangeDetectionStrategy, Component, output, signal, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, output, signal, input, inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { TextFieldModule } from '@angular/cdk/text-field';
+import { ToolConfigurationDialog } from '../tool-configuration-dialog/tool-configuration-dialog';
+import { AiToolAppModelView } from '../../models/chat-completion-view.models';
 
 @Component({
   selector: 'app-message-input',
-  imports: [MatInputModule, MatButtonModule, MatIconModule, FormsModule, TextFieldModule],
+  imports: [MatInputModule, MatButtonModule, MatIconModule, MatTooltipModule, FormsModule, TextFieldModule],
   templateUrl: './message-input.html',
   styleUrl: './message-input.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageInput {
+  private readonly dialog = inject(MatDialog);
+
   public focusInput(): void {
     const textarea = document.querySelector('textarea[matInput]') as HTMLTextAreaElement;
     if (textarea) {
@@ -28,11 +34,20 @@ export class MessageInput {
   private readonly HISTORY_LIMIT = 50;
   protected readonly messageContent = signal('');
   readonly messageSubmit = output<string>();
+  readonly toolsConfigured = output<Map<string, AiToolAppModelView[]> | null>();
   readonly disabled = input<boolean>(false);
 
   configureTools(): void {
-    // TODO: Implement tool configuration logic
-    // For now, just a stub to resolve template error
+    const dialogRef = this.dialog.open(ToolConfigurationDialog, {
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result !== null && result !== undefined) {
+        // result is Map<string, AiToolAppModelView[]> | null
+        this.toolsConfigured.emit(result);
+      }
+    });
   }
 
   sendMessage(): void {

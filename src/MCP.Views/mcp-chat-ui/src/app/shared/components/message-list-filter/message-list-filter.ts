@@ -29,7 +29,7 @@ export class MessageListFilterComponent {
       text: true,
       reasoning: true,
       error: true,
-      functionCall: true,
+      functionCall: false,
       functionResult: false
     }
   });

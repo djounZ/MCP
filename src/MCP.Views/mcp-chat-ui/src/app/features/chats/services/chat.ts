@@ -112,8 +112,8 @@ export class Chat {
     this.messages.update(() => {
       return [...this.chatResponseAppModelView.messages];
     });
-    this.isAwaitingResponse.set(false);
-    if (response.finish_reason && response.finish_reason == ChatFinishReasonAppModel.Stop) {
+    this.isAwaitingResponse.set(response.finish_reason != ChatFinishReasonAppModel.Stop);
+    if (response.finish_reason) {
       this.isLoading.set(false);
     }
   }

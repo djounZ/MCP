@@ -45,9 +45,12 @@
     <h3>No messages found</h3>
     <p>No messages match your search criteria. Try a different search term.</p>
     } @else {
-    <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
-    <h3>Start a conversation</h3>
-    <p>Type a message below to begin chatting with the AI assistant.</p>
+    <mat-icon class="empty-icon">filter_alt_off</mat-icon>
+    <h3>No messages match your current filters</h3>
+    <p>
+      There are messages in this conversation, but none match your selected
+      filters.<br />Try adjusting the filter settings above.
+    </p>
     }
   </div>
   } @else if (messages().length === 0) {

@@ -67,7 +67,7 @@
 
           <app-message-content
             [message]="message"
-            [displayContent]="getDisplayContentWithHighlight(message)"
+            [searchQuery]="searchQuery()"
             [showSpinner]="
               isLoading() && $index === filteredMessages().length - 1
             "

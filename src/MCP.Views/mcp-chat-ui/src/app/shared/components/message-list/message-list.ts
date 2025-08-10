@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { ChatMessageAppModelView } from '../../models/chat-completion-view.models';
-import { SearchConfig, searchFilter, highlightSearchMatches } from '../../utils/search.utils';
+import { SearchConfig, searchFilter } from '../../utils/search.utils';
 import { MessageHeaderComponent } from '../message-header/message-header';
 import { MessageContentComponent } from '../message-content/message-content';
 import { MessageFooterComponent } from '../message-footer/message-footer';
@@ -96,32 +96,9 @@ export class MessageList {
   }
 
   /**
-   * Gets display content with search highlighting if active
+   * Checks if a message contains error content
    */
-  protected getDisplayContentWithHighlight(message: ChatMessageAppModelView): string {
-    const content = this.getDisplayContent(message);
-    const query = this.searchQuery().trim();
-
-    if (!query) {
-      return content;
-    }
-
-    return highlightSearchMatches(content, query, 'search-highlight');
-  }
-
   protected isErrorMessage(message: ChatMessageAppModelView): boolean {
     return message?.contents.some(c => c.$type === 'error') || false;
-  }
-
-  private getDisplayContent(message: ChatMessageAppModelView): string {
-    return message.contents
-      .filter(c => c.$type === 'text' || c.$type === 'reasoning')
-      .map(c => {
-        if (c.$type === 'text' || c.$type === 'reasoning') {
-          return c.text || '';
-        }
-        return '';
-      })
-      .join('');
   }
 }

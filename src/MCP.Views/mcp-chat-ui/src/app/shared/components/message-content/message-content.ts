@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input, computed } from '@angular/co
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ChatMessageAppModelView } from '../../models/chat-completion-view.models';
+import { highlightSearchMatches } from '../../utils/search.utils';
 
 @Component({
   selector: 'app-message-content',
@@ -12,7 +13,7 @@ import { ChatMessageAppModelView } from '../../models/chat-completion-view.model
 })
 export class MessageContentComponent {
   readonly message = input.required<ChatMessageAppModelView>();
-  readonly displayContent = input<string>('');
+  readonly searchQuery = input<string>('');
   readonly showSpinner = input<boolean>(false);
 
   protected readonly isError = computed(() =>
@@ -36,7 +37,14 @@ export class MessageContentComponent {
       .join('')
   );
 
-  protected readonly effectiveDisplayContent = computed(() =>
-    this.displayContent() || this.defaultDisplayContent()
-  );
+  protected readonly displayContentWithHighlight = computed(() => {
+    const content = this.defaultDisplayContent();
+    const query = this.searchQuery().trim();
+
+    if (!query) {
+      return content;
+    }
+
+    return highlightSearchMatches(content, query, 'search-highlight');
+  });
 }

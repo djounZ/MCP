@@ -13,7 +13,7 @@ import {
   AiToolAppModelView
 } from '../../../shared/models/chat-completion-view.models';
 import { ChatMessageAppModelViewBuilder, ChatRequestViewBuilder, AiContentAppModelTextContentAppModelViewBuilder } from '../../../shared/models/chat-completion-view.builder';
-import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel } from '../../../shared/models/chat-completion-api.models';
+import { ChatResponseUpdateAppModel, AiContentAppModelTextContentAppModel, AiContentAppModelTextReasoningContentAppModel, AiContentAppModelErrorContentAppModel, ChatFinishReasonAppModel } from '../../../shared/models/chat-completion-api.models';
 import { fromChatRequestView, updateChatMessageAppModelViewsFromAppModelContents, updateChatResponseAppModelViewFromChatResponseUpdateAppModel } from '../../../shared/models/chat-completion-mapper.models';
 import { ChatOptionsService } from './chat-options';
 import { exportAsJsonFile } from '../../../shared/utils/file.utils';
@@ -113,7 +113,7 @@ export class Chat {
       return [...this.chatResponseAppModelView.messages];
     });
     this.isAwaitingResponse.set(false);
-    if (response.finish_reason) {
+    if (response.finish_reason && response.finish_reason == ChatFinishReasonAppModel.Stop) {
       this.isLoading.set(false);
     }
   }

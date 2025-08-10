@@ -55,7 +55,7 @@ export class MessageList {
       text: true,
       reasoning: true,
       error: true,
-      functionCall: false,
+      functionCall: true,
       functionResult: false
     }
   });

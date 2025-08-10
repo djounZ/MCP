@@ -33,88 +33,8 @@ export class MessageContentRendererComponent {
   readonly searchQuery = input<string>('');
   readonly showSpinner = input<boolean>(false);
   readonly contentTypeFilter = input.required<MessageContentTypeFilter>();
-
-  // Computed properties for content filtering
-  protected readonly shouldShowTextContent = computed(() => {
-    return this.contentTypeFilter().text && this.combinedTextContent() !== null;
-  });
-
-  protected readonly shouldShowReasoningContent = computed(() => {
-    return this.contentTypeFilter().reasoning && this.combinedTextReasoningContent() !== null;
-  });
-
-  protected readonly shouldShowErrorContent = computed(() => {
-    return this.contentTypeFilter().error && this.hasErrorContent();
-  });
-
-  protected readonly shouldShowFunctionCallContent = computed(() => {
-    return this.contentTypeFilter().functionCall && this.hasFunctionCallContent();
-  });
-
-  protected readonly shouldShowFunctionResultContent = computed(() => {
-    return this.contentTypeFilter().functionResult && this.hasFunctionResultContent();
-  });
-
-  // Helper methods to check for content existence
-  protected readonly hasErrorContent = computed(() => {
-    return this.message().contents.some(c => c.$type === 'error');
-  });
-
-  protected readonly hasFunctionCallContent = computed(() => {
-    return this.message().contents.some(c => c.$type === 'function_call');
-  });
-
-  protected readonly hasFunctionResultContent = computed(() => {
-    return this.message().contents.some(c => c.$type === 'function_result');
-  });
-
-  // Combine all text content only
-  protected readonly combinedTextContent = computed(() => {
-    const combinedText = this.message().contents
-      .filter(c => c.$type === 'text')
-      .map(c => {
-        if (c.$type === 'text') {
-          return c.text || '';
-        }
-        return '';
-      })
-      .join('');
-
-    if (!combinedText) {
-      return null;
-    }
-
-    // Create a single text content object with the combined text
-    return {
-      $type: 'text' as const,
-      text: combinedText
-    } as AiContentAppModelTextContentAppModelView;
-  });
-
-  // Combine all reasoning content only
-  protected readonly combinedTextReasoningContent = computed(() => {
-    const combinedReasoning = this.message().contents
-      .filter(c => c.$type === 'reasoning')
-      .map(c => {
-        if (c.$type === 'reasoning') {
-          return c.text || '';
-        }
-        return '';
-      })
-      .join('');
-
-    if (!combinedReasoning) {
-      return null;
-    }
-
-    // Create a single reasoning content object with the combined reasoning
-    return {
-      $type: 'reasoning' as const,
-      text: combinedReasoning
-    } as AiContentAppModelTextReasoningContentAppModelView;
-  });
-
-  // Get non-text content (errors, function calls, etc.) - excluding usage which is handled in footer
+  // Only pass props to child components, let them handle filtering
+  // Optionally, keep nonTextContent for unknown types
   protected readonly nonTextContent = computed(() => {
     return this.message().contents.filter(c =>
       c.$type !== 'text' &&
@@ -125,12 +45,4 @@ export class MessageContentRendererComponent {
       c.$type !== 'function_result'
     );
   });
-
-  protected isContentType(content: AiContentAppModelView, type: string): boolean {
-    return content.$type === type;
-  }
-
-  protected asErrorContent(content: AiContentAppModelView): AiContentAppModelErrorContentAppModelView {
-    return content as AiContentAppModelErrorContentAppModelView;
-  }
 }

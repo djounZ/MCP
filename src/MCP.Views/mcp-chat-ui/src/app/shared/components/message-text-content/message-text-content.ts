@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MarkdownComponent } from 'ngx-markdown';
 import { AiContentAppModelTextContentAppModelView, ChatMessageAppModelView } from '../../models/chat-completion-view.models';
+import { MessageContentTypeFilter } from '../../models/message-filters.models';
 import { highlightSearchMatches } from '../../utils/search.utils';
 import { isMarkdownContent } from '../../utils/string.utils';
 
@@ -18,14 +19,18 @@ export class MessageTextContentComponent {
 
   readonly message = input.required<ChatMessageAppModelView>();
   readonly searchQuery = input<string>('');
+  readonly contentTypeFilter = input.required<MessageContentTypeFilter>();
 
   // Signal to track whether to show markdown or HTML
   protected readonly showMarkdown = signal(true);
 
 
 
-  // Combine all text content only
+  // Combine all text content only, respect contentTypeFilter
   protected readonly content = computed(() => {
+    if (!this.contentTypeFilter().text) {
+      return null;
+    }
     const combinedText = this.message().contents
       .filter(c => c.$type === 'text')
       .map(c => {

@@ -1,35 +1,32 @@
 <div class="message-content-renderer">
   @if (showSpinner() && message().role !== 'user') {
   <mat-spinner diameter="20"></mat-spinner>
-  } @if (shouldShowTextContent()) {
+  }
   <app-message-text-content
     [message]="message()"
     [searchQuery]="searchQuery()"
+    [contentTypeFilter]="contentTypeFilter()"
   />
-  } @if (shouldShowReasoningContent()) {
   <app-message-text-reasoning-content
     [message]="message()"
     [searchQuery]="searchQuery()"
+    [contentTypeFilter]="contentTypeFilter()"
   />
-  } @if (shouldShowErrorContent()) {
   <app-message-error-content
     [message]="message()"
     [searchQuery]="searchQuery()"
-  >
-  </app-message-error-content>
-  } @if (shouldShowFunctionCallContent()) {
+    [contentTypeFilter]="contentTypeFilter()"
+  />
   <app-message-function-call-content
     [message]="message()"
     [searchQuery]="searchQuery()"
-  >
-  </app-message-function-call-content>
-  } @if (shouldShowFunctionResultContent()) {
+    [contentTypeFilter]="contentTypeFilter()"
+  />
   <app-message-function-result-content
     [message]="message()"
     [searchQuery]="searchQuery()"
-  >
-  </app-message-function-result-content>
-  }
+    [contentTypeFilter]="contentTypeFilter()"
+  />
 
   <!-- Render remaining unknown content types -->
   @for (content of nonTextContent(); track content) {

@@ -7,6 +7,7 @@ import {
     ChatMessageAppModelView,
     AiContentAppModelFunctionCallContentAppModelView
 } from '../../models/chat-completion-view.models';
+import { MessageContentTypeFilter } from '../../models/message-filters.models';
 
 @Component({
     selector: 'app-message-function-call-content',
@@ -18,9 +19,13 @@ import {
 export class MessageFunctionCallContentComponent {
     readonly message = input.required<ChatMessageAppModelView>();
     readonly searchQuery = input<string>('');
+    readonly contentTypeFilter = input.required<MessageContentTypeFilter>();
 
-    // Get all function call content
+    // Get all function call content, respect contentTypeFilter
     protected readonly functionCalls = computed(() => {
+        if (!this.contentTypeFilter().functionCall) {
+            return [];
+        }
         return this.message().contents
             .filter(c => c.$type === 'function_call')
             .map(c => c as AiContentAppModelFunctionCallContentAppModelView);

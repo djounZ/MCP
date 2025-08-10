@@ -1,0 +1,8 @@
+@if (hasActualUsageData()) {
+<div class="usage-details" [matTooltip]="usageTooltip()">
+  <mat-icon class="usage-icon">analytics</mat-icon>
+  <span class="usage-text">
+    {{ usageText() }}
+  </span>
+</div>
+}

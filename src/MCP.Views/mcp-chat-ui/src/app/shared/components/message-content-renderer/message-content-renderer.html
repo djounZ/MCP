@@ -1,5 +1,5 @@
 <div class="message-content-renderer">
-  @if (showSpinner()) {
+  @if (showSpinner() && message().role !== 'user') {
   <mat-spinner diameter="20"></mat-spinner>
   }
 

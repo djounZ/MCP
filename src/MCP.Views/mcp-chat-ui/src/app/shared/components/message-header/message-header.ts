@@ -13,9 +13,20 @@ import { ChatMessageAppModelView } from '../../models/chat-completion-view.model
 export class MessageHeaderComponent {
   readonly message = input.required<ChatMessageAppModelView>();
 
-  protected readonly authorName = computed(() =>
-    this.message().role === 'user' ? 'You' : 'AI Assistant'
-  );
+  protected readonly authorName = computed(() => {
+    switch (this.message().role) {
+      case 'user':
+        return 'You';
+      case 'assistant':
+        return 'AI Assistant';
+      case 'system':
+        return 'System';
+      case 'tool':
+        return 'Tool';
+      default:
+        return 'Unknown';
+    }
+  });
 
   protected readonly formattedTime = computed(() =>
     this.getFormattedTime(this.message().messageTime)

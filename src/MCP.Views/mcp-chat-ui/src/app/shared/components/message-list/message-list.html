@@ -3,12 +3,7 @@
   @if (messages().length > 0) {
   <div class="sticky-header">
     <!-- Filter Controls -->
-    <app-message-list-filter
-      [filters]="messageFilters()"
-      (toggleRole)="toggleRole($event)"
-      (toggleContentType)="toggleContentType($event)"
-      (resetFilters)="resetFilters()"
-    />
+    <app-message-list-filter (filtersChange)="onFiltersChange($event)" />
 
     <!-- Search Section -->
     <div class="search-section">
@@ -79,7 +74,7 @@
           <app-message-content-renderer
             [message]="message"
             [searchQuery]="searchQuery()"
-            [contentTypeFilter]="messageFilters().contentTypes"
+            [contentTypeFilter]="filters().contentTypes"
             [showSpinner]="
               isLoading() && $index === filteredMessages().length - 1
             "

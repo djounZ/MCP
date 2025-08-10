@@ -38,15 +38,8 @@ import { MessageListFilterComponent } from '../message-list-filter/message-list-
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageList {
-  readonly messages = input.required<ChatMessageAppModelView[]>();
-  readonly isLoading = input.required<boolean>();
-  readonly isAwaitingResponse = input.required<boolean>();
-
-  // Search functionality
-  protected readonly searchQuery = signal('');
-
-  // Filter signals with default values
-  protected readonly messageFilters = signal<MessageFilters>({
+  // Filters state managed by child filter component
+  protected readonly filters = signal<MessageFilters>({
     roles: {
       user: true,
       assistant: true,
@@ -61,6 +54,19 @@ export class MessageList {
       functionResult: false
     }
   });
+
+  /**
+   * Handler for filter changes emitted by child filter component
+   */
+  onFiltersChange(filters: MessageFilters): void {
+    this.filters.set(filters);
+  }
+  readonly messages = input.required<ChatMessageAppModelView[]>();
+  readonly isLoading = input.required<boolean>();
+  readonly isAwaitingResponse = input.required<boolean>();
+
+  // Search functionality
+  protected readonly searchQuery = signal('');
 
   // Search configuration for messages
   private readonly searchConfig: SearchConfig<ChatMessageAppModelView> = {
@@ -82,22 +88,42 @@ export class MessageList {
   // Computed filtered messages based on search query and filters
   protected readonly filteredMessages = computed(() => {
     let messages = this.messages();
+    const filters = this.filters();
 
     // Apply role filtering
-    const roleFilters = this.messageFilters().roles;
     messages = messages.filter(message => {
       switch (message.role) {
         case ChatRoleEnumAppModelView.User:
-          return roleFilters.user;
+          return filters.roles.user;
         case ChatRoleEnumAppModelView.Assistant:
-          return roleFilters.assistant;
+          return filters.roles.assistant;
         case ChatRoleEnumAppModelView.Tool:
-          return roleFilters.tool;
+          return filters.roles.tool;
         case ChatRoleEnumAppModelView.System:
-          return roleFilters.system;
+          return filters.roles.system;
         default:
           return false;
       }
+    });
+
+    // Apply content type filtering
+    messages = messages.filter(message => {
+      return message.contents.some(content => {
+        switch (content.$type) {
+          case 'text':
+            return filters.contentTypes.text;
+          case 'reasoning':
+            return filters.contentTypes.reasoning;
+          case 'error':
+            return filters.contentTypes.error;
+          case 'function_call':
+            return filters.contentTypes.functionCall;
+          case 'function_result':
+            return filters.contentTypes.functionResult;
+          default:
+            return false;
+        }
+      });
     });
 
     // Apply search filtering if query exists
@@ -147,42 +173,6 @@ export class MessageList {
     return message?.contents.some(c => c.$type === 'error') || false;
   }
 
-  // Filter toggle methods
-  toggleRole(role: keyof MessageRoleFilter): void {
-    this.messageFilters.update(current => ({
-      ...current,
-      roles: {
-        ...current.roles,
-        [role]: !current.roles[role]
-      }
-    }));
-  }
 
-  toggleContentType(type: keyof MessageContentTypeFilter): void {
-    this.messageFilters.update(current => ({
-      ...current,
-      contentTypes: {
-        ...current.contentTypes,
-        [type]: !current.contentTypes[type]
-      }
-    }));
-  }
 
-  resetFilters(): void {
-    this.messageFilters.set({
-      roles: {
-        user: true,
-        assistant: true,
-        tool: false,
-        system: false
-      },
-      contentTypes: {
-        text: true,
-        reasoning: true,
-        error: true,
-        functionCall: false,
-        functionResult: false
-      }
-    });
-  }
 }

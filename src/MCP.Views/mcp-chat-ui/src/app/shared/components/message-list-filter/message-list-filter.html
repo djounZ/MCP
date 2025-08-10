@@ -11,25 +11,25 @@
     <div class="filter-group">
       <mat-checkbox
         [checked]="filters().roles.user"
-        (change)="toggleRole.emit('user')"
+        (change)="toggleRole('user')"
       >
         User
       </mat-checkbox>
       <mat-checkbox
         [checked]="filters().roles.assistant"
-        (change)="toggleRole.emit('assistant')"
+        (change)="toggleRole('assistant')"
       >
         Assistant
       </mat-checkbox>
       <mat-checkbox
         [checked]="filters().roles.tool"
-        (change)="toggleRole.emit('tool')"
+        (change)="toggleRole('tool')"
       >
         Tool
       </mat-checkbox>
       <mat-checkbox
         [checked]="filters().roles.system"
-        (change)="toggleRole.emit('system')"
+        (change)="toggleRole('system')"
       >
         System
       </mat-checkbox>
@@ -41,31 +41,31 @@
     <div class="filter-group">
       <mat-checkbox
         [checked]="filters().contentTypes.text"
-        (change)="toggleContentType.emit('text')"
+        (change)="toggleContentType('text')"
       >
         Text
       </mat-checkbox>
       <mat-checkbox
         [checked]="filters().contentTypes.reasoning"
-        (change)="toggleContentType.emit('reasoning')"
+        (change)="toggleContentType('reasoning')"
       >
         Reasoning
       </mat-checkbox>
       <mat-checkbox
         [checked]="filters().contentTypes.error"
-        (change)="toggleContentType.emit('error')"
+        (change)="toggleContentType('error')"
       >
         Error
       </mat-checkbox>
       <mat-checkbox
         [checked]="filters().contentTypes.functionCall"
-        (change)="toggleContentType.emit('functionCall')"
+        (change)="toggleContentType('functionCall')"
       >
         Function Call
       </mat-checkbox>
       <mat-checkbox
         [checked]="filters().contentTypes.functionResult"
-        (change)="toggleContentType.emit('functionResult')"
+        (change)="toggleContentType('functionResult')"
       >
         Function Result
       </mat-checkbox>
@@ -73,7 +73,7 @@
   </div>
 
   <div class="filter-actions">
-    <button mat-button (click)="resetFilters.emit()" class="reset-button">
+    <button mat-button (click)="resetFilters()" class="reset-button">
       <mat-icon>refresh</mat-icon>
       Reset Filters
     </button>

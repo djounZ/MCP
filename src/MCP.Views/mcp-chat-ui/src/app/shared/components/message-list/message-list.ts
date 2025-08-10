@@ -9,8 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ChatMessageAppModelView } from '../../models/chat-completion-view.models';
 import { SearchConfig, searchFilter } from '../../utils/search.utils';
 import { MessageHeaderComponent } from '../message-header/message-header';
-import { MessageContentUserComponent } from '../message-content-user/message-content-user';
-import { MessageContentNonUserComponent } from '../message-content-non-user/message-content-non-user';
+import { MessageContentRendererComponent } from '../message-content-renderer/message-content-renderer';
 import { MessageFooterComponent } from '../message-footer/message-footer';
 
 @Component({
@@ -24,8 +23,7 @@ import { MessageFooterComponent } from '../message-footer/message-footer';
     MatTooltipModule,
     MatButtonModule,
     MessageHeaderComponent,
-    MessageContentUserComponent,
-    MessageContentNonUserComponent,
+    MessageContentRendererComponent,
     MessageFooterComponent
   ],
   templateUrl: './message-list.html',

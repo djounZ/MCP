@@ -65,20 +65,13 @@
         <mat-card-content>
           <app-message-header [message]="message" />
 
-          @if (message.role === 'user') {
-          <app-message-content-user
-            [message]="message"
-            [searchQuery]="searchQuery()"
-          />
-          } @else {
-          <app-message-content-non-user
+          <app-message-content-renderer
             [message]="message"
             [searchQuery]="searchQuery()"
             [showSpinner]="
               isLoading() && $index === filteredMessages().length - 1
             "
           />
-          }
 
           <app-message-footer [message]="message" />
         </mat-card-content>

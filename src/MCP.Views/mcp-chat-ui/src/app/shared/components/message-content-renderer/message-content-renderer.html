@@ -1,0 +1,24 @@
+<div class="message-content-renderer">
+  @if (showSpinner()) {
+  <mat-spinner diameter="20"></mat-spinner>
+  }
+
+  <!-- Render combined text content as a single block -->
+  @if (combinedTextContent()) {
+  <div class="text-content" [innerHTML]="displayTextContent()"></div>
+  }
+
+  <!-- Render non-text content separately -->
+  @for (content of nonTextContent(); track content) { @if
+  (isContentType(content, 'error')) {
+  <app-message-error-content
+    [content]="asErrorContent(content)"
+    [searchQuery]="searchQuery()"
+  >
+  </app-message-error-content>
+  } @else {
+  <div class="unknown-content-type">
+    Unknown content type: {{ content.$type }}
+  </div>
+  } }
+</div>

@@ -1,0 +1,67 @@
+.reasoning-content {
+  background-color: var(--mat-sys-surface-variant);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  border-left: 4px solid var(--mat-sys-primary);
+
+  .reasoning-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--mat-sys-primary);
+    font-weight: 500;
+    font-size: 0.9em;
+
+    .reasoning-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .reasoning-text {
+    line-height: 1.5;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+
+    // Support for search highlighting
+    ::ng-deep .search-highlight {
+      background-color: #ffeb3b;
+      color: #333;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(255, 235, 59, 0.3);
+    }
+
+    // Support for markdown and rich content
+    :deep(p) {
+      margin: 0 0 8px 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    :deep(code) {
+      background-color: var(--mat-sys-surface);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: "Courier New", monospace;
+      font-style: normal;
+    }
+
+    :deep(pre) {
+      background-color: var(--mat-sys-surface);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 8px 0;
+      font-style: normal;
+    }
+  }
+}

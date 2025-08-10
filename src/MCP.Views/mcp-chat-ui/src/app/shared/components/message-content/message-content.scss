@@ -1,0 +1,72 @@
+.message-content {
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .error-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--mat-sys-error);
+    padding: 8px 0;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    span {
+      font-weight: 500;
+    }
+  }
+
+  .message-text {
+    line-height: 1.5;
+    word-wrap: break-word;
+    color: var(--mat-sys-on-surface);
+
+    // Support for search highlighting
+    ::ng-deep .search-highlight {
+      background-color: #ffeb3b;
+      color: #333;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(255, 235, 59, 0.3);
+    }
+
+    // Support for markdown and rich content
+    :deep(p) {
+      margin: 0 0 8px 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    :deep(code) {
+      background-color: var(--mat-sys-surface-variant);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+
+    :deep(pre) {
+      background-color: var(--mat-sys-surface-variant);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+  }
+
+  .streaming-indicator {
+    align-self: flex-start;
+    margin-top: 0;
+    display: inline-block;
+  }
+}

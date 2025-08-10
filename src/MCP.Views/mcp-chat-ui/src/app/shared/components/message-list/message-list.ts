@@ -7,12 +7,25 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { ChatMessageAppModelView, AiContentAppModelUsageContentAppModelView } from '../../models/chat-completion-view.models';
-import { formatMessageTime } from '../../utils/date-time.utils';
 import { SearchConfig, searchFilter, highlightSearchMatches } from '../../utils/search.utils';
+import { MessageHeaderComponent } from '../message-header/message-header';
+import { MessageContentComponent } from '../message-content/message-content';
+import { MessageUsageComponent } from '../message-usage/message-usage';
 
 @Component({
   selector: 'app-message-list',
-  imports: [CommonModule, FormsModule, MatCardModule, MatProgressSpinnerModule, MatIconModule, MatTooltipModule, MatButtonModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    MatCardModule, 
+    MatProgressSpinnerModule, 
+    MatIconModule, 
+    MatTooltipModule, 
+    MatButtonModule,
+    MessageHeaderComponent,
+    MessageContentComponent,
+    MessageUsageComponent
+  ],
   templateUrl: './message-list.html',
   styleUrl: './message-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -112,22 +125,6 @@ export class MessageList {
     }
   }
 
-  /**
-   * Returns a plain text tooltip for token usage info
-   */
-  protected getUsageTooltip(usage: any): string {
-    if (!usage || !usage.details) return '';
-    const input = usage.details.inputTokenCount ?? 'N/A';
-    const output = usage.details.outputTokenCount ?? 'N/A';
-    const total = usage.details.totalTokenCount ?? 'N/A';
-    let tooltip = `Token usage information: Input=${input}, Output=${output}, Total=${total}`;
-    if (usage.details.additionalCounts && typeof usage.details.additionalCounts === 'object') {
-      const additional = JSON.stringify(usage.details.additionalCounts);
-      tooltip += `, Additional=${additional}`;
-    }
-    return tooltip;
-  }
-
   isErrorMessage(message: ChatMessageAppModelView): boolean {
     return message?.contents.some(c => c.$type === 'error') || false;
   }
@@ -157,9 +154,5 @@ export class MessageList {
   getUsageContent(message: ChatMessageAppModelView): AiContentAppModelUsageContentAppModelView | null {
     const usageContent = message.contents.find(c => c.$type === 'usage');
     return usageContent && usageContent.$type === 'usage' ? usageContent : null;
-  }
-
-  protected getFormattedTime(messageTime: Date): string {
-    return formatMessageTime(messageTime);
   }
 }

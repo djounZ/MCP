@@ -1,0 +1,24 @@
+<div class="usage-info">
+  <div class="message-meta-row">
+    <div
+      class="usage-details"
+      [matTooltip]="usageTooltip()"
+    >
+      <mat-icon class="usage-icon">analytics</mat-icon>
+      <span class="usage-text">
+        {{ usageText() }}
+      </span>
+    </div>
+    <div class="commands-area">
+      <button
+        mat-icon-button
+        class="copy-message-btn"
+        aria-label="Copy message"
+        matTooltip="Copy to clipboard"
+        (click)="onCopyMessage()"
+      >
+        <mat-icon>content_copy</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

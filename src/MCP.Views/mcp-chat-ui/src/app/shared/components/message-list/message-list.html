@@ -63,72 +63,27 @@
         [class.error-message]="isErrorMessage(message)"
       >
         <mat-card-content>
-          <div class="message-header">
-            <span class="message-author">
-              {{ message.role === "user" ? "You" : "AI Assistant" }}
-            </span>
-            <span
-              class="message-time"
-              matTooltip="{{ message.messageTime | date : 'full' }}"
-            >
-              {{ getFormattedTime(message.messageTime) }}
-            </span>
-          </div>
+          <app-message-header
+            [role]="message.role"
+            [messageTime]="message.messageTime"
+          />
 
-          <div class="message-content">
-            @if (isErrorMessage(message)) {
-            <div class="error-content">
-              <mat-icon color="warn">error</mat-icon>
-              <span>{{ getErrorMessage(message) }}</span>
-            </div>
-            } @else {
-            <div
-              class="message-text"
-              [innerHTML]="getDisplayContentWithHighlight(message)"
-            ></div>
-            @if (message.role !== 'user' && isLoading() && $index ===
-            filteredMessages().length - 1) {
-            <mat-spinner
-              diameter="16"
-              class="streaming-indicator"
-            ></mat-spinner>
-            } @if (hasUsageContent(message)) {
-            <div class="usage-info">
-              @let usage = getUsageContent(message); @if (usage) {
-              <div class="message-meta-row">
-                <div
-                  class="usage-details"
-                  [matTooltip]="getUsageTooltip(usage)"
-                >
-                  <mat-icon class="usage-icon">analytics</mat-icon>
-                  <span class="usage-text">
-                    @if (usage.details.totalTokenCount) {
-                    {{ usage.details.totalTokenCount }} tokens } @else if
-                    (usage.details.inputTokenCount ||
-                    usage.details.outputTokenCount) {
-                    {{
-                      (usage.details.inputTokenCount || 0) +
-                        (usage.details.outputTokenCount || 0)
-                    }}
-                    tokens } @else { Usage tracked }
-                  </span>
-                </div>
-                <div class="commands-area">
-                  <button
-                    mat-icon-button
-                    class="copy-message-btn"
-                    aria-label="Copy message"
-                    [matTooltip]="'Copy to clipboard'"
-                    (click)="copyMessageContent(message)"
-                  >
-                    <mat-icon>content_copy</mat-icon>
-                  </button>
-                </div>
-              </div>
-              }
-            </div>
-            } }
-          </div>
+          <app-message-content
+            [isError]="isErrorMessage(message)"
+            [errorMessage]="getErrorMessage(message)"
+            [displayContent]="getDisplayContentWithHighlight(message)"
+            [showSpinner]="message.role !== 'user' && isLoading() && $index === filteredMessages().length - 1"
+          />
+
+          @if (hasUsageContent(message)) {
+            @let usage = getUsageContent(message);
+            @if (usage) {
+              <app-message-usage
+                [usage]="usage"
+                (copyMessage)="copyMessageContent(message)"
+              />
+            }
+          }
         </mat-card-content>
       </mat-card>
     </div>

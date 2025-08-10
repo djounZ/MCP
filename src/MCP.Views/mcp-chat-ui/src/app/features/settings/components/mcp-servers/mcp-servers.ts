@@ -8,7 +8,6 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatMenuModule } from '@angular/material/menu';
 import { McpServerConfigHttpClient } from '../../../../core/services/mcp-server-config-http-client';
 import { McpServerConfigurationItem } from '../../../../shared/models/mcp-server-config-api.models';
 import { ServerFormComponent, type ServerFormData } from '../server-form/server-form';
@@ -24,8 +23,7 @@ import { ServerFormComponent, type ServerFormData } from '../server-form/server-
     MatChipsModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatDialogModule,
-    MatMenuModule
+    MatDialogModule
   ],
   templateUrl: './mcp-servers.html',
   styleUrl: './mcp-servers.scss',
@@ -82,7 +80,8 @@ export class McpServersComponent implements OnInit {
         config,
         isEdit: true
       } as ServerFormData,
-      disableClose: true
+      disableClose: true,
+      maxWidth: 'none'
     });
 
     dialogRef.afterClosed().subscribe(async (result) => {
@@ -108,7 +107,9 @@ export class McpServersComponent implements OnInit {
       data: {
         isEdit: false
       } as ServerFormData,
-      disableClose: true
+      disableClose: true,
+      maxWidth: 'none',
+      maxHeight: 'none'
     });
 
     dialogRef.afterClosed().subscribe(async (result) => {

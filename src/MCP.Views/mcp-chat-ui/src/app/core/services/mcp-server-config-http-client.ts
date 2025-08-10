@@ -11,6 +11,7 @@ export class McpServerConfigHttpClient {
     servers: '/mcp-servers',
     serverByName: (name: string) => `/mcp-servers/${encodeURIComponent(name)}`
   };
+  private readonly snackBar = (window as any).ng?.injector?.get?.('MatSnackBar') ?? undefined;
 
   async getAllServers(): Promise<Map<string, McpServerConfigurationItem>> {
     try {
@@ -49,8 +50,13 @@ export class McpServerConfigHttpClient {
       const data = await response.json() as McpServerConfigurationItem;
       // Optionally map to view model: toMcpServerConfigurationView(data)
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failed to create MCP server '${serverName}':`, error);
+      if (this.snackBar) {
+        this.snackBar.open(`Failed to create MCP server '${serverName}': ${error?.message ?? error}`, 'Close', { duration: 7000 });
+      } else {
+        alert(`Failed to create MCP server '${serverName}': ${error?.message ?? error}`);
+      }
       return null;
     }
   }

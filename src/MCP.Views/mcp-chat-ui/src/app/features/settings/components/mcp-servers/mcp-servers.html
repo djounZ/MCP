@@ -102,28 +102,20 @@
             <td mat-cell *matCellDef="let serverEntry">
               <button
                 mat-icon-button
-                [matMenuTriggerFor]="serverMenu"
-                matTooltip="Server actions"
+                (click)="editServer(serverEntry[0], serverEntry[1])"
+                matTooltip="Edit server"
+                class="action-button"
               >
-                <mat-icon>more_vert</mat-icon>
+                <mat-icon>edit</mat-icon>
               </button>
-              <mat-menu #serverMenu="matMenu">
-                <button
-                  mat-menu-item
-                  (click)="editServer(serverEntry[0], serverEntry[1])"
-                >
-                  <mat-icon>edit</mat-icon>
-                  Edit
-                </button>
-                <button
-                  mat-menu-item
-                  (click)="deleteServer(serverEntry[0])"
-                  class="delete-action"
-                >
-                  <mat-icon>delete</mat-icon>
-                  Delete
-                </button>
-              </mat-menu>
+              <button
+                mat-icon-button
+                (click)="deleteServer(serverEntry[0])"
+                matTooltip="Delete server"
+                class="action-button delete-button"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
             </td>
           </ng-container>
 
@@ -134,9 +126,7 @@
 
       <div class="servers-summary">
         <p>
-          {{ servers().size }} server{{
-            servers().size !== 1 ? "s" : ""
-          }}
+          {{ servers().size }} server{{ servers().size !== 1 ? "s" : "" }}
           configured
         </p>
       </div>

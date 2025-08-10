@@ -169,3 +169,16 @@
     }
   }
 }
+
+// Action buttons styling
+.action-button {
+  margin: 0 2px;
+
+  &.delete-button {
+    color: var(--mat-sys-error);
+
+    &:hover {
+      background-color: rgba(var(--mat-sys-error-rgb), 0.08);
+    }
+  }
+}

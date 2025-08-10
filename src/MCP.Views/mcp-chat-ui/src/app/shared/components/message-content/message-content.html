@@ -1,19 +1,12 @@
 <div class="message-content">
   @if (isError()) {
-    <div class="error-content">
-      <mat-icon color="warn">error</mat-icon>
-      <span>{{ errorMessage() }}</span>
-    </div>
+  <div class="error-content">
+    <mat-icon color="warn">error</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
   } @else {
-    <div
-      class="message-text"
-      [innerHTML]="displayContent()"
-    ></div>
-    @if (showSpinner()) {
-      <mat-spinner
-        diameter="16"
-        class="streaming-indicator"
-      ></mat-spinner>
-    }
-  }
+  <div class="message-text" [innerHTML]="displayContent()"></div>
+  @if (showSpinner()) {
+  <mat-spinner diameter="16" class="streaming-indicator"></mat-spinner>
+  } }
 </div>

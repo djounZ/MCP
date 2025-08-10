@@ -72,18 +72,20 @@
             [isError]="isErrorMessage(message)"
             [errorMessage]="getErrorMessage(message)"
             [displayContent]="getDisplayContentWithHighlight(message)"
-            [showSpinner]="message.role !== 'user' && isLoading() && $index === filteredMessages().length - 1"
+            [showSpinner]="
+              message.role !== 'user' &&
+              isLoading() &&
+              $index === filteredMessages().length - 1
+            "
           />
 
-          @if (hasUsageContent(message)) {
-            @let usage = getUsageContent(message);
-            @if (usage) {
-              <app-message-usage
-                [usage]="usage"
-                (copyMessage)="copyMessageContent(message)"
-              />
-            }
-          }
+          @if (hasUsageContent(message)) { @let usage =
+          getUsageContent(message); @if (usage) {
+          <app-message-usage
+            [usage]="usage"
+            (copyMessage)="copyMessageContent(message)"
+          />
+          } }
         </mat-card-content>
       </mat-card>
     </div>

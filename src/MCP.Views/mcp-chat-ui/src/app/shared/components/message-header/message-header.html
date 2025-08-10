@@ -2,10 +2,7 @@
   <span class="message-author">
     {{ authorName() }}
   </span>
-  <span
-    class="message-time"
-    [matTooltip]="fullDateTooltip() | date : 'full'"
-  >
+  <span class="message-time" [matTooltip]="fullDateTooltip() | date : 'full'">
     {{ formattedTime() }}
   </span>
 </div>

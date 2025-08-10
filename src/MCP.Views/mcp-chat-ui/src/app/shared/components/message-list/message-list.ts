@@ -15,12 +15,12 @@ import { MessageUsageComponent } from '../message-usage/message-usage';
 @Component({
   selector: 'app-message-list',
   imports: [
-    CommonModule, 
-    FormsModule, 
-    MatCardModule, 
-    MatProgressSpinnerModule, 
-    MatIconModule, 
-    MatTooltipModule, 
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatTooltipModule,
     MatButtonModule,
     MessageHeaderComponent,
     MessageContentComponent,

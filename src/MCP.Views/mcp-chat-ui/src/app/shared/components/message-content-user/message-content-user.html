@@ -1,4 +1,4 @@
-<div class="message-content">
+<div class="message-content-user">
   @if (isError()) {
   <div class="error-content">
     <mat-icon color="warn">error</mat-icon>
@@ -6,7 +6,5 @@
   </div>
   } @else {
   <div class="message-text" [innerHTML]="displayContentWithHighlight()"></div>
-  @if (message().role !== 'user' && showSpinner()) {
-  <mat-spinner diameter="16" class="streaming-indicator"></mat-spinner>
-  } }
+  }
 </div>

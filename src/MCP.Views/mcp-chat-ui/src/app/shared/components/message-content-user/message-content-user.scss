@@ -1,4 +1,4 @@
-.message-content {
+.message-content-user {
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -62,11 +62,5 @@
       overflow-x: auto;
       margin: 8px 0;
     }
-  }
-
-  .streaming-indicator {
-    align-self: flex-start;
-    margin-top: 0;
-    display: inline-block;
   }
 }

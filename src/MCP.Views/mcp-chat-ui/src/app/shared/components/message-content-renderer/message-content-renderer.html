@@ -3,9 +3,13 @@
   <mat-spinner diameter="20"></mat-spinner>
   }
 
-  <!-- Render combined text content as a single block -->
+  <!-- Render combined text content with copy functionality -->
   @if (combinedTextContent()) {
-  <div class="text-content" [innerHTML]="displayTextContent()"></div>
+  <app-message-text-content
+    [content]="combinedTextContent()!"
+    [searchQuery]="searchQuery()"
+  >
+  </app-message-text-content>
   }
 
   <!-- Render non-text content separately -->

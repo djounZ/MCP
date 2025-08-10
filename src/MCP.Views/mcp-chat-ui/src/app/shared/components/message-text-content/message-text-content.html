@@ -1,1 +1,12 @@
-<div class="text-content" [innerHTML]="displayContent()"></div>
+<div class="text-content-container">
+  <div class="text-content" [innerHTML]="displayContent()"></div>
+  <button
+    mat-icon-button
+    class="copy-message-btn"
+    aria-label="Copy message"
+    matTooltip="Copy to clipboard"
+    (click)="onCopyMessage()"
+  >
+    <mat-icon>content_copy</mat-icon>
+  </button>
+</div>

@@ -3,10 +3,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   ChatMessageAppModelView,
   AiContentAppModelView,
-  AiContentAppModelErrorContentAppModelView
+  AiContentAppModelErrorContentAppModelView,
+  AiContentAppModelTextContentAppModelView
 } from '../../models/chat-completion-view.models';
 import { MessageErrorContentComponent } from '../message-error-content/message-error-content';
-import { highlightSearchMatches } from '../../utils/search.utils';
+import { MessageTextContentComponent } from '../message-text-content/message-text-content';
 
 @Component({
   selector: 'app-message-content-renderer',
@@ -15,7 +16,8 @@ import { highlightSearchMatches } from '../../utils/search.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatProgressSpinnerModule,
-    MessageErrorContentComponent
+    MessageErrorContentComponent,
+    MessageTextContentComponent
   ]
 })
 export class MessageContentRendererComponent {
@@ -23,9 +25,9 @@ export class MessageContentRendererComponent {
   readonly searchQuery = input<string>('');
   readonly showSpinner = input<boolean>(false);
 
-  // Combine all text and reasoning content like the old implementation
+  // Combine all text and reasoning content into a single text content object
   protected readonly combinedTextContent = computed(() => {
-    return this.message().contents
+    const combinedText = this.message().contents
       .filter(c => c.$type === 'text' || c.$type === 'reasoning')
       .map(c => {
         if (c.$type === 'text' || c.$type === 'reasoning') {
@@ -34,17 +36,16 @@ export class MessageContentRendererComponent {
         return '';
       })
       .join('');
-  });
 
-  protected readonly displayTextContent = computed(() => {
-    const content = this.combinedTextContent();
-    const query = this.searchQuery().trim();
-
-    if (!query) {
-      return content;
+    if (!combinedText) {
+      return null;
     }
 
-    return highlightSearchMatches(content, query, 'search-highlight');
+    // Create a single text content object with the combined text
+    return {
+      $type: 'text' as const,
+      text: combinedText
+    } as AiContentAppModelTextContentAppModelView;
   });
 
   // Get non-text content (errors, function calls, etc.) - excluding usage which is handled in footer

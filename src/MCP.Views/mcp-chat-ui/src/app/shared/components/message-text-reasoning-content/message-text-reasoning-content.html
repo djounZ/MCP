@@ -5,8 +5,30 @@
       <mat-icon class="reasoning-icon">psychology</mat-icon>
       <span class="reasoning-label">Reasoning</span>
     </div>
+    @if (shouldShowMarkdown()) {
+    <markdown
+      class="reasoning-text markdown-content"
+      [data]="displayContent()"
+    ></markdown>
+    } @else {
     <div class="reasoning-text" [innerHTML]="displayContent()"></div>
+    }
   </div>
+  @if (isMarkdown()) {
+  <button
+    mat-icon-button
+    class="toggle-markdown-btn"
+    [attr.aria-label]="
+      showMarkdown() ? 'Switch to HTML view' : 'Switch to Markdown view'
+    "
+    [matTooltip]="
+      showMarkdown() ? 'Switch to HTML view' : 'Switch to Markdown view'
+    "
+    (click)="toggleMarkdownDisplay()"
+  >
+    <mat-icon>{{ showMarkdown() ? "code" : "text_fields" }}</mat-icon>
+  </button>
+  }
   <button
     mat-icon-button
     class="copy-message-btn"

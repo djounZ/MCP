@@ -1,21 +1,26 @@
-import { ChangeDetectionStrategy, Component, input, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, computed, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MarkdownComponent } from 'ngx-markdown';
 import { AiContentAppModelTextContentAppModelView, ChatMessageAppModelView } from '../../models/chat-completion-view.models';
 import { highlightSearchMatches } from '../../utils/search.utils';
+import { isMarkdownContent } from '../../utils/string.utils';
 
 @Component({
   selector: 'app-message-text-content',
   templateUrl: './message-text-content.html',
   styleUrl: './message-text-content.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatIconModule, MatButtonModule, MatTooltipModule]
+  imports: [MatIconModule, MatButtonModule, MatTooltipModule, MarkdownComponent]
 })
 export class MessageTextContentComponent {
 
   readonly message = input.required<ChatMessageAppModelView>();
   readonly searchQuery = input<string>('');
+
+  // Signal to track whether to show markdown or HTML
+  protected readonly showMarkdown = signal(true);
 
 
 
@@ -53,6 +58,24 @@ export class MessageTextContentComponent {
 
     return highlightSearchMatches(text, query, 'search-highlight');
   });
+
+  // Detect if content is markdown based on common markdown patterns
+  protected readonly isMarkdown = computed(() => {
+    const text = this.content()?.text ?? '';
+    return isMarkdownContent(text);
+  });
+
+  // Computed property to determine if markdown should be shown
+  protected readonly shouldShowMarkdown = computed(() => {
+    return this.isMarkdown() && this.showMarkdown();
+  });
+
+  /**
+   * Toggles between markdown and HTML display
+   */
+  protected toggleMarkdownDisplay(): void {
+    this.showMarkdown.update(show => !show);
+  }
 
   /**
    * Copies the text content to clipboard

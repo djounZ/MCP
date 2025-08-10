@@ -1,6 +1,27 @@
 @if (content()) {
 <div class="text-content-container">
+  @if (shouldShowMarkdown()) {
+  <markdown
+    class="text-content markdown-content"
+    [data]="displayContent()"
+  ></markdown>
+  } @else {
   <div class="text-content" [innerHTML]="displayContent()"></div>
+  } @if (isMarkdown()) {
+  <button
+    mat-icon-button
+    class="toggle-markdown-btn"
+    [attr.aria-label]="
+      showMarkdown() ? 'Switch to HTML view' : 'Switch to Markdown view'
+    "
+    [matTooltip]="
+      showMarkdown() ? 'Switch to HTML view' : 'Switch to Markdown view'
+    "
+    (click)="toggleMarkdownDisplay()"
+  >
+    <mat-icon>{{ showMarkdown() ? "code" : "text_fields" }}</mat-icon>
+  </button>
+  }
   <button
     mat-icon-button
     class="copy-message-btn"

@@ -4,14 +4,25 @@
   align-items: flex-start;
   gap: 8px;
 
-  .copy-message-btn {
+  .copy-message-btn,
+  .toggle-markdown-btn {
     opacity: 0.3;
     transition: opacity 0.2s ease;
     flex-shrink: 0;
     margin-top: -8px; // Align with first line of text
   }
 
-  &:hover .copy-message-btn {
+  .copy-message-btn {
+    margin-left: 8px;
+  }
+
+  .toggle-markdown-btn {
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+
+  &:hover .copy-message-btn,
+  &:hover .toggle-markdown-btn {
     opacity: 1;
   }
 }
@@ -32,7 +43,7 @@
     box-shadow: 0 1px 3px rgba(255, 235, 59, 0.3);
   }
 
-  // Support for markdown and rich content
+  // Support for markdown and rich content in non-markdown mode
   :deep(p) {
     margin: 0 0 8px 0;
 
@@ -54,5 +65,57 @@
     border-radius: 8px;
     overflow-x: auto;
     margin: 8px 0;
+  }
+}
+
+// Basic color harmonization for markdown content
+.text-content-container .markdown-content {
+  ::ng-deep {
+    // Harmonize heading colors with Material Design
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--mat-sys-primary);
+    }
+
+    // Harmonize code and pre background with Material Design
+    code {
+      background-color: var(--mat-sys-surface-variant);
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    pre {
+      background-color: var(--mat-sys-surface-variant);
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    // Harmonize blockquote colors
+    blockquote {
+      border-left-color: var(--mat-sys-primary);
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    // Harmonize link colors
+    a {
+      color: var(--mat-sys-primary);
+    }
+
+    // Harmonize table colors
+    table {
+      border-color: var(--mat-sys-outline-variant);
+    }
+
+    th,
+    td {
+      border-color: var(--mat-sys-outline-variant);
+    }
+
+    th {
+      background-color: var(--mat-sys-surface-variant);
+      color: var(--mat-sys-on-surface-variant);
+    }
   }
 }

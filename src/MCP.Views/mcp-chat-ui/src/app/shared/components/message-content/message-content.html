@@ -5,8 +5,8 @@
     <span>{{ errorMessage() }}</span>
   </div>
   } @else {
-  <div class="message-text" [innerHTML]="displayContent()"></div>
-  @if (showSpinner()) {
+  <div class="message-text" [innerHTML]="effectiveDisplayContent()"></div>
+  @if (message().role !== 'user' && showSpinner()) {
   <mat-spinner diameter="16" class="streaming-indicator"></mat-spinner>
   } }
 </div>

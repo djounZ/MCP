@@ -66,13 +66,10 @@
           <app-message-header [message]="message" />
 
           <app-message-content
-            [isError]="isErrorMessage(message)"
-            [errorMessage]="getErrorMessage(message)"
+            [message]="message"
             [displayContent]="getDisplayContentWithHighlight(message)"
             [showSpinner]="
-              message.role !== 'user' &&
-              isLoading() &&
-              $index === filteredMessages().length - 1
+              isLoading() && $index === filteredMessages().length - 1
             "
           />
 

@@ -109,12 +109,11 @@ export class MessageList {
     return highlightSearchMatches(content, query, 'search-highlight');
   }
 
-  isErrorMessage(message: ChatMessageAppModelView): boolean {
+  protected isErrorMessage(message: ChatMessageAppModelView): boolean {
     return message?.contents.some(c => c.$type === 'error') || false;
   }
 
-  getDisplayContent(message: ChatMessageAppModelView): string {
-
+  private getDisplayContent(message: ChatMessageAppModelView): string {
     return message.contents
       .filter(c => c.$type === 'text' || c.$type === 'reasoning')
       .map(c => {
@@ -124,10 +123,5 @@ export class MessageList {
         return '';
       })
       .join('');
-  }
-
-  getErrorMessage(message: ChatMessageAppModelView): string {
-    const errorContent = message.contents.find(c => c.$type === 'error');
-    return errorContent && errorContent.$type === 'error' ? errorContent.message : '';
   }
 }

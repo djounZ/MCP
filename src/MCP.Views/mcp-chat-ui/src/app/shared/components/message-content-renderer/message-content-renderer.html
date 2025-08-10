@@ -3,24 +3,23 @@
   <mat-spinner diameter="20"></mat-spinner>
   }
 
-  <!-- Render combined text content with copy functionality -->
-  @if (combinedTextContent()) {
   <app-message-text-content
-    [content]="combinedTextContent()!"
+    [message]="message()"
     [searchQuery]="searchQuery()"
-  >
-  </app-message-text-content>
-  }
-
-  <!-- Render non-text content separately -->
-  @for (content of nonTextContent(); track content) { @if
-  (isContentType(content, 'error')) {
+  />
+  <app-message-text-reasoning-content
+    [message]="message()"
+    [searchQuery]="searchQuery()"
+  />
   <app-message-error-content
-    [content]="asErrorContent(content)"
+    [message]="message()"
     [searchQuery]="searchQuery()"
   >
   </app-message-error-content>
-  } @else {
+
+  <!-- Render non-text content separately -->
+  @for (content of nonTextContent(); track content) { @if
+  (isContentType(content, 'error')) { } @else {
   <div class="unknown-content-type">
     Unknown content type: {{ content.$type }}
   </div>

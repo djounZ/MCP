@@ -1,7 +1,20 @@
-<div class="reasoning-content">
-  <div class="reasoning-header">
-    <mat-icon class="reasoning-icon">psychology</mat-icon>
-    <span class="reasoning-label">Reasoning</span>
+@if (content()) {
+<div class="reasoning-content-container">
+  <div class="reasoning-content">
+    <div class="reasoning-header">
+      <mat-icon class="reasoning-icon">psychology</mat-icon>
+      <span class="reasoning-label">Reasoning</span>
+    </div>
+    <div class="reasoning-text" [innerHTML]="displayContent()"></div>
   </div>
-  <div class="reasoning-text" [innerHTML]="displayContent()"></div>
+  <button
+    mat-icon-button
+    class="copy-message-btn"
+    aria-label="Copy reasoning"
+    matTooltip="Copy to clipboard"
+    (click)="onCopyMessage()"
+  >
+    <mat-icon>content_copy</mat-icon>
+  </button>
 </div>
+}

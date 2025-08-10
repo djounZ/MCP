@@ -4,10 +4,12 @@ import {
   ChatMessageAppModelView,
   AiContentAppModelView,
   AiContentAppModelErrorContentAppModelView,
-  AiContentAppModelTextContentAppModelView
+  AiContentAppModelTextContentAppModelView,
+  AiContentAppModelTextReasoningContentAppModelView
 } from '../../models/chat-completion-view.models';
 import { MessageErrorContentComponent } from '../message-error-content/message-error-content';
 import { MessageTextContentComponent } from '../message-text-content/message-text-content';
+import { MessageTextReasoningContentComponent } from '../message-text-reasoning-content/message-text-reasoning-content';
 
 @Component({
   selector: 'app-message-content-renderer',
@@ -17,7 +19,8 @@ import { MessageTextContentComponent } from '../message-text-content/message-tex
   imports: [
     MatProgressSpinnerModule,
     MessageErrorContentComponent,
-    MessageTextContentComponent
+    MessageTextContentComponent,
+    MessageTextReasoningContentComponent
   ]
 })
 export class MessageContentRendererComponent {
@@ -25,12 +28,12 @@ export class MessageContentRendererComponent {
   readonly searchQuery = input<string>('');
   readonly showSpinner = input<boolean>(false);
 
-  // Combine all text and reasoning content into a single text content object
+  // Combine all text content only
   protected readonly combinedTextContent = computed(() => {
     const combinedText = this.message().contents
-      .filter(c => c.$type === 'text' || c.$type === 'reasoning')
+      .filter(c => c.$type === 'text')
       .map(c => {
-        if (c.$type === 'text' || c.$type === 'reasoning') {
+        if (c.$type === 'text') {
           return c.text || '';
         }
         return '';
@@ -46,6 +49,29 @@ export class MessageContentRendererComponent {
       $type: 'text' as const,
       text: combinedText
     } as AiContentAppModelTextContentAppModelView;
+  });
+
+  // Combine all reasoning content only
+  protected readonly combinedTextReasoningContent = computed(() => {
+    const combinedReasoning = this.message().contents
+      .filter(c => c.$type === 'reasoning')
+      .map(c => {
+        if (c.$type === 'reasoning') {
+          return c.text || '';
+        }
+        return '';
+      })
+      .join('');
+
+    if (!combinedReasoning) {
+      return null;
+    }
+
+    // Create a single reasoning content object with the combined reasoning
+    return {
+      $type: 'reasoning' as const,
+      text: combinedReasoning
+    } as AiContentAppModelTextReasoningContentAppModelView;
   });
 
   // Get non-text content (errors, function calls, etc.) - excluding usage which is handled in footer

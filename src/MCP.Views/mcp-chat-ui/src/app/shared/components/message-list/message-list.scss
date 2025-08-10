@@ -166,7 +166,7 @@
         }
       }
 
-      &.assistant-message {
+      &.non-user-message {
         justify-content: flex-start;
 
         .message-card {
@@ -233,7 +233,7 @@
 
       .message-wrapper {
         &.user-message .message-card,
-        &.assistant-message .message-card {
+        &.non-user-message .message-card {
           max-width: 85%;
         }
       }

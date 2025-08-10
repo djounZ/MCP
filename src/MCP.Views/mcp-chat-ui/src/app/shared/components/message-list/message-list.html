@@ -56,7 +56,7 @@
     <div
       class="message-wrapper"
       [class.user-message]="message.role === 'user'"
-      [class.assistant-message]="message.role === 'assistant'"
+      [class.non-user-message]="message.role !== 'user'"
     >
       <mat-card
         class="message-card"

@@ -17,11 +17,22 @@
   >
   </app-message-error-content>
 
-  <!-- Render non-text content separately -->
-  @for (content of nonTextContent(); track content) { @if
-  (isContentType(content, 'error')) { } @else {
+  <app-message-function-call-content
+    [message]="message()"
+    [searchQuery]="searchQuery()"
+  >
+  </app-message-function-call-content>
+
+  <app-message-function-result-content
+    [message]="message()"
+    [searchQuery]="searchQuery()"
+  >
+  </app-message-function-result-content>
+
+  <!-- Render remaining unknown content types -->
+  @for (content of nonTextContent(); track content) {
   <div class="unknown-content-type">
     Unknown content type: {{ content.$type }}
   </div>
-  } }
+  }
 </div>

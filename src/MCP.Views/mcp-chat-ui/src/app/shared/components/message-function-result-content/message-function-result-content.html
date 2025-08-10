@@ -1,0 +1,31 @@
+@if (functionResults().length > 0) { @for (functionResult of functionResults();
+track functionResult.callId) {
+<div class="function-result-container">
+  <div class="function-result-content">
+    <div class="function-result-header">
+      <mat-icon class="result-icon">assignment_returned</mat-icon>
+      <span class="result-label">Function Result</span>
+      <span class="call-id">{{ functionResult.callId }}</span>
+    </div>
+
+    <mat-expansion-panel class="result-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Result Data</mat-panel-title>
+      </mat-expansion-panel-header>
+      <pre class="result-content">{{
+        formatResult(functionResult.result)
+      }}</pre>
+    </mat-expansion-panel>
+  </div>
+
+  <button
+    mat-icon-button
+    class="copy-message-btn"
+    aria-label="Copy function result"
+    matTooltip="Copy to clipboard"
+    (click)="onCopyFunctionResult(functionResult)"
+  >
+    <mat-icon>content_copy</mat-icon>
+  </button>
+</div>
+} }

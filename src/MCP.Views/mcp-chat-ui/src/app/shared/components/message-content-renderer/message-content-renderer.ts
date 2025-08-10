@@ -10,6 +10,8 @@ import {
 import { MessageErrorContentComponent } from '../message-error-content/message-error-content';
 import { MessageTextContentComponent } from '../message-text-content/message-text-content';
 import { MessageTextReasoningContentComponent } from '../message-text-reasoning-content/message-text-reasoning-content';
+import { MessageFunctionCallContentComponent } from '../message-function-call-content/message-function-call-content';
+import { MessageFunctionResultContentComponent } from '../message-function-result-content/message-function-result-content';
 
 @Component({
   selector: 'app-message-content-renderer',
@@ -20,7 +22,9 @@ import { MessageTextReasoningContentComponent } from '../message-text-reasoning-
     MatProgressSpinnerModule,
     MessageErrorContentComponent,
     MessageTextContentComponent,
-    MessageTextReasoningContentComponent
+    MessageTextReasoningContentComponent,
+    MessageFunctionCallContentComponent,
+    MessageFunctionResultContentComponent
   ]
 })
 export class MessageContentRendererComponent {
@@ -79,7 +83,10 @@ export class MessageContentRendererComponent {
     return this.message().contents.filter(c =>
       c.$type !== 'text' &&
       c.$type !== 'reasoning' &&
-      c.$type !== 'usage'
+      c.$type !== 'usage' &&
+      c.$type !== 'error' &&
+      c.$type !== 'function_call' &&
+      c.$type !== 'function_result'
     );
   });
 

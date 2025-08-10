@@ -3,18 +3,22 @@ using MCP.Application.DTOs.AI;
 using MCP.Application.DTOs.AI.ChatCompletion;
 using MCP.Infrastructure.Models.Mappers;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 namespace MCP.Infrastructure.Services.ChatServiceImplementations;
 
-public abstract class ChatServiceBase<TChatClient>(TChatClient chatClient,ChatClientExtensionsAiAppModelsMapper mapper, AiToolsManager aiToolsManager) : IChatService where TChatClient : IChatClient
+public abstract class ChatServiceBase<TChatClient>(ILoggerFactory loggerFactory,TChatClient chatClient,ChatClientExtensionsAiAppModelsMapper mapper, AiToolsManager aiToolsManager) : IChatService where TChatClient : IChatClient
 {
-
+    private readonly IChatClient _aiChatClient = chatClient
+        .AsBuilder()
+        .UseFunctionInvocation(loggerFactory)
+        .Build();
 
     public async Task<ChatResponseAppModel> GetResponseAsync(IEnumerable<ChatMessageAppModel> messagesAppModel, ChatOptionsAppModel? optionsAppModel = null,
         CancellationToken cancellationToken = new())
     {
         var (messages,options) = await  MapAsync(messagesAppModel, optionsAppModel, cancellationToken);
-        var chatCompletionResponse = await chatClient.GetResponseAsync(messages, options, cancellationToken);
+        var chatCompletionResponse = await _aiChatClient.GetResponseAsync(messages, options, cancellationToken);
         return mapper.MapToAppModel(chatCompletionResponse);
     }
 
@@ -22,14 +26,10 @@ public abstract class ChatServiceBase<TChatClient>(TChatClient chatClient,ChatCl
         [EnumeratorCancellation] CancellationToken cancellationToken = new())
     {
         var (messages,options) = await MapAsync(messagesAppModel, optionsAppModel, cancellationToken);
-        var chatCompletionStreamAsync = chatClient.GetStreamingResponseAsync(messages, options, cancellationToken);
+        var chatCompletionStreamAsync = _aiChatClient.GetStreamingResponseAsync(messages, options, cancellationToken);
 
         await foreach (var update in chatCompletionStreamAsync)
         {
-            if (update.Contents.Count >0 && update.Contents.All(c => c is FunctionCallContent || c is FunctionResultContent))
-            {
-                continue;
-            }
             yield return mapper.MapToAppModel(update);
         }
     }

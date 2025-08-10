@@ -97,7 +97,7 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
         }
     }
 
-    private static HttpRequestMessage CreateHttpRequestMessage<TIn>(HttpMethod method, string? requestUri,
+    private HttpRequestMessage CreateHttpRequestMessage<TIn>(HttpMethod method, string? requestUri,
         TIn requestContent, Dictionary<string, string> headers, JsonSerializerOptions? options)
     {
         HttpRequestMessage? request = null;
@@ -111,6 +111,9 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
             }
 
             var json = JsonSerializer.Serialize(requestContent, options);
+#if DEBUG
+            logger.LogInformation("Serialized request content: {Json}", json);
+#endif
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             return request;
         }
@@ -240,9 +243,16 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
 
         while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
         {
-            var item = await contentReaderAsync(reader, cancellationToken);
-            logger.LogInformation("Stream item content: {@StreamItem}", item);
-            yield return item;
+            var line = await reader.ReadLineAsync(cancellationToken);
+            if (line != null)
+            {
+                logger.LogInformation("Stream line content: {Content}", line);
+                // Reset reader position by creating a new StringReader with the line
+                using var lineReader = new StringReader(line);
+                using var streamReader = new StreamReader(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(line)));
+                var item = await contentReaderAsync(streamReader, cancellationToken);
+                yield return item;
+            }
         }
     }
 #endif

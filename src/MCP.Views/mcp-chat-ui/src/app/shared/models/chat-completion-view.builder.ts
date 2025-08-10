@@ -1,3 +1,50 @@
+export class AiContentAppModelFunctionCallContentAppModelViewBuilder {
+  private _callId: string = '';
+  private _name: string = '';
+  private _arguments: unknown | null = null;
+
+  callId(callId: string): this {
+    this._callId = callId;
+    return this;
+  }
+  name(name: string): this {
+    this._name = name;
+    return this;
+  }
+  arguments(args: unknown | null): this {
+    this._arguments = args;
+    return this;
+  }
+  build(): any {
+    return {
+      $type: 'function_call',
+      callId: this._callId,
+      name: this._name,
+      arguments: this._arguments
+    };
+  }
+}
+
+export class AiContentAppModelFunctionResultContentAppModelViewBuilder {
+  private _callId: string = '';
+  private _result: unknown | null = null;
+
+  callId(callId: string): this {
+    this._callId = callId;
+    return this;
+  }
+  result(result: unknown | null): this {
+    this._result = result;
+    return this;
+  }
+  build(): any {
+    return {
+      $type: 'function_result',
+      callId: this._callId,
+      result: this._result
+    };
+  }
+}
 import { AiToolAppModel } from './chat-completion-api.models';
 export class ChatOptionsAppModelViewBuilder {
   private _conversationId: string | null = null;

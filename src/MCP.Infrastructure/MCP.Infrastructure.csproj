@@ -13,6 +13,7 @@
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="$(MicrosoftIdentityModelTokensVersion)"/>
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(SystemIdentityModelTokensJwtVersion)"/>
         <PackageReference Include="OllamaSharp" Version="$(OllamaSharpVersion)"/>
+        <PackageReference Include="Microsoft.Extensions.AI" Version="$(MicrosoftExtensionsAIPackagesCommonVersion)" />
     </ItemGroup>
 
 </Project>

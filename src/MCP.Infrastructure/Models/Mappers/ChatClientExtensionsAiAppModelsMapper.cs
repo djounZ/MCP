@@ -184,7 +184,26 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
             Message: errorContent.Message
         );
     }
+    public FunctionCallContentAppModel MapToAppModel(FunctionCallContent errorContent)
+    {
 
+        return new FunctionCallContentAppModel(
+            Annotations: null, // Microsoft.Extensions.AI.ErrorContent doesn't have annotations
+            CallId: errorContent.CallId,
+            Name: errorContent.Name,
+            Arguments: errorContent.Arguments
+        );
+    }
+
+    public FunctionResultContentAppModel MapToAppModel(FunctionResultContent errorContent)
+    {
+
+        return new FunctionResultContentAppModel(
+            Annotations: null, // Microsoft.Extensions.AI.ErrorContent doesn't have annotations
+            CallId: errorContent.CallId,
+            Result: errorContent.Result
+        );
+    }
     // Usage mappings
     public UsageDetailsAppModel MapToAppModel(UsageDetails usageDetails)
     {
@@ -262,6 +281,8 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
             UsageContent usageContent => MapToAppModel(usageContent),
             UriContent uriContent => MapToAppModel(uriContent),
             ErrorContent errorContent => MapToAppModel(errorContent),
+            FunctionCallContent errorContent => MapToAppModel(errorContent),
+            FunctionResultContent errorContent => MapToAppModel(errorContent),
             _ =>
                 throw new NotSupportedException($"Unsupported content type: {content.GetType().Name}")
         };
@@ -384,11 +405,21 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
         return new UriContent(appModel.Uri, appModel.MediaType);
     }
 
+    public FunctionCallContent MapFromAppModel(FunctionCallContentAppModel appModel)
+    {
+        return new FunctionCallContent(appModel.CallId, appModel.Name, appModel.Arguments);
+    }
+
+
+
+    public FunctionResultContent MapFromAppModel(FunctionResultContentAppModel appModel)
+    {
+        return new FunctionResultContent(appModel.CallId, appModel.Result);
+    }
     public ErrorContent MapFromAppModel(ErrorContentAppModel appModel)
     {
         return new ErrorContent(appModel.Message);
     }
-
     // Usage reverse mappings
     public UsageDetails MapFromAppModel(UsageDetailsAppModel appModel)
     {
@@ -439,6 +470,8 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
             UsageContentAppModel usage => MapFromAppModel(usage),
             UriContentAppModel uri => MapFromAppModel(uri),
             ErrorContentAppModel error => MapFromAppModel(error),
+            FunctionCallContentAppModel error => MapFromAppModel(error),
+            FunctionResultContentAppModel error => MapFromAppModel(error),
             _ => throw new NotSupportedException($"Unsupported app model content type: {appModel.GetType().Name}")
         };
     }

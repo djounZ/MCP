@@ -28,7 +28,9 @@ export type AiContentAppModel =
   | AiContentAppModelTextContentAppModel
   | AiContentAppModelTextReasoningContentAppModel
   | AiContentAppModelUriContentAppModel
-  | AiContentAppModelUsageContentAppModel;
+  | AiContentAppModelUsageContentAppModel
+  | AiContentAppModelFunctionCallContentAppModel
+  | AiContentAppModelFunctionResultContentAppModel;
 
 export interface AiContentAppModelDataContentAppModel {
   $type: 'data';
@@ -69,6 +71,20 @@ export interface AiContentAppModelUsageContentAppModel {
   annotations?: unknown[] | null;
 }
 
+export interface AiContentAppModelFunctionCallContentAppModel {
+  $type: 'function_call';
+  call_id: string;
+  name: string;
+  arguments?: unknown | null;
+  annotations?: unknown[] | null;
+}
+
+export interface AiContentAppModelFunctionResultContentAppModel {
+  $type: 'function_result';
+  call_id: string;
+  result?: unknown | null;
+  annotations?: unknown[] | null;
+}
 // --- ChatMessageAppModel ---
 export interface ChatMessageAppModel {
   role: ChatRoleEnumAppModel;

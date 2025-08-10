@@ -22,7 +22,9 @@ export type AiContentAppModelView =
   | AiContentAppModelTextContentAppModelView
   | AiContentAppModelTextReasoningContentAppModelView
   | AiContentAppModelUriContentAppModelView
-  | AiContentAppModelUsageContentAppModelView;
+  | AiContentAppModelUsageContentAppModelView
+  | AiContentAppModelFunctionCallContentAppModelView
+  | AiContentAppModelFunctionResultContentAppModelView;
 
 export interface AiContentAppModelDataContentAppModelView {
   $type: 'data';
@@ -60,6 +62,21 @@ export interface AiContentAppModelUsageContentAppModelView {
     totalTokenCount?: number | null;
     additionalCounts?: Record<string, number> | null;
   };
+  annotations?: unknown[] | null;
+}
+
+export interface AiContentAppModelFunctionCallContentAppModelView {
+  $type: 'function_call';
+  callId: string;
+  name: string;
+  arguments?: unknown | null;
+  annotations?: unknown[] | null;
+}
+
+export interface AiContentAppModelFunctionResultContentAppModelView {
+  $type: 'function_result';
+  callId: string;
+  result?: unknown | null;
   annotations?: unknown[] | null;
 }
 

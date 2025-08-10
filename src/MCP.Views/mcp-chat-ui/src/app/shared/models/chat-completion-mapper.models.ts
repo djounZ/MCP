@@ -205,6 +205,21 @@ export function toAiContentAppModelView(api: AiContentAppModel): AiContentAppMod
         },
         annotations: api.annotations ?? null
       };
+    case 'function_call':
+      return {
+        $type: 'function_call',
+        callId: (api as any).call_id,
+        name: (api as any).name,
+        arguments: (api as any).arguments ?? null,
+        annotations: api.annotations ?? null
+      };
+    case 'function_result':
+      return {
+        $type: 'function_result',
+        callId: (api as any).call_id,
+        result: (api as any).result ?? null,
+        annotations: api.annotations ?? null
+      };
     default:
       throw new Error('Unknown AiContentAppModel type');
   }
@@ -236,6 +251,21 @@ export function fromAiContentAppModelView(view: AiContentAppModelView): AiConten
       return {
         $type: 'reasoning',
         text: (view as AiContentAppModelTextReasoningContentAppModelView).text ?? null,
+        annotations: view.annotations ?? null
+      };
+    case 'function_call':
+      return {
+        $type: 'function_call',
+        call_id: (view as any).callId,
+        name: (view as any).name,
+        arguments: (view as any).arguments ?? null,
+        annotations: view.annotations ?? null
+      };
+    case 'function_result':
+      return {
+        $type: 'function_result',
+        call_id: (view as any).callId,
+        result: (view as any).result ?? null,
         annotations: view.annotations ?? null
       };
     case 'uri':

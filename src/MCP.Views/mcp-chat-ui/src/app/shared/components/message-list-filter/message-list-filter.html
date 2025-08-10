@@ -1,0 +1,81 @@
+<mat-expansion-panel class="filter-panel" [disabled]="disabled()">
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      <mat-icon>filter_list</mat-icon>
+      <span>Message Filters</span>
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <div class="filter-section">
+    <h4>Message Roles</h4>
+    <div class="filter-group">
+      <mat-checkbox
+        [checked]="filters().roles.user"
+        (change)="toggleRole.emit('user')"
+      >
+        User
+      </mat-checkbox>
+      <mat-checkbox
+        [checked]="filters().roles.assistant"
+        (change)="toggleRole.emit('assistant')"
+      >
+        Assistant
+      </mat-checkbox>
+      <mat-checkbox
+        [checked]="filters().roles.tool"
+        (change)="toggleRole.emit('tool')"
+      >
+        Tool
+      </mat-checkbox>
+      <mat-checkbox
+        [checked]="filters().roles.system"
+        (change)="toggleRole.emit('system')"
+      >
+        System
+      </mat-checkbox>
+    </div>
+  </div>
+
+  <div class="filter-section">
+    <h4>Content Types</h4>
+    <div class="filter-group">
+      <mat-checkbox
+        [checked]="filters().contentTypes.text"
+        (change)="toggleContentType.emit('text')"
+      >
+        Text
+      </mat-checkbox>
+      <mat-checkbox
+        [checked]="filters().contentTypes.reasoning"
+        (change)="toggleContentType.emit('reasoning')"
+      >
+        Reasoning
+      </mat-checkbox>
+      <mat-checkbox
+        [checked]="filters().contentTypes.error"
+        (change)="toggleContentType.emit('error')"
+      >
+        Error
+      </mat-checkbox>
+      <mat-checkbox
+        [checked]="filters().contentTypes.functionCall"
+        (change)="toggleContentType.emit('functionCall')"
+      >
+        Function Call
+      </mat-checkbox>
+      <mat-checkbox
+        [checked]="filters().contentTypes.functionResult"
+        (change)="toggleContentType.emit('functionResult')"
+      >
+        Function Result
+      </mat-checkbox>
+    </div>
+  </div>
+
+  <div class="filter-actions">
+    <button mat-button (click)="resetFilters.emit()" class="reset-button">
+      <mat-icon>refresh</mat-icon>
+      Reset Filters
+    </button>
+  </div>
+</mat-expansion-panel>

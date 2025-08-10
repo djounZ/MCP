@@ -139,6 +139,14 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
     }
 
     // Content mappings
+    public TextReasoningContentAppModel MapToAppModel(TextReasoningContent textContent)
+    {
+        return new TextReasoningContentAppModel(
+            Annotations: null, // Microsoft.Extensions.AI.TextContent doesn't have annotations
+            Text: textContent.Text
+        );
+    }
+    // Content mappings
     public TextContentAppModel MapToAppModel(TextContent textContent)
     {
         return new TextContentAppModel(
@@ -276,6 +284,7 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
     {
         return content switch
         {
+            TextReasoningContent textContent => MapToAppModel(textContent),
             TextContent textContent => MapToAppModel(textContent),
             DataContent dataContent => MapToAppModel(dataContent),
             UsageContent usageContent => MapToAppModel(usageContent),
@@ -385,6 +394,10 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
     }
 
     // Content reverse mappings
+    public TextReasoningContent MapFromAppModel(TextReasoningContentAppModel appModel)
+    {
+        return new TextReasoningContent(appModel.Text);
+    }
     public TextContent MapFromAppModel(TextContentAppModel appModel)
     {
         return new TextContent(appModel.Text);
@@ -466,6 +479,7 @@ public sealed class ChatClientExtensionsAiAppModelsMapper
         return appModel switch
         {
             TextContentAppModel text => MapFromAppModel(text),
+            TextReasoningContentAppModel text => MapFromAppModel(text),
             DataContentAppModel data => MapFromAppModel(data),
             UsageContentAppModel usage => MapFromAppModel(usage),
             UriContentAppModel uri => MapFromAppModel(uri),

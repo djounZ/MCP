@@ -3,87 +3,12 @@
   @if (messages().length > 0) {
   <div class="sticky-header">
     <!-- Filter Controls -->
-    <mat-expansion-panel class="filter-panel">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>filter_list</mat-icon>
-          <span>Message Filters</span>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-
-      <div class="filter-section">
-        <h4>Message Roles</h4>
-        <div class="filter-group">
-          <mat-checkbox
-            [checked]="messageFilters().roles.user"
-            (change)="toggleRole('user')"
-          >
-            User
-          </mat-checkbox>
-          <mat-checkbox
-            [checked]="messageFilters().roles.assistant"
-            (change)="toggleRole('assistant')"
-          >
-            Assistant
-          </mat-checkbox>
-          <mat-checkbox
-            [checked]="messageFilters().roles.tool"
-            (change)="toggleRole('tool')"
-          >
-            Tool
-          </mat-checkbox>
-          <mat-checkbox
-            [checked]="messageFilters().roles.system"
-            (change)="toggleRole('system')"
-          >
-            System
-          </mat-checkbox>
-        </div>
-      </div>
-
-      <div class="filter-section">
-        <h4>Content Types</h4>
-        <div class="filter-group">
-          <mat-checkbox
-            [checked]="messageFilters().contentTypes.text"
-            (change)="toggleContentType('text')"
-          >
-            Text
-          </mat-checkbox>
-          <mat-checkbox
-            [checked]="messageFilters().contentTypes.reasoning"
-            (change)="toggleContentType('reasoning')"
-          >
-            Reasoning
-          </mat-checkbox>
-          <mat-checkbox
-            [checked]="messageFilters().contentTypes.error"
-            (change)="toggleContentType('error')"
-          >
-            Error
-          </mat-checkbox>
-          <mat-checkbox
-            [checked]="messageFilters().contentTypes.functionCall"
-            (change)="toggleContentType('functionCall')"
-          >
-            Function Call
-          </mat-checkbox>
-          <mat-checkbox
-            [checked]="messageFilters().contentTypes.functionResult"
-            (change)="toggleContentType('functionResult')"
-          >
-            Function Result
-          </mat-checkbox>
-        </div>
-      </div>
-
-      <div class="filter-actions">
-        <button mat-button (click)="resetFilters()" class="reset-button">
-          <mat-icon>refresh</mat-icon>
-          Reset Filters
-        </button>
-      </div>
-    </mat-expansion-panel>
+    <app-message-list-filter
+      [filters]="messageFilters()"
+      (toggleRole)="toggleRole($event)"
+      (toggleContentType)="toggleContentType($event)"
+      (resetFilters)="resetFilters()"
+    />
 
     <!-- Search Section -->
     <div class="search-section">

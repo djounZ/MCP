@@ -14,6 +14,7 @@ import { SearchConfig, searchFilter } from '../../utils/search.utils';
 import { MessageHeaderComponent } from '../message-header/message-header';
 import { MessageContentRendererComponent } from '../message-content-renderer/message-content-renderer';
 import { MessageFooterComponent } from '../message-footer/message-footer';
+import { MessageListFilterComponent } from '../message-list-filter/message-list-filter';
 
 @Component({
   selector: 'app-message-list',
@@ -29,7 +30,8 @@ import { MessageFooterComponent } from '../message-footer/message-footer';
     MatExpansionModule,
     MessageHeaderComponent,
     MessageContentRendererComponent,
-    MessageFooterComponent
+    MessageFooterComponent,
+    MessageListFilterComponent
   ],
   templateUrl: './message-list.html',
   styleUrl: './message-list.scss',

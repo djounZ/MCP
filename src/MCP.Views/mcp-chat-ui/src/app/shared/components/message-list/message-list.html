@@ -1,36 +1,122 @@
 <div class="message-list-container">
-  <!-- Search Section -->
+  <!-- Sticky Header Section with Filters and Search -->
   @if (messages().length > 0) {
-  <div class="search-section">
-    <div class="search-input-container">
-      <mat-icon class="search-icon">search</mat-icon>
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Search messages..."
-        [value]="searchQuery()"
-        (input)="updateSearchQuery($any($event.target).value)"
-      />
-      @if (searchQuery()) {
-      <button
-        mat-icon-button
-        class="clear-search-button"
-        (click)="clearSearch()"
-        title="Clear search"
-        aria-label="Clear search"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
+  <div class="sticky-header">
+    <!-- Filter Controls -->
+    <mat-expansion-panel class="filter-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>filter_list</mat-icon>
+          <span>Message Filters</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="filter-section">
+        <h4>Message Roles</h4>
+        <div class="filter-group">
+          <mat-checkbox
+            [checked]="messageFilters().roles.user"
+            (change)="toggleRole('user')"
+          >
+            User
+          </mat-checkbox>
+          <mat-checkbox
+            [checked]="messageFilters().roles.assistant"
+            (change)="toggleRole('assistant')"
+          >
+            Assistant
+          </mat-checkbox>
+          <mat-checkbox
+            [checked]="messageFilters().roles.tool"
+            (change)="toggleRole('tool')"
+          >
+            Tool
+          </mat-checkbox>
+          <mat-checkbox
+            [checked]="messageFilters().roles.system"
+            (change)="toggleRole('system')"
+          >
+            System
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h4>Content Types</h4>
+        <div class="filter-group">
+          <mat-checkbox
+            [checked]="messageFilters().contentTypes.text"
+            (change)="toggleContentType('text')"
+          >
+            Text
+          </mat-checkbox>
+          <mat-checkbox
+            [checked]="messageFilters().contentTypes.reasoning"
+            (change)="toggleContentType('reasoning')"
+          >
+            Reasoning
+          </mat-checkbox>
+          <mat-checkbox
+            [checked]="messageFilters().contentTypes.error"
+            (change)="toggleContentType('error')"
+          >
+            Error
+          </mat-checkbox>
+          <mat-checkbox
+            [checked]="messageFilters().contentTypes.functionCall"
+            (change)="toggleContentType('functionCall')"
+          >
+            Function Call
+          </mat-checkbox>
+          <mat-checkbox
+            [checked]="messageFilters().contentTypes.functionResult"
+            (change)="toggleContentType('functionResult')"
+          >
+            Function Result
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button mat-button (click)="resetFilters()" class="reset-button">
+          <mat-icon>refresh</mat-icon>
+          Reset Filters
+        </button>
+      </div>
+    </mat-expansion-panel>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-input-container">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search messages..."
+          [value]="searchQuery()"
+          (input)="updateSearchQuery($any($event.target).value)"
+        />
+        @if (searchQuery()) {
+        <button
+          mat-icon-button
+          class="clear-search-button"
+          (click)="clearSearch()"
+          title="Clear search"
+          aria-label="Clear search"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        }
+      </div>
+      @if (searchResultInfo(); as resultInfo) {
+      <div class="search-results-info">
+        <span class="results-text">
+          Found {{ resultInfo.filtered }} of {{ resultInfo.total }}
+          {{ resultInfo.total === 1 ? "message" : "messages" }}
+        </span>
+      </div>
       }
     </div>
-    @if (searchResultInfo(); as resultInfo) {
-    <div class="search-results-info">
-      <span class="results-text">
-        Found {{ resultInfo.filtered }} of {{ resultInfo.total }}
-        {{ resultInfo.total === 1 ? "message" : "messages" }}
-      </span>
-    </div>
-    }
   </div>
   } @if (filteredMessages().length === 0 && messages().length > 0) {
   <div class="empty-state">
@@ -68,6 +154,7 @@
           <app-message-content-renderer
             [message]="message"
             [searchQuery]="searchQuery()"
+            [contentTypeFilter]="messageFilters().contentTypes"
             [showSpinner]="
               isLoading() && $index === filteredMessages().length - 1
             "

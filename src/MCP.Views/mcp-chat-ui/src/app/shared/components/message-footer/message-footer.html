@@ -1,7 +1,12 @@
+@if (hasUsageContent()) {
 <div class="message-footer">
   <div class="message-meta-row">
     <div class="usage-details" [matTooltip]="usageTooltip()">
+      @if (hasActualUsageData()) {
       <mat-icon class="usage-icon">analytics</mat-icon>
+      } @else {
+      <mat-icon class="usage-icon">smart_toy</mat-icon>
+      }
       <span class="usage-text">
         {{ usageText() }}
       </span>
@@ -19,3 +24,4 @@
     </div>
   </div>
 </div>
+}

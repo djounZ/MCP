@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ChatMessageAppModelView } from '../../models/chat-completion-view.models';
 
 @Component({
   selector: 'app-message-header',
@@ -10,19 +11,18 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   imports: [DatePipe, MatTooltipModule]
 })
 export class MessageHeaderComponent {
-  readonly role = input.required<string>();
-  readonly messageTime = input.required<Date>();
+  readonly message = input.required<ChatMessageAppModelView>();
 
   protected readonly authorName = computed(() =>
-    this.role() === 'user' ? 'You' : 'AI Assistant'
+    this.message().role === 'user' ? 'You' : 'AI Assistant'
   );
 
   protected readonly formattedTime = computed(() =>
-    this.getFormattedTime(this.messageTime())
+    this.getFormattedTime(this.message().messageTime)
   );
 
   protected readonly fullDateTooltip = computed(() =>
-    this.messageTime()
+    this.message().messageTime
   );
 
   private getFormattedTime(time: Date): string {

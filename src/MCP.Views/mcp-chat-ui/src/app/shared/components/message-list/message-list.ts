@@ -6,7 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
-import { ChatMessageAppModelView, AiContentAppModelUsageContentAppModelView } from '../../models/chat-completion-view.models';
+import { ChatMessageAppModelView } from '../../models/chat-completion-view.models';
 import { SearchConfig, searchFilter, highlightSearchMatches } from '../../utils/search.utils';
 import { MessageHeaderComponent } from '../message-header/message-header';
 import { MessageContentComponent } from '../message-content/message-content';
@@ -109,22 +109,6 @@ export class MessageList {
     return highlightSearchMatches(content, query, 'search-highlight');
   }
 
-  /**
-   * Copies the raw message content to clipboard
-   */
-  copyMessageContent(message: ChatMessageAppModelView): void {
-    if (message?.contents) {
-      // Concatenate all text and reasoning contents
-      const rawContent = message.contents
-        .filter(c => c.$type === 'text' || c.$type === 'reasoning')
-        .map(c => c.text || '')
-        .join('');
-      if (rawContent) {
-        navigator.clipboard.writeText(rawContent);
-      }
-    }
-  }
-
   isErrorMessage(message: ChatMessageAppModelView): boolean {
     return message?.contents.some(c => c.$type === 'error') || false;
   }
@@ -145,14 +129,5 @@ export class MessageList {
   getErrorMessage(message: ChatMessageAppModelView): string {
     const errorContent = message.contents.find(c => c.$type === 'error');
     return errorContent && errorContent.$type === 'error' ? errorContent.message : '';
-  }
-
-  hasUsageContent(message: ChatMessageAppModelView): boolean {
-    return message.contents.some(c => c.$type === 'usage');
-  }
-
-  getUsageContent(message: ChatMessageAppModelView): AiContentAppModelUsageContentAppModelView | null {
-    const usageContent = message.contents.find(c => c.$type === 'usage');
-    return usageContent && usageContent.$type === 'usage' ? usageContent : null;
   }
 }

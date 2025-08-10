@@ -520,14 +520,18 @@ export function updateChatMessageAppModelViewsFromAppModelContents(viewMessages:
       contents: viewContents,
       messageTime: apiCreatedAt ? new Date(apiCreatedAt) : new Date()
     });
+    return;
   }
 
   const last_message = viewMessages[idx];
   if (last_message && last_message.role === viewRole) {
-    last_message.contents.push(...viewContents);
-    if (apiCreatedAt) {
-      last_message.messageTime = new Date(apiCreatedAt);
-    }
+    // Replace the entire message object to ensure signal reactivity
+    const updatedMessage: ChatMessageAppModelView = {
+      ...last_message,
+      contents: [...last_message.contents, ...viewContents],
+      messageTime: apiCreatedAt ? new Date(apiCreatedAt) : last_message.messageTime
+    };
+    viewMessages[idx] = updatedMessage;
   }
   else {
     viewMessages.push({

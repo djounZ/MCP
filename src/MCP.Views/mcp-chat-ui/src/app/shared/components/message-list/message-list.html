@@ -81,7 +81,7 @@
 
           @if (hasUsageContent(message)) { @let usage =
           getUsageContent(message); @if (usage) {
-          <app-message-usage
+          <app-message-footer
             [usage]="usage"
             (copyMessage)="copyMessageContent(message)"
           />

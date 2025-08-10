@@ -5,13 +5,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AiContentAppModelUsageContentAppModelView } from '../../models/chat-completion-view.models';
 
 @Component({
-    selector: 'app-message-usage',
-    templateUrl: './message-usage.html',
-    styleUrl: './message-usage.scss',
+    selector: 'app-message-footer',
+    templateUrl: './message-footer.html',
+    styleUrl: './message-footer.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatIconModule, MatButtonModule, MatTooltipModule]
 })
-export class MessageUsageComponent {
+export class MessageFooterComponent {
     readonly usage = input.required<AiContentAppModelUsageContentAppModelView>();
     readonly copyMessage = output<void>();
 

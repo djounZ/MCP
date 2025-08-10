@@ -10,7 +10,7 @@ import { ChatMessageAppModelView, AiContentAppModelUsageContentAppModelView } fr
 import { SearchConfig, searchFilter, highlightSearchMatches } from '../../utils/search.utils';
 import { MessageHeaderComponent } from '../message-header/message-header';
 import { MessageContentComponent } from '../message-content/message-content';
-import { MessageUsageComponent } from '../message-usage/message-usage';
+import { MessageFooterComponent } from '../message-footer/message-footer';
 
 @Component({
   selector: 'app-message-list',
@@ -24,7 +24,7 @@ import { MessageUsageComponent } from '../message-usage/message-usage';
     MatButtonModule,
     MessageHeaderComponent,
     MessageContentComponent,
-    MessageUsageComponent
+    MessageFooterComponent
   ],
   templateUrl: './message-list.html',
   styleUrl: './message-list.scss',

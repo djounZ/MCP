@@ -1,0 +1,332 @@
+<section class="mcp-client-description">
+  <div class="header">
+    <h1 class="page-title">MCP Client Descriptions</h1>
+    <p class="page-subtitle">
+      Available Model Context Protocol server configurations and capabilities
+    </p>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-input-container">
+        <div class="search-icon">🔍</div>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search servers by name, tools, prompts, or resources..."
+          [value]="searchQuery()"
+          (input)="updateSearchQuery($any($event.target).value)"
+          #searchInput
+        />
+        @if (searchQuery()) {
+        <button
+          class="clear-search-button"
+          (click)="clearSearch()"
+          title="Clear search"
+        >
+          ✕
+        </button>
+        }
+      </div>
+      @if (searchQuery()) {
+      <div class="search-results-info">
+        <span class="results-text">
+          Found {{ totalClientsCount() }}
+          {{ totalClientsCount() === 1 ? "server" : "servers" }}
+          @if (filteredGroupsCount() < originalGroupsCount()) {
+          <span class="filtered-info"
+            >(of {{ originalGroupsCount() }} total servers)</span
+          >
+          }
+        </span>
+      </div>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading client descriptions...</p>
+  </div>
+  } @else if (totalClientsCount() === 0) {
+  <div class="empty-state">
+    <div class="empty-icon">🖥️</div>
+    <h3>No servers found</h3>
+    <p>
+      @if (searchQuery()) { No servers match your search criteria. Try a
+      different search term. } @else { No MCP servers are currently configured.
+      Check your server configuration. }
+    </p>
+  </div>
+  } @else {
+  <div class="clients-header">
+    <div class="clients-count">
+      <span class="count">{{ totalClientsCount() }}</span>
+      <span class="label"
+        >{{ totalClientsCount() === 1 ? "server" : "servers" }} configured</span
+      >
+    </div>
+  </div>
+
+  <div class="clients-scroll-container">
+    @for (group of clientGroups(); track group.serverName) {
+    <div class="client-group">
+      <div class="group-header" (click)="toggleGroup(group.serverName)">
+        <div class="group-info">
+          <h2 class="group-title">{{ group.serverName }}</h2>
+          <div class="group-stats">
+            <span class="stat-item"
+              >{{ getTotalToolsCount(group.description) }} tools</span
+            >
+            <span class="stat-item"
+              >{{ getTotalPromptsCount(group.description) }} prompts</span
+            >
+            <span class="stat-item"
+              >{{ getTotalResourcesCount(group.description) }} resources</span
+            >
+          </div>
+        </div>
+        <div
+          class="expand-button"
+          [class.expanded]="isGroupExpanded(group.serverName)"
+        >
+          <span class="expand-icon">{{
+            isGroupExpanded(group.serverName) ? "▼" : "▶"
+          }}</span>
+        </div>
+      </div>
+
+      @if (isGroupExpanded(group.serverName)) {
+      <div class="client-content">
+        <!-- Tools Section -->
+        @if (group.description.tools.length > 0) {
+        <div class="content-section">
+          <div
+            class="section-header"
+            (click)="toggleSection(group.serverName, 'tools')"
+          >
+            <h3 class="section-title">
+              🛠️ Tools ({{ group.description.tools.length }})
+            </h3>
+            <div
+              class="section-expand-button"
+              [class.expanded]="isSectionExpanded(group.serverName, 'tools')"
+            >
+              <span class="expand-icon">{{
+                isSectionExpanded(group.serverName, "tools") ? "▼" : "▶"
+              }}</span>
+            </div>
+          </div>
+          @if (isSectionExpanded(group.serverName, 'tools')) {
+          <div class="items-grid">
+            @for (tool of group.description.tools; track tool.name) {
+            <div class="item-card tool-card">
+              <div class="item-header">
+                <h4 class="item-name">{{ tool.name }}</h4>
+              </div>
+              <div class="item-body">
+                @if (tool.description) {
+                <p class="item-description">{{ tool.description }}</p>
+                } @if (tool.inputSchema) {
+                <div class="schema-section">
+                  <h5 class="schema-title">Input Schema</h5>
+                  <pre class="schema-json">{{
+                    formatSchema(tool.inputSchema)
+                  }}</pre>
+                </div>
+                } @if (tool.outputSchema) {
+                <div class="schema-section">
+                  <h5 class="schema-title">Output Schema</h5>
+                  <pre class="schema-json">{{
+                    formatSchema(tool.outputSchema)
+                  }}</pre>
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Prompts Section -->
+        @if (group.description.prompts.length > 0) {
+        <div class="content-section">
+          <div
+            class="section-header"
+            (click)="toggleSection(group.serverName, 'prompts')"
+          >
+            <h3 class="section-title">
+              💬 Prompts ({{ group.description.prompts.length }})
+            </h3>
+            <div
+              class="section-expand-button"
+              [class.expanded]="isSectionExpanded(group.serverName, 'prompts')"
+            >
+              <span class="expand-icon">{{
+                isSectionExpanded(group.serverName, "prompts") ? "▼" : "▶"
+              }}</span>
+            </div>
+          </div>
+          @if (isSectionExpanded(group.serverName, 'prompts')) {
+          <div class="items-grid">
+            @for (prompt of group.description.prompts; track prompt.name) {
+            <div class="item-card prompt-card">
+              <div class="item-header">
+                <h4 class="item-name">{{ prompt.name }}</h4>
+                @if (prompt.title && prompt.title !== prompt.name) {
+                <p class="item-title">{{ prompt.title }}</p>
+                }
+              </div>
+              <div class="item-body">
+                @if (prompt.description) {
+                <p class="item-description">{{ prompt.description }}</p>
+                } @if (prompt.arguments && prompt.arguments.length > 0) {
+                <div class="arguments-section">
+                  <h5 class="arguments-title">Arguments</h5>
+                  <div class="arguments-list">
+                    @for (arg of prompt.arguments; track arg.name) {
+                    <div class="argument-item">
+                      <span class="argument-name">{{ arg.name }}</span>
+                      @if (arg.required) {
+                      <span class="argument-required">*</span>
+                      } @if (arg.description) {
+                      <span class="argument-description">{{
+                        arg.description
+                      }}</span>
+                      }
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Resources Section -->
+        @if (group.description.resources.length > 0) {
+        <div class="content-section">
+          <div
+            class="section-header"
+            (click)="toggleSection(group.serverName, 'resources')"
+          >
+            <h3 class="section-title">
+              📄 Resources ({{ group.description.resources.length }})
+            </h3>
+            <div
+              class="section-expand-button"
+              [class.expanded]="
+                isSectionExpanded(group.serverName, 'resources')
+              "
+            >
+              <span class="expand-icon">{{
+                isSectionExpanded(group.serverName, "resources") ? "▼" : "▶"
+              }}</span>
+            </div>
+          </div>
+          @if (isSectionExpanded(group.serverName, 'resources')) {
+          <div class="items-grid">
+            @for (resource of group.description.resources; track resource.name)
+            {
+            <div class="item-card resource-card">
+              <div class="item-header">
+                <h4 class="item-name">{{ resource.name }}</h4>
+                @if (resource.title && resource.title !== resource.name) {
+                <p class="item-title">{{ resource.title }}</p>
+                }
+              </div>
+              <div class="item-body">
+                @if (resource.description) {
+                <p class="item-description">{{ resource.description }}</p>
+                } @if (resource.uri) {
+                <div class="resource-uri">
+                  <strong>URI:</strong> <code>{{ resource.uri }}</code>
+                </div>
+                } @if (resource.mimeType) {
+                <div class="resource-mime">
+                  <strong>MIME Type:</strong>
+                  <span class="mime-type">{{ resource.mimeType }}</span>
+                </div>
+                } @if (resource.size) {
+                <div class="resource-size">
+                  <strong>Size:</strong> {{ resource.size }} bytes
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Resource Templates Section -->
+        @if (group.description.resourceTemplates.length > 0) {
+        <div class="content-section">
+          <div
+            class="section-header"
+            (click)="toggleSection(group.serverName, 'resourceTemplates')"
+          >
+            <h3 class="section-title">
+              📋 Resource Templates ({{
+                group.description.resourceTemplates.length
+              }})
+            </h3>
+            <div
+              class="section-expand-button"
+              [class.expanded]="
+                isSectionExpanded(group.serverName, 'resourceTemplates')
+              "
+            >
+              <span class="expand-icon">{{
+                isSectionExpanded(group.serverName, "resourceTemplates")
+                  ? "▼"
+                  : "▶"
+              }}</span>
+            </div>
+          </div>
+          @if (isSectionExpanded(group.serverName, 'resourceTemplates')) {
+          <div class="items-grid">
+            @for (template of group.description.resourceTemplates; track
+            template.name) {
+            <div class="item-card template-card">
+              <div class="item-header">
+                <h4 class="item-name">{{ template.name }}</h4>
+                @if (template.title && template.title !== template.name) {
+                <p class="item-title">{{ template.title }}</p>
+                }
+              </div>
+              <div class="item-body">
+                @if (template.description) {
+                <p class="item-description">{{ template.description }}</p>
+                } @if (template.uriTemplate) {
+                <div class="template-uri">
+                  <strong>URI Template:</strong>
+                  <code>{{ template.uriTemplate }}</code>
+                </div>
+                } @if (template.mimeType) {
+                <div class="template-mime">
+                  <strong>MIME Type:</strong>
+                  <span class="mime-type">{{ template.mimeType }}</span>
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+</section>

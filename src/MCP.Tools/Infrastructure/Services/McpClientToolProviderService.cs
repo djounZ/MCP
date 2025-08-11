@@ -11,10 +11,10 @@ public class McpClientToolProviderService(McpServerConfigurationProviderService 
 
     private readonly ConcurrentDictionary<string, ServerValue > _serversDescription = new();
 
-    private record ServerValue(McpServerConfigurationItem ServerConfiguration, IList<McpToolDescription> McpToolDescriptions);
-    public async Task<IDictionary<string, IList<McpToolDescription>>> GetAll(CancellationToken cancellationToken)
+    private record ServerValue(McpServerConfigurationItem ServerConfiguration, IList<McpClientToolDescription> McpToolDescriptions);
+    public async Task<IDictionary<string, IList<McpClientToolDescription>>> GetAll(CancellationToken cancellationToken)
     {
-        var mcpToolDescriptions = new Dictionary<string, IList<McpToolDescription>>();
+        var mcpToolDescriptions = new Dictionary<string, IList<McpClientToolDescription>>();
         var servers =  mcpServerConfigurationProviderService.GetMcpServerConfiguration()!.Servers;
 
         foreach (var (serverName, serverConfiguration) in servers)

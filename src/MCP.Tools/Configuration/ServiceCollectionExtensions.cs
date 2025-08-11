@@ -47,6 +47,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ClientTransportFactoryService>();
         services.AddSingleton<McpServerConfigurationProviderService>();
         services.AddSingleton<McpClientToolProviderService>();
+        services.AddSingleton<McpClientDescriptionProviderService>();
         return services;
     }
 }

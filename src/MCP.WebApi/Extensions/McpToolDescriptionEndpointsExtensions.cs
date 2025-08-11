@@ -19,7 +19,7 @@ public static class McpToolDescriptionEndpointsExtensions
             .WithSummary("Get description of MCP tools")
             .WithDescription("Return all available MCP tools descriptions")
             .WithTags("MCP Tools")
-            .Produces<IDictionary<string, IList<McpToolDescription>>>()
+            .Produces<IDictionary<string, IList<McpClientToolDescription>>>()
             .WithOpenApi();
 
         return app;

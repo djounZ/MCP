@@ -59,6 +59,7 @@ app.MapMcpToolsEndpoints();
 
 // Register McpServerConfiguration CRUD endpoints
 app.MapMcpServerConfigurationEndpoints();
+app.MapMcpClientDescriptionEndpoints();
 
 // Initialize startup operations (device registration and browser opening)
 await app.Services.UseMcpInfrastructureAsync(CancellationToken.None);

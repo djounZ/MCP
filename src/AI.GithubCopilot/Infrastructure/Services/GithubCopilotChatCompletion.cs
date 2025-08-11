@@ -122,7 +122,7 @@ public sealed class GithubCopilotChatCompletion(
     private ChatCompletionResponse AccumulateToolCallArguments(ChatCompletionResponse previousResponse, ChatCompletionResponse itemValue)
     {
         // If the ID is the same, we are still processing the same response
-        var functionArguments = itemValue.Choices.Single().Delta?.ToolCalls?.Single()?.Function?.Arguments ?? string.Empty;
+        var functionArguments = itemValue.Choices.Single().Delta?.ToolCalls?.Single().Function?.Arguments ?? string.Empty;
 
         // Get the existing function arguments and append the new ones
         var existingChoice = previousResponse.Choices.Single();
@@ -180,7 +180,7 @@ public sealed class GithubCopilotChatCompletion(
 
         if (jsonLine == "[DONE]")
         {
-            return StreamItem<ChatCompletionResponse>.BuildEnded(line!);
+            return StreamItem<ChatCompletionResponse>.BuildEnded(line);
         }
 
         return StreamItem<ChatCompletionResponse>.BuildContent(

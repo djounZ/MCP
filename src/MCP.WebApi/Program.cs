@@ -1,8 +1,33 @@
 using MCP.Application.Configuration;
 using MCP.Infrastructure.Configuration;
 using MCP.WebApi.Extensions;
+using Serilog;
+using Serilog.Sinks.OpenTelemetry;
+using SerilogTracing;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)
+    .WriteTo.OpenTelemetry(x =>
+    {
+        x.Endpoint ="http://localhost:5341/ingest/otlp/v1/logs";
+        x.Protocol = OtlpProtocol.HttpProtobuf;
+    })
+    .CreateLogger();
+
+// External trace sources will be enabled until the returned handle is disposed.
+using var _ = new ActivityListenerConfiguration()
+    .Instrument.AspNetCoreRequests()
+    .TraceToSharedLogger();
+
+
+
+builder.Services.AddSerilog();
+
+
 
 // Add services to the container
 // Note: Removed AddControllers() for minimal API approach

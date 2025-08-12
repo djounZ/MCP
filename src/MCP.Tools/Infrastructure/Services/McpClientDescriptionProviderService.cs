@@ -3,6 +3,7 @@ using MCP.Tools.Infrastructure.Mappers;
 using MCP.Tools.Infrastructure.Models;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
 
 namespace MCP.Tools.Infrastructure.Services;
 
@@ -27,12 +28,18 @@ public class McpClientDescriptionProviderService(ILogger<McpClientDescriptionPro
             }
             var clientTransport = clientTransportFactoryService.Create(serverConfiguration);
             var client = await  McpClientFactory.CreateAsync(clientTransport, cancellationToken: cancellationToken);
+            ServerCapabilities clientServerCapabilities = new ();
             try
             {
-                var mcpClientTools = RunSafeAsync(()=>client.ListToolsAsync(cancellationToken: cancellationToken));
-                var mcpClientPrompts =  RunSafeAsync(()=>client.ListPromptsAsync(cancellationToken: cancellationToken));
-                var mcpClientResourceTemplates =  RunSafeAsync(()=>client.ListResourceTemplatesAsync(cancellationToken: cancellationToken));
-                var mcpClientResources =  RunSafeAsync(()=>client.ListResourcesAsync(cancellationToken: cancellationToken));
+                clientServerCapabilities = client.ServerCapabilities!;
+                logger.LogInformation("{@Server} has {@Capacities}", serverName, clientServerCapabilities);
+                var mcpClientTools = RunSafeAsync(clientServerCapabilities.Tools!=null, () => client.ListToolsAsync(cancellationToken: cancellationToken));
+                var mcpClientPrompts =
+                    RunSafeAsync(clientServerCapabilities.Prompts!=null, () => client.ListPromptsAsync(cancellationToken: cancellationToken));
+                var mcpClientResourceTemplates = RunSafeAsync(clientServerCapabilities.Resources!=null, () =>
+                    client.ListResourceTemplatesAsync(cancellationToken: cancellationToken));
+                var mcpClientResources =
+                    RunSafeAsync(clientServerCapabilities.Resources!=null, () => client.ListResourcesAsync(cancellationToken: cancellationToken));
                 var toolDescriptions = mcpServerConfigurationMapper.Map(await mcpClientTools);
                 var promptDescriptions = mcpServerConfigurationMapper.Map(await mcpClientPrompts);
                 var resourceTemplatesDescriptions = mcpServerConfigurationMapper.Map(await mcpClientResourceTemplates);
@@ -48,6 +55,17 @@ public class McpClientDescriptionProviderService(ILogger<McpClientDescriptionPro
                 mcpToolDescriptions[serverName] = mcpClientDescription;
                 _serversDescription[serverName] = new ServerValue(serverConfiguration, mcpClientDescription);
             }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error while fetching MCP client descriptions for server {@ServerName} and {@Capacities} ", serverName, clientServerCapabilities);
+                mcpToolDescriptions[serverName] = new McpClientDescription(
+                    [], // Empty tools
+                    [], // Empty prompts
+                    [], // Empty resource templates
+                    []  // Empty resources
+                );
+                _serversDescription[serverName] = new ServerValue(serverConfiguration, mcpToolDescriptions[serverName]);
+            }
             finally
             {
                 await client.DisposeAsync();
@@ -56,10 +74,14 @@ public class McpClientDescriptionProviderService(ILogger<McpClientDescriptionPro
         return mcpToolDescriptions;
     }
 
-    private async ValueTask<IList<T>> RunSafeAsync<T>(Func<ValueTask<IList<T>>> fun)
+    private async ValueTask<IList<T>> RunSafeAsync<T>(bool shouldRun, Func<ValueTask<IList<T>>> fun)
     {
         try
         {
+            if (!shouldRun)
+            {
+                return [];
+            }
             return await fun();
         }
         catch (Exception ex)

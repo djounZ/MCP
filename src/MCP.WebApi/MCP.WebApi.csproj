@@ -3,6 +3,9 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="$(MicrosoftExtensionsPackagesCommonVersion)"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(MicrosoftExtensionsPackagesCommonVersion)"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="$(SerilogAspNetCoreVersion)" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="$(SerilogSinksOpenTelemetryVersion)" />
+        <PackageReference Include="SerilogTracing.Instrumentation.AspNetCore" Version="$(SerilogTracingInstrumentationAspNetCoreVersion)" />
     </ItemGroup>
 
     <ItemGroup>

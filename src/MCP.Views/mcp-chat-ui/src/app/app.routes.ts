@@ -31,4 +31,10 @@ export const routes: Routes = [
     path: 'mcp-client-description',
     loadComponent: () => import('./features/mcp/client/description/client-description').then(m => m.McpClientDescriptionComponent)
   }
+  ,
+  // TEMP: Route for MCP Tool Demo
+  {
+    path: 'mcp-tool-demo',
+    loadComponent: () => import('./features/mcp/tools/mcp-tool-call-demo.component').then(m => m.McpToolCallDemoComponent)
+  }
 ];

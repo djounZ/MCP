@@ -322,6 +322,38 @@
         }
       }
     },
+    "/api/mcp_tools/call": {
+      "post": {
+        "tags": [
+          "MCP Tools"
+        ],
+        "summary": "Call an MCP tool",
+        "description": "Invoke a tool on a configured MCP server and return the result.",
+        "operationId": "CallMcpTool",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McpClientToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpClientToolResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mcp-servers": {
       "get": {
         "tags": [
@@ -1354,6 +1386,9 @@
         }
       },
       "JsonElement": { },
+      "JsonNode": {
+        "nullable": true
+      },
       "LoginRequest": {
         "required": [
           "username",
@@ -1581,6 +1616,259 @@
           "user"
         ]
       },
+      "McpClientToolContentBlock": {
+        "required": [
+          "$type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/McpClientToolContentBlockMcpClientToolTextContentBlock"
+          },
+          {
+            "$ref": "#/components/schemas/McpClientToolContentBlockMcpClientToolImageContentBlock"
+          },
+          {
+            "$ref": "#/components/schemas/McpClientToolContentBlockMcpClientToolAudioContentBlock"
+          },
+          {
+            "$ref": "#/components/schemas/McpClientToolContentBlockMcpClientToolEmbeddedResourceBlock"
+          },
+          {
+            "$ref": "#/components/schemas/McpClientToolContentBlockMcpClientToolResourceLinkBlock"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "$type",
+          "mapping": {
+            "text": "#/components/schemas/McpClientToolContentBlockMcpClientToolTextContentBlock",
+            "image": "#/components/schemas/McpClientToolContentBlockMcpClientToolImageContentBlock",
+            "audio": "#/components/schemas/McpClientToolContentBlockMcpClientToolAudioContentBlock",
+            "resource": "#/components/schemas/McpClientToolContentBlockMcpClientToolEmbeddedResourceBlock",
+            "resource_link": "#/components/schemas/McpClientToolContentBlockMcpClientToolResourceLinkBlock"
+          }
+        }
+      },
+      "McpClientToolContentBlockMcpClientToolAudioContentBlock": {
+        "required": [
+          "data",
+          "media_type",
+          "_meta",
+          "annotations"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "audio"
+            ],
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "_meta": {
+            "type": "object",
+            "nullable": true
+          },
+          "annotations": {
+            "$ref": "#/components/schemas/McpClientAnnotationsDescription"
+          }
+        }
+      },
+      "McpClientToolContentBlockMcpClientToolEmbeddedResourceBlock": {
+        "required": [
+          "resource",
+          "_meta",
+          "annotations"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "resource"
+            ],
+            "type": "string"
+          },
+          "resource": {
+            "required": [
+              "$type"
+            ],
+            "type": "object",
+            "anyOf": [
+              {
+                "required": [
+                  "blob",
+                  "uri",
+                  "media_type",
+                  "_meta"
+                ],
+                "properties": {
+                  "$type": {
+                    "enum": [
+                      "blob"
+                    ],
+                    "type": "string"
+                  },
+                  "blob": {
+                    "type": "string"
+                  },
+                  "uri": {
+                    "type": "string"
+                  },
+                  "media_type": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "_meta": {
+                    "type": "object",
+                    "nullable": true
+                  }
+                }
+              },
+              {
+                "required": [
+                  "text",
+                  "uri",
+                  "media_type",
+                  "_meta"
+                ],
+                "properties": {
+                  "$type": {
+                    "enum": [
+                      "text"
+                    ],
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "uri": {
+                    "type": "string"
+                  },
+                  "media_type": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "_meta": {
+                    "type": "object",
+                    "nullable": true
+                  }
+                }
+              }
+            ],
+            "discriminator": {
+              "propertyName": "$type",
+              "mapping": {
+                "blob": "#/components/schemas/McpClientToolResourceContentsMcpClientToolBlobResourceContents",
+                "text": "#/components/schemas/McpClientToolResourceContentsMcpClientToolTextResourceContents"
+              }
+            }
+          },
+          "_meta": {
+            "type": "object",
+            "nullable": true
+          },
+          "annotations": {
+            "$ref": "#/components/schemas/McpClientAnnotationsDescription"
+          }
+        }
+      },
+      "McpClientToolContentBlockMcpClientToolImageContentBlock": {
+        "required": [
+          "data",
+          "media_type",
+          "_meta",
+          "annotations"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "image"
+            ],
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "_meta": {
+            "type": "object",
+            "nullable": true
+          },
+          "annotations": {
+            "$ref": "#/components/schemas/McpClientAnnotationsDescription"
+          }
+        }
+      },
+      "McpClientToolContentBlockMcpClientToolResourceLinkBlock": {
+        "required": [
+          "uri",
+          "name",
+          "description",
+          "media_type",
+          "size",
+          "annotations"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "resource_link"
+            ],
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "media_type": {
+            "type": "string",
+            "nullable": true
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "annotations": {
+            "$ref": "#/components/schemas/McpClientAnnotationsDescription"
+          }
+        }
+      },
+      "McpClientToolContentBlockMcpClientToolTextContentBlock": {
+        "required": [
+          "text",
+          "_meta",
+          "annotations"
+        ],
+        "properties": {
+          "$type": {
+            "enum": [
+              "text"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "_meta": {
+            "type": "object",
+            "nullable": true
+          },
+          "annotations": {
+            "$ref": "#/components/schemas/McpClientAnnotationsDescription"
+          }
+        }
+      },
       "McpClientToolDescription": {
         "required": [
           "name",
@@ -1602,6 +1890,49 @@
           },
           "output_schema": {
             "$ref": "#/components/schemas/NullableOfJsonElement"
+          }
+        }
+      },
+      "McpClientToolRequest": {
+        "required": [
+          "server_name",
+          "tool_name",
+          "arguments"
+        ],
+        "type": "object",
+        "properties": {
+          "server_name": {
+            "type": "string"
+          },
+          "tool_name": {
+            "type": "string"
+          },
+          "arguments": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "McpClientToolResponse": {
+        "required": [
+          "content",
+          "structured_content",
+          "isError"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpClientToolContentBlock"
+            }
+          },
+          "structured_content": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "isError": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },

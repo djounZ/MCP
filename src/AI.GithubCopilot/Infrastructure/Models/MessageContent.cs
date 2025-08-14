@@ -12,7 +12,7 @@ public abstract record MessageContent
     public static implicit operator MessageContent(string text) => new TextContent(text);
     public static MessageContent FromText(string text) => new TextContent(text);
     public static MessageContent Multipart(params ContentPart[] parts) => new MultipartContent(parts);
-    
+
     /// <summary>
     /// Converts content to text string if possible
     /// </summary>
@@ -37,33 +37,25 @@ public record MultipartContent(ContentPart[] Parts) : MessageContent;
 /// <summary>
 /// Part of multipart content
 /// </summary>
-public abstract record ContentPart
-{
-    [JsonPropertyName("type")]
-    public abstract string Type { get; }
-}
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+[JsonDerivedType(typeof(TextPart), typeDiscriminator: "text")]
+[JsonDerivedType(typeof(ImagePart), typeDiscriminator: "image_url")]
+public abstract record ContentPart;
 
 /// <summary>
 /// Text part of multipart content
 /// </summary>
-public record TextPart(
+public sealed record TextPart(
     [property: JsonPropertyName("text")] string Text
-) : ContentPart
-{
-    [JsonPropertyName("type")]
-    public override string Type => "text";
-}
+) : ContentPart;
 
 /// <summary>
 /// Image part of multipart content
 /// </summary>
-public record ImagePart(
+public sealed record ImagePart(
     [property: JsonPropertyName("image_url")] ImageUrl ImageUrl
-) : ContentPart
-{
-    [JsonPropertyName("type")]
-    public override string Type => "image_url";
-}
+) : ContentPart;
 
 /// <summary>
 /// Image URL specification
@@ -88,7 +80,7 @@ public class MessageContentConverter : JsonConverter<MessageContent>
         if (reader.TokenType == JsonTokenType.StartArray)
         {
             var parts = JsonSerializer.Deserialize<ContentPart[]>(ref reader, options);
-            return new MultipartContent(parts ?? Array.Empty<ContentPart>());
+            return new MultipartContent(parts ?? []);
         }
 
         throw new JsonException("MessageContent must be a string or array");

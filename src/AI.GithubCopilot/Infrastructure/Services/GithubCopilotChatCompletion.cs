@@ -4,6 +4,7 @@ using AI.GithubCopilot.Infrastructure.Models;
 using AI.GithubCopilot.Infrastructure.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MultipartContent = AI.GithubCopilot.Infrastructure.Models.MultipartContent;
 
 namespace AI.GithubCopilot.Infrastructure.Services;
 
@@ -45,12 +46,14 @@ public sealed class GithubCopilotChatCompletion(
     {
         // Ensure streaming is disabled
         var streamingRequest = request with { Stream = false };
+
+        var headers = GetCopilotChatCompletionsHeaders(request.Messages);
         return await httpClientRunner.SendAndDeserializeAsync<ChatCompletionRequest,ChatCompletionResponse>(
             streamingRequest,
             httpClient,
             HttpMethod.Post,
             Options.CopilotChatCompletionsUrl,
-            Options.CopilotChatCompletionsHeaders,
+            headers,
             HttpCompletionOption.ResponseContentRead,
             JsonOptions,
             cancellationToken,
@@ -67,12 +70,14 @@ public sealed class GithubCopilotChatCompletion(
         var streamingRequest = request with { Stream = true };
         ChatCompletionResponse? previousResponse = null;
 
+        var headers = GetCopilotChatCompletionsHeaders(request.Messages);
+
         await foreach (var item in httpClientRunner.SendAndReadStreamAsync(
                            streamingRequest,
                            httpClient,
                            HttpMethod.Post,
                            Options.CopilotChatCompletionsUrl,
-                           Options.CopilotChatCompletionsHeaders,
+                           headers,
                            HttpCompletionOption.ResponseContentRead,
                            JsonOptions,
                            cancellationToken,
@@ -120,6 +125,23 @@ public sealed class GithubCopilotChatCompletion(
             }
             yield return  itemValue;
         }
+    }
+
+    private Dictionary<string, string> GetCopilotChatCompletionsHeaders(IReadOnlyList<ChatMessage> messages)
+    {
+        var headers = Options.CopilotChatCompletionsHeaders;
+
+        if(messages.Any(m=>m.Content is MultipartContent multipartContent && multipartContent.Parts.Any(m=>m is ImagePart)))
+        {
+
+            headers = new Dictionary<string, string>(headers)
+            {
+                { "Copilot-Vision-Request", "true" }
+            };
+
+        }
+
+        return headers;
     }
 
     private ChatCompletionResponse AccumulateToolCallArguments(ChatCompletionResponse previousResponse, ChatCompletionResponse itemValue)

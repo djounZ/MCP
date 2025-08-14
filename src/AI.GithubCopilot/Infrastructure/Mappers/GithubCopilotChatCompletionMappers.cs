@@ -303,14 +303,24 @@ public static class GithubCopilotChatCompletionMappers
     /// </summary>
     private static MessageContent? ExtractMessageContent(IList<AIContent> contents)
     {
-        var textParts = new List<string>();
+        var parts = new List<ContentPart>();
+        var textBuffer = new List<string>();
+        bool hasNonText = false;
 
         foreach (var content in contents)
         {
             switch (content)
             {
+                case FunctionCallContent:
+                    // handled in tools
+                    break;
+
                 case AITextContent textContent:
-                    textParts.Add(textContent.Text);
+                    if(!string.IsNullOrWhiteSpace(textContent.Text))
+                    {
+                        textBuffer.Add(textContent.Text);
+                    }
+
                     break;
                 case FunctionResultContent resultContent:
                     // For tool results, serialize the result
@@ -320,12 +330,76 @@ public static class GithubCopilotChatCompletionMappers
                         null => string.Empty,
                         _ => JsonSerializer.Serialize(resultContent.Result)
                     };
-                    textParts.Add(resultText);
+
+                    if(!string.IsNullOrWhiteSpace(resultText))
+                    {
+                        textBuffer.Add(resultText);
+                    }
                     break;
+                case TextReasoningContent reasoningContent:
+                    textBuffer.Add("[Reasoning] " + reasoningContent.Text);
+                    break;
+                case ErrorContent:
+                    //textBuffer.Add($"[Error: {errorContent.Message}{(string.IsNullOrEmpty(errorContent.ErrorCode) ? "" : $" (Code: {errorContent.ErrorCode})")}{(string.IsNullOrEmpty(errorContent.Details) ? "" : $" - {errorContent.Details}") }]");
+                    break;
+                // throw new NotSupportedException($"FunctionCallContent is not supported for chat message content yet. Please implement handling if needed.");
+                // TODO: The following types could not be resolved. Ensure your project references the correct Microsoft.Extensions.AI.Abstractions assembly.
+                // case HostedFileContent hostedFileContent:
+                //     hasNonText = true;
+                //     parts.Add(new AI.GithubCopilot.Infrastructure.Models.TextPart($"[HostedFile: {hostedFileContent.FileId}]") );
+                //     break;
+                // case HostedVectorStoreContent hostedVectorStoreContent:
+                //     hasNonText = true;
+                //     parts.Add(new AI.GithubCopilot.Infrastructure.Models.TextPart($"[HostedVectorStore: {hostedVectorStoreContent.VectorStoreId}]") );
+                //     break;
+                case UriContent uriContent:
+                    hasNonText = true;
+                    if (uriContent.MediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        parts.Add(new ImagePart(new ImageUrl(uriContent.Uri.ToString())));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException($"UriContent with media type '{uriContent.MediaType}' is not supported as chat content.");
+                    }
+                    break;
+                case DataContent dataContent:
+                    hasNonText = true;
+                    if (dataContent.MediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        parts.Add(new ImagePart(new ImageUrl(dataContent.Uri)));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException($"DataContent with media type '{dataContent.MediaType}' is not supported as chat content.");
+                    }
+                    break;
+                case UsageContent:
+                    //textBuffer.Add($"[Usage: {System.Text.Json.JsonSerializer.Serialize(usageContent.Details)}]");
+                    break;
+                default:
+                    throw new NotSupportedException($"AIContent type '{content.GetType().Name}' is not supported in ExtractMessageContent.");
             }
         }
 
-        return textParts.Count > 0 ? MessageContent.FromText(string.Join("\n", textParts)) : null;
+        // If only textBuffer is filled, return TextContent or null
+        if (!hasNonText && parts.Count == 0)
+        {
+            if (textBuffer.Count == 0)
+                return null;
+            if (textBuffer.Count == 1)
+                return MessageContent.FromText(textBuffer[0]);
+            // Multiple text parts: return MultipartContent
+            return MessageContent.FromText(string.Join("\n", textBuffer));
+        }
+
+        // If there are non-text parts, combine textBuffer as TextParts and add to parts
+        foreach (var t in textBuffer)
+            parts.Add(new TextPart(t));
+
+        return parts.Count > 0
+            ? MessageContent.Multipart(parts.ToArray())
+            : null;
     }
 
     /// <summary>

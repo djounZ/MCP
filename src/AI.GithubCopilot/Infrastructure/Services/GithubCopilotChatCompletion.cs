@@ -32,7 +32,8 @@ public sealed class GithubCopilotChatCompletion(
             Options.CopilotChatCompletionsHeaders,
             HttpCompletionOption.ResponseContentRead,
             JsonOptions,
-            cancellationToken
+            cancellationToken,
+            logger
         );
 
         return response;
@@ -52,7 +53,8 @@ public sealed class GithubCopilotChatCompletion(
             Options.CopilotChatCompletionsHeaders,
             HttpCompletionOption.ResponseContentRead,
             JsonOptions,
-            cancellationToken
+            cancellationToken,
+            logger
         );
     }
 
@@ -74,7 +76,8 @@ public sealed class GithubCopilotChatCompletion(
                            HttpCompletionOption.ResponseContentRead,
                            JsonOptions,
                            cancellationToken,
-                           ReadItemAsync))
+                           ReadItemAsync,
+                           logger))
         {
             if (item.IsIgnored)
             {

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AI.GithubCopilot.Infrastructure.Services;
 
-public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
+public sealed class HttpClientRunner
 {
 
 
@@ -18,11 +18,11 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
         string? requestUri,
         Dictionary<string, string> headers,
         HttpCompletionOption completionOption,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, ILogger logger)
     {
         using var request = CreateHttpRequestMessage(method, requestUri, headers);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        await EnsureSuccessStatusCodeAsync(response);
+        await EnsureSuccessStatusCodeAsync(response, logger);
         return  await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
@@ -34,12 +34,12 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
         Dictionary<string, string> headers,
         HttpCompletionOption completionOption,
         JsonSerializerOptions? options,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, ILogger logger)
     {
 
-        using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options);
+        using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options, logger);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        await EnsureSuccessStatusCodeAsync(response);
+        await EnsureSuccessStatusCodeAsync(response, logger );
         return  await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
@@ -50,12 +50,12 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
         Dictionary<string, string> headers,
         HttpCompletionOption completionOption,
         JsonSerializerOptions? options,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, ILogger logger)
     {
         using var request = CreateHttpRequestMessage(method, requestUri, headers);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        await EnsureSuccessStatusCodeAsync(response);
-        return await ReadContentAsync<TOut>(options, cancellationToken, response);
+        await EnsureSuccessStatusCodeAsync(response, logger);
+        return await ReadContentAsync<TOut>(options, cancellationToken, response, logger);
 
     }
 
@@ -67,13 +67,13 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
         Dictionary<string, string> headers,
         HttpCompletionOption completionOption,
         JsonSerializerOptions? options,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, ILogger logger)
     {
 
-        using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options);
+        using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options, logger);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        await EnsureSuccessStatusCodeAsync(response);
-        return await ReadContentAsync<TOut>(options, cancellationToken, response);
+        await EnsureSuccessStatusCodeAsync(response,logger);
+        return await ReadContentAsync<TOut>(options, cancellationToken, response, logger);
     }
 
     public async  IAsyncEnumerable<StreamItem<TOut>> SendAndReadStreamAsync<TIn,TOut>(
@@ -85,20 +85,20 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
         HttpCompletionOption completionOption,
         JsonSerializerOptions? options,
         [EnumeratorCancellation] CancellationToken cancellationToken,
-        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync)
+        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync, ILogger logger)
     {
 
-        using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options);
+        using var request = CreateHttpRequestMessage(method, requestUri, requestContent, headers, options, logger);
         using var response = await client.SendAsync(request, completionOption, cancellationToken);
-        await EnsureSuccessStatusCodeAsync(response);
-        await foreach (var line in ReadContentStreamAsync(cancellationToken, response, contentReaderAsync))
+        await EnsureSuccessStatusCodeAsync(response, logger);
+        await foreach (var line in ReadContentStreamAsync(cancellationToken, response, contentReaderAsync, logger))
         {
             yield return line;
         }
     }
 
     private HttpRequestMessage CreateHttpRequestMessage<TIn>(HttpMethod method, string? requestUri,
-        TIn requestContent, Dictionary<string, string> headers, JsonSerializerOptions? options)
+        TIn requestContent, Dictionary<string, string> headers, JsonSerializerOptions? options, ILogger logger)
     {
         HttpRequestMessage? request = null;
         try
@@ -146,10 +146,10 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
     }
 
     private async Task<TOut> ReadContentAsync<TOut>(JsonSerializerOptions? options,
-        CancellationToken cancellationToken, HttpResponseMessage response)
+        CancellationToken cancellationToken, HttpResponseMessage response, ILogger logger)
     {
 #if DEBUG
-        return await ReadContentInDebugAsync<TOut>(options, cancellationToken, response);
+        return await ReadContentInDebugAsync<TOut>(options, cancellationToken, response, logger);
 #else
         return await ReadContentInReleaseAsync<TOut>(options, cancellationToken, response);
 #endif
@@ -177,7 +177,7 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
 #endif
 #if DEBUG
     private async Task<TOut> ReadContentInDebugAsync<TOut>(JsonSerializerOptions? options,
-        CancellationToken cancellationToken, HttpResponseMessage response)
+        CancellationToken cancellationToken, HttpResponseMessage response, ILogger logger)
     {
         await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         // Buffer the stream to memory for logging and deserialization only in debug builds
@@ -202,10 +202,10 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
     private async IAsyncEnumerable<StreamItem<TOut>> ReadContentStreamAsync<TOut>(
         [EnumeratorCancellation] CancellationToken cancellationToken,
         HttpResponseMessage response,
-        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync)
+        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync, ILogger logger)
     {
 #if DEBUG
-        await foreach (var item in ReadContentStreamInDebugAsync(cancellationToken, response, contentReaderAsync))
+        await foreach (var item in ReadContentStreamInDebugAsync(cancellationToken, response, contentReaderAsync, logger))
         {
             yield return item;
         }
@@ -236,7 +236,7 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
     private async IAsyncEnumerable<StreamItem<TOut>> ReadContentStreamInDebugAsync<TOut>(
         [EnumeratorCancellation] CancellationToken cancellationToken,
         HttpResponseMessage response,
-        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync)
+        Func<StreamReader,CancellationToken, Task<StreamItem<TOut>>> contentReaderAsync, ILogger logger)
     {
         await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var reader = new StreamReader(responseStream);
@@ -257,7 +257,7 @@ public sealed class HttpClientRunner(ILogger<HttpClientRunner> logger)
     }
 #endif
 
-    private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response)
+    private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response, ILogger logger)
     {
         if (!response.IsSuccessStatusCode)
         {

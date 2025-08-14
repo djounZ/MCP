@@ -37,7 +37,7 @@ public class HttpClientRunnerTests
     };
 
     // Shared HttpClientRunner instance
-    private readonly HttpClientRunner _runner = new(Substitute.For<ILogger<HttpClientRunner>>());
+    private readonly HttpClientRunner _runner = new();
 
     /// <summary>
     /// Tests that SendAsyncAndDeserialize correctly sends a request and deserializes the response.
@@ -87,7 +87,7 @@ public class HttpClientRunnerTests
                 TestHeaders,
                 HttpCompletionOption.ResponseContentRead,
                 _jsonOptions,
-                CancellationToken.None);
+                CancellationToken.None, Substitute.For<ILogger>());
         }
 
         // Assert - After client is disposed, we can safely check the captured values
@@ -140,7 +140,7 @@ public class HttpClientRunnerTests
                 EmptyHeaders,
                 HttpCompletionOption.ResponseContentRead,
                 _jsonOptions,
-                CancellationToken.None);
+                CancellationToken.None, Substitute.For<ILogger>());
         }
 
         // Assert - After client is disposed
@@ -172,7 +172,7 @@ public class HttpClientRunnerTests
                 EmptyHeaders,
                 HttpCompletionOption.ResponseContentRead,
                 _jsonOptions,
-                CancellationToken.None);
+                CancellationToken.None, Substitute.For<ILogger>());
         }).Should().ThrowAsync<HttpRequestException>()
             .Where(ex => ex.StatusCode == HttpStatusCode.BadRequest);
     }
@@ -207,7 +207,7 @@ public class HttpClientRunnerTests
                 EmptyHeaders,
                 HttpCompletionOption.ResponseContentRead,
                 _jsonOptions,
-                cts.Token);
+                cts.Token, Substitute.For<ILogger>());
         }).Should().ThrowAsync<OperationCanceledException>();
     }
 
@@ -253,7 +253,7 @@ public class HttpClientRunnerTests
                 EmptyHeaders,
                 HttpCompletionOption.ResponseContentRead,
                 _jsonOptions,
-                CancellationToken.None);
+                CancellationToken.None, Substitute.For<ILogger>());
 
             // Capture the request info before disposal
             mockHandler.LastRequest.Should().NotBeNull();
@@ -295,7 +295,7 @@ public class HttpClientRunnerTests
                 invalidHeaders,
                 HttpCompletionOption.ResponseContentRead,
                 _jsonOptions,
-                CancellationToken.None);
+                CancellationToken.None, Substitute.For<ILogger>());
         }).Should().ThrowAsync<FormatException>();
     }
 
@@ -323,7 +323,7 @@ public class HttpClientRunnerTests
                 EmptyHeaders,
                 HttpCompletionOption.ResponseContentRead,
                 _jsonOptions,
-                CancellationToken.None);
+                CancellationToken.None, Substitute.For<ILogger>());
         }).Should().ThrowAsync<JsonException>();
     }
 
@@ -352,7 +352,7 @@ public class HttpClientRunnerTests
                 EmptyHeaders,
                 HttpCompletionOption.ResponseContentRead,
                 _jsonOptions,
-                CancellationToken.None);
+                CancellationToken.None, Substitute.For<ILogger>());
         }).Should().ThrowAsync<InvalidDataException>()
             .WithMessage("*unsupported compression*");
     }

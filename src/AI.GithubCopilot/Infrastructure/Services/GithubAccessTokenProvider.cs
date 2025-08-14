@@ -1,10 +1,12 @@
 using AI.GithubCopilot.Infrastructure.Models;
 using AI.GithubCopilot.Infrastructure.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AI.GithubCopilot.Infrastructure.Services;
 
 public sealed class GithubAccessTokenProvider(
+    ILogger<GithubAccessTokenProvider> logger,
     HttpClient httpClient,
     IOptions<GithubOptions> options,
     GithubAccessTokenStore githubAccessTokenStore,
@@ -49,7 +51,8 @@ public sealed class GithubAccessTokenProvider(
                 Options.DeviceCodeHeaders,
                 HttpCompletionOption.ResponseHeadersRead,
                 null,
-                cancellationToken);
+                cancellationToken,
+                logger);
         return response;
     }
 
@@ -74,7 +77,8 @@ public sealed class GithubAccessTokenProvider(
                 Options.TokenHeaders,
                 HttpCompletionOption.ResponseHeadersRead,
                 null,
-                cancellationToken);
+                cancellationToken,
+                logger);
         await githubAccessTokenStore.SetAccessToken(response, cancellationToken);
     }
 }

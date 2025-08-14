@@ -2,11 +2,13 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AI.GithubCopilot.Infrastructure.Models;
 using AI.GithubCopilot.Infrastructure.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AI.GithubCopilot.Infrastructure.Services;
 
 public sealed class GithubCopilotTokenProvider(
+    ILogger<GithubCopilotTokenProvider> logger,
     HttpClient httpClient,
     IOptions<GithubOptions> options,
     GithubCopilotAccessTokenStore githubCopilotAccessTokenStore,
@@ -45,7 +47,8 @@ public sealed class GithubCopilotTokenProvider(
                     Options.CopilotTokenHeaders,
                     HttpCompletionOption.ResponseHeadersRead,
                     JsonOptions,
-                    cancellationToken);
+                    cancellationToken,
+                    logger);
 
             githubCopilotAccessTokenStore.SetToken(tokenResponse);
             return githubCopilotAccessTokenStore.Token;
